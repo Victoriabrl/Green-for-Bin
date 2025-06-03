@@ -159,26 +159,31 @@ Compétences attendues :
 ## Trame d’évaluation technique
 **Rappel de l’appel d’offre (2 points)**
 - Contexte : Décrire le contexte général du projet, 
-- Problématique : Définir la problématique spécifique à résoudre.    
+- Problématique : Définir la problématique spécifique à résoudre.
+##    
 **Méthodologie (4 points)**
 - Conception de la chaîne : Acquisition → annotation → stockage → traitement des données,  
-- Pertinences des caractéristiques et des règles de classification choisies.  
+- Pertinences des caractéristiques et des règles de classification choisies.
+##     
 **Implémentation et expérimentation (5 points)**  
 - Librairies et Framework utilisés (justification des choix techniques),  
 - Détails des phases d’entrainement et de validation : Explication et interprétation de ces phases,  
 - Fonctionnalités implémentées,  
 - Utilisation des règles configurables,  
 - UX du dashboard implémenté,  
-- Modularité / maintenabilité du code.  
+- Modularité / maintenabilité du code.
+##    
 **Résultats (5 points)**
 - Résultats de la classification (Performance des modèles sur le jeu de données) : Taux de classification correcte avec des métriques adaptées à la classification (Accuracy, Precision, Recall,…),  
 - Résultats de l’explicabilité (Evaluation des techniques d’explicabilité fournies par les modèles avec des exemples concrets),  
 - Cartographie dynamiquement les zones à risque de débordement,  
-- Performance de la plateforme (temps de réponse).    
+- Performance de la plateforme (temps de réponse).
+##        
 **Démo (2 points)**
-- Démonstration des différentes fonctionnalités du projet.  
+- Démonstration des différentes fonctionnalités du projet.
+##      
 **Appréciation des Experts (2 points)** 
 - Innovation et Créativité, Impact Potentiel, Qualité de la Documentation.
 
 ## Timeline 10 min de présentation, 5 min Demo Et 5 min de
->>>>>>> 4aaf06b (Premier commit)
+
