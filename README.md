@@ -77,7 +77,8 @@ Pour chaque image ajoutée, un script Python récupère automatiquement des cara
 - Niveau de contraste (différence max-min des pixels),
 - Détection de contours (avec OpenCV ou Pillow : Sobel/Canny simple),
 - Histogramme de luminance 
-- etc.  
+- etc.
+  
 Ces informations sont :
 - Stockées automatiquement dans la base,
 - Affichées dans l’interface utilisateur après upload.  
@@ -92,7 +93,7 @@ Ici, sans machine learning, on simule un processus de décision automatique à p
 - Le système doit :  
     o	Exécuter la règle automatiquement après upload,  
     o	Marquer l’image avec un label automatique (visible dans la base + interface).  
-4.	Tableau de bord (visualisation & suivi)
+4.	Tableau de bord (visualisation & suivi)  
 Pour offrir une vue globale du projet et des données collectées, un dashboard interactif est intégré.
 - Indicateurs clés :  
     o	Nombre total d’images uploadées,  
