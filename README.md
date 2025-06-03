@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Solution_Factory_Data
 =======
 Solution Factory Project : Efrei, 2025  
