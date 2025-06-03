@@ -7,6 +7,7 @@ Auteur : Ahmed Ghazi BLAIECH
 # Plateforme intelligente de suivi des poubelles par image pour la prévention des dépôts sauvages
 ## -	Solution Delivery pour masterCamp Data   –
 ## Contexte :
+<p align="justify">
 Face au manque de données précises sur les déchets dits abandonnés et à l’urgence d’agir pour limiter leur prolifération, le projet Wild Dump Prevention (WDP) propose une approche innovante visant à dresser un état des lieux aussi exhaustif que possible de la problématique des déchets sauvages. S’appuyant sur la démarche AI for Good, WDP vise non seulement à cartographier les dépôts existants, mais surtout à anticiper l’apparition de nouveaux sites de dépôt, en se concentrant notamment sur les zones où les poubelles débordent fréquemment, car elles deviennent souvent des points de départ de dépôts sauvages.
 Ainsi, dans un contexte où le volet préventif se limite encore trop souvent à des actions de sensibilisation ou de formation, l’IA peut offrir une capacité de prédiction accrue, permettant une meilleure anticipation des risques de débordement et contribuant à la réduction des déchets abandonnés dans l’espace public.
 
@@ -166,3 +167,4 @@ Compétences attendues :
 
 ## Timeline 10 min de présentation, 5 min Demo Et 5 min de
 >>>>>>> 4aaf06b (Premier commit)
+</p>
