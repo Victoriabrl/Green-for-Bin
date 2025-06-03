@@ -65,7 +65,7 @@ La plateforme web constitue le cœur du projet, accessible via un navigateur, et
     o	Chaque image est liée à : Son chemin de stockage,La date d’ajout, Son annotation (pleine/vide), Les métadonnées extraites (taille, dimensions, couleur moyenne, …).  
 2.	Extraction de caractéristiques (feature extraction)  
 Pour chaque image ajoutée, un script Python récupère automatiquement des caractéristiques simples permettant d’alimenter la base et de préparer l’analyse future :  
-- Taille du fichier :
+- Taille du fichier :  
     o	Exprimée en Ko/Mo, via la fonction os.path.getsize().  
 - Dimensions :  
     o	Hauteur et largeur (en pixels), extraites avec Pillow (PIL).
