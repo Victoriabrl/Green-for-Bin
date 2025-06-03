@@ -49,8 +49,8 @@ D’un point de vue technique, ce projet intègre l’IA afin de mettre en place
 - Tester la plateforme dans un contexte réel et rédiger une documentation technique.  
 
 <p align="justify">
-1.	Plateforme Web (Flask ou Django)
-La plateforme web constitue le cœur du projet, accessible via un navigateur, et permet aux utilisateurs de gérer les images et les annotations facilement. Les principales fonctionnalités attendues sont :  
+1.	Plateforme Web (Flask ou Django)  
+La plateforme web constitue le cœur du projet, accessible via un navigateur, et permet aux utilisateurs de gérer les images et les annotations facilement. Les principales fonctionnalités attendues sont :    
 - Formulaire d’upload d’image :  
     o	L’utilisateur peut sélectionner et envoyer une image depuis son ordinateur,       
     o	Vérifications basiques (formats acceptés : JPG, PNG...),     
@@ -102,8 +102,9 @@ Pour offrir une vue globale du projet et des données collectées, un dashboard 
 - Visualisation :  
     o	Côté back-end (Python) : Utilisation de matplotlib pour générer des graphes statiques (en PNG) à afficher.  
     o	Côté front-end (JavaScript) : Utilisation de chart.js pour produire des graphes dynamiques directement dans la page web.
-  <p align="justify">
+ 
 ## Évaluation des risques et démarche Green IT
+ <p align="justify">
 Afin de garantir la robustesse et l’innovation du projet, l’intégration d’une évaluation des risques ainsi que l’adoption d’une démarche Green IT / d’éco-conception s’imposent aujourd’hui non seulement comme une nécessité, mais également comme un véritable atout différenciant pour vos futurs profils d’ingénieurs du numérique. L’évaluation des risques permettra d’identifier et de documenter les principaux dangers liés à la réalisation technique et à l’usage de la plateforme, tandis que l’approche Green IT visera à limiter l’impact environnemental et la consommation d’énergie, tout en favorisant l’inclusion sociale et la sensibilisation à la problématique des déchets sauvages. Nous vos mettons à dispositions deux documents :
  
 1.	Questionnaire d'écoconception de services numériques ( Doc Word - – approche macro entreprise  sous forme de questions thématiques  ( Stratégie, Spécifications, Architecture, UX/UI,  Contenus, Frontend, Backend, hébergement, Algorithmie)  dont certaines questions sont récurrentes pour tous les projets.
