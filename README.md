@@ -106,7 +106,7 @@ Pour offrir une vue globale du projet et des données collectées, un dashboard 
  
 ## Évaluation des risques et démarche Green IT
  <p align="justify">
-Afin de garantir la robustesse et l’innovation du projet, l’intégration d’une évaluation des risques ainsi que l’adoption d’une démarche Green IT / d’éco-conception s’imposent aujourd’hui non seulement comme une nécessité, mais également comme un véritable atout différenciant pour vos futurs profils d’ingénieurs du numérique. L’évaluation des risques permettra d’identifier et de documenter les principaux dangers liés à la réalisation technique et à l’usage de la plateforme, tandis que l’approche Green IT visera à limiter l’impact environnemental et la consommation d’énergie, tout en favorisant l’inclusion sociale et la sensibilisation à la problématique des déchets sauvages. Nous vos mettons à dispositions deux documents :
+Afin de garantir la robustesse et l’innovation du projet, l’intégration d’une évaluation des risques ainsi que l’adoption d’une démarche Green IT / d’éco-conception s’imposent aujourd’hui non seulement comme une nécessité, mais également comme un véritable atout différenciant pour vos futurs profils d’ingénieurs du numérique. L’évaluation des risques permettra d’identifier et de documenter les principaux dangers liés à la réalisation technique et à l’usage de la plateforme, tandis que l’approche Green IT visera à limiter l’impact environnemental et la consommation d’énergie, tout en favorisant l’inclusion sociale et la sensibilisation à la problématique des déchets sauvages. Nous vos mettons à dispositions "Dossier guides" :
  
 1.	Questionnaire d'écoconception de services numériques ( Doc Word - – approche macro entreprise  sous forme de questions thématiques  ( Stratégie, Spécifications, Architecture, UX/UI,  Contenus, Frontend, Backend, hébergement, Algorithmie)  dont certaines questions sont récurrentes pour tous les projets.
 2.	le   tableau de synthèse de  l’évaluation   qualitative et quantitative de  l’impact de votre projet  permet d’ aborder  en deux thèmes généraux  n°1  ( Software : design - coding - hébergement, stockage, transport de données  )  n°2 (User device (PC, tablet, smart phone,…) et/ou éléments numériques d'un produit).
@@ -115,8 +115,7 @@ Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 
 
 ## Technos à utiliser :
-<p align="justify">
-- Back-end : Python (Flask,  Django, etc.),
+- Back-end : Python (Flask,  Django, etc.),  
 - Gestion des images : Pillow, os, shutil,
 - Base de données : SQLite / PostgreSQL,
 - Front-end : HTML/CSS + Bootstrap (ou autre), Chart.js (pour les graphes dynamiques),
@@ -136,7 +135,6 @@ Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 ## Niveaux de complexité 
 **Niveau 1-basique (Must)**
 Compétences attendues :
-<p align="justify">
 - Mise en place d’une plateforme web simple (upload, affichage image, annotation), utilisation d’outils existants pour annotation comme par exemple Scalabel,  
 - Détermination des caractéristiques de base (taille, dimensions, couleur) et leur stockage dans une base de données,    
 - Définir des règles conditionnelles de classification codées en dur (directement intégrées dans le code),  
@@ -144,7 +142,6 @@ Compétences attendues :
     
 
 **Niveau 2 –Intermédiaire (Should)**
-<p align="justify">
 Compétences attendues :
 - Développement complet de l’interface d’annotation UX : navigation entre les images, raccourcis clavier, affichage des métadonnées au survol des annotations,  
 - Extension des caractéristiques extraites avancées comme (histogrammes, contraste, contours, etc.),   
