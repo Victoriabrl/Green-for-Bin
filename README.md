@@ -52,10 +52,10 @@ D’un point de vue technique, ce projet intègre l’IA afin de mettre en place
 1.	Plateforme Web (Flask ou Django)
 La plateforme web constitue le cœur du projet, accessible via un navigateur, et permet aux utilisateurs de gérer les images et les annotations facilement. Les principales fonctionnalités attendues sont :  
 - Formulaire d’upload d’image :  
-    o	L’utilisateur peut sélectionner et envoyer une image depuis son ordinateur,     
-    o	Vérifications basiques (formats acceptés : JPG, PNG...),   
-    o	Stockage physique de l’image sur le serveur (dans un répertoire dédié),    
-    o	Les données sont accessibles via ce lien [Lien].  
+    o	L’utilisateur peut sélectionner et envoyer une image depuis son ordinateur,       
+    o	Vérifications basiques (formats acceptés : JPG, PNG...),     
+    o	Stockage physique de l’image sur le serveur (dans un répertoire dédié),      
+    o	Les données sont accessibles via ce lien [Lien].    
 
 - Affichage de l’image à l’écran :  
     o	Après upload, l’image est affichée directement sur l’interface.  
