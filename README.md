@@ -48,8 +48,9 @@ D’un point de vue technique, ce projet intègre l’IA afin de mettre en place
 - Développer un tableau de bord avec des statistiques et des graphiques (localisation, date, caractéristiques d’image) et cartographier dynamiquement les zones à risque de débordement,   
 - Tester la plateforme dans un contexte réel et rédiger une documentation technique.  
 
-<p align="justify">
-1.	Plateforme Web (Flask ou Django)  
+
+1.	Plateforme Web (Flask ou Django)
+<p align="justify">  
 La plateforme web constitue le cœur du projet, accessible via un navigateur, et permet aux utilisateurs de gérer les images et les annotations facilement. Les principales fonctionnalités attendues sont :    
 - Formulaire d’upload d’image :  
     o	L’utilisateur peut sélectionner et envoyer une image depuis son ordinateur,       
