@@ -38,14 +38,15 @@ Une plateforme web capable de :
 - Reduction de l'empreinte écologique de l'homme et le risque des dépôts sauvages par une action préventive efficace et une meilleure gestion des points de collecte officiels 
 
 ## Structure du projet :
-<p align="justify">
+
 D’un point de vue technique, ce projet intègre l’IA afin de mettre en place une plateforme web capable de :
-- Collecter des images de poubelles (via upload et stockage)
-- Proposer une interface d’annotation manuelle (pleine / vide)
-- Extraire automatiquement des caractéristiques simples (dimensions, taille du fichier, couleur moyenne, histogrammes, contraste, contours, etc.)
-- Mettre en place des règles conditionnelles pour simuler une classification (sans utiliser de modèles de machine learning)
-- Développer un tableau de bord avec des statistiques et des graphiques (localisation, date, caractéristiques d’image) et cartographier dynamiquement les zones à risque de débordement 
-- Tester la plateforme dans un contexte réel et rédiger une documentation technique
+    <p align="justify">
+- Collecter des images de poubelles (via upload et stockage),  
+- Proposer une interface d’annotation manuelle (pleine / vide),  
+- Extraire automatiquement des caractéristiques simples (dimensions, taille du fichier, couleur moyenne, histogrammes, contraste, contours, etc.),  
+- Mettre en place des règles conditionnelles pour simuler une classification (sans utiliser de modèles de machine learning),  
+- Développer un tableau de bord avec des statistiques et des graphiques (localisation, date, caractéristiques d’image) et cartographier dynamiquement les zones à risque de débordement,   
+- Tester la plateforme dans un contexte réel et rédiger une documentation technique.  
 
 <p align="justify">
 1.	Plateforme Web (Flask ou Django)
