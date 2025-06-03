@@ -42,7 +42,7 @@ D’un point de vue technique, ce projet intègre l’IA afin de mettre en place
 - Développer un tableau de bord avec des statistiques et des graphiques (localisation, date, caractéristiques d’image) et cartographier dynamiquement les zones à risque de débordement 
 - Tester la plateforme dans un contexte réel et rédiger une documentation technique
 
-
+<p align="justify">
 1.	Plateforme Web (Flask ou Django)
 La plateforme web constitue le cœur du projet, accessible via un navigateur, et permet aux utilisateurs de gérer les images et les annotations facilement. Les principales fonctionnalités attendues sont :
 - Formulaire d’upload d’image :  
@@ -95,7 +95,8 @@ Pour offrir une vue globale du projet et des données collectées, un dashboard 
     o	Localisation, date d’acquisition des images afin de cartographier dynamiquement les zones à risque de débordement   
 - Visualisation :  
     o	Côté back-end (Python) : Utilisation de matplotlib pour générer des graphes statiques (en PNG) à afficher.  
-    o	Côté front-end (JavaScript) : Utilisation de chart.js pour produire des graphes dynamiques directement dans la page web.  
+    o	Côté front-end (JavaScript) : Utilisation de chart.js pour produire des graphes dynamiques directement dans la page web.
+  <p align="justify">
 ## Évaluation des risques et démarche Green IT
 Afin de garantir la robustesse et l’innovation du projet, l’intégration d’une évaluation des risques ainsi que l’adoption d’une démarche Green IT / d’éco-conception s’imposent aujourd’hui non seulement comme une nécessité, mais également comme un véritable atout différenciant pour vos futurs profils d’ingénieurs du numérique. L’évaluation des risques permettra d’identifier et de documenter les principaux dangers liés à la réalisation technique et à l’usage de la plateforme, tandis que l’approche Green IT visera à limiter l’impact environnemental et la consommation d’énergie, tout en favorisant l’inclusion sociale et la sensibilisation à la problématique des déchets sauvages. Nous vos mettons à dispositions deux documents :
  
@@ -104,7 +105,7 @@ Afin de garantir la robustesse et l’innovation du projet, l’intégration d�
  
 Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 
-
+<p align="justify">
 ## Technos à utiliser :
 - Back-end : Python (Flask,  Django, etc.),
 - Gestion des images : Pillow, os, shutil,
@@ -124,12 +125,13 @@ Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 
 ## Niveaux de complexité 
 **Niveau 1-basique (Must)**
+<p align="justify">
 Compétences attendues :
 - Mise en place d’une plateforme web simple (upload, affichage image, annotation), utilisation d’outils existants pour annotation comme par exemple Scalabel,  
 - Détermination des caractéristiques de base (taille, dimensions, couleur) et leur stockage dans une base de données,    
 - Définir des règles conditionnelles de classification codées en dur (directement intégrées dans le code),  
 - Visualisation des statistiques basiques via matplotlib ou graphes statiques.
-
+<p align="justify">
 **Niveau 2 –Intermédiaire (Should)**
 Compétences attendues :
 - Développement complet de l’interface d’annotation UX : navigation entre les images, raccourcis clavier, affichage des métadonnées au survol des annotations,  
@@ -143,7 +145,7 @@ Compétences attendues :
 - Optimisation de performance (compression image, gestion mémoire interne, gestion asynchrone de l'upload et de l'extraction de features pour ne pas bloquer l'interface, pagination pour les listes d'images, optimisation des requêtes BDD, etc.),  
 - Optimisation des performances : compression des images, gestion de la mémoire interne, gestion asynchrone de l’upload et de l’extraction des caractéristiques pour ne pas bloquer l’interface, pagination des listes d’images, optimisation des requêtes vers la BDD,  
 - Version multilingue de la plateforme.
-
+<p align="justify">
 ## Trame d’évaluation technique
 **Rappel de l’appel d’offre (2 points)**
 - Contexte : Décrire le contexte général du projet, 
@@ -167,7 +169,7 @@ Compétences attendues :
 - Démonstration des différentes fonctionnalités du projet.
 **Appréciation des Experts (2 points)** 
 - Innovation et Créativité, Impact Potentiel, Qualité de la Documentation.
-
+<p align="justify">
 ## Timeline 10 min de présentation, 5 min Demo Et 5 min de
 >>>>>>> 4aaf06b (Premier commit)
 </p>
