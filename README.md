@@ -19,11 +19,15 @@ Lorsque les débordements ne sont pas détectés rapidement, les déchets s’ac
 ## Objectif
 <p align="justify">
 Développer une plateforme intelligente de détection de l’état des poubelles publiques (pleines ou débordantes, vides) à partir d’images collectées sur le terrain pour améliorer la gestion des déchets urbains et la prévention des dépôts sauvages 
-<p align="justify">
+
 ## Compétences
+<p align="justify">
 Une équipe mixte, esprit innovant et novateur, une capacité d’analyse critique à dominante SI, et d’une bonne maîtrise de l’analyse de données.
+
 ## Changements
+<p align="justify">
 Aujourd’hui, très peu d’initiatives permettent une surveillance proactive des dispositifs de collecte. La maintenance des bacs est souvent déclenchée trop tard, une fois le problème devenu visible dans l’espace public. Ce projet propose une alternative numérique simple, peu coûteuse et plus efficace, capable d’améliorer la performance du service public de gestion des déchets en s’appuyant sur des données de terrain. Il permettra de prédire avec précision les zones à risque et d’anticiper les périodes les plus propices à l’apparition de dépôts.
+    
 ## Sorties
 Une plateforme web capable de :
 - Collecter des images de poubelles via upload citoyen, agent, caméra embarquée 
@@ -32,8 +36,9 @@ Une plateforme web capable de :
 - Cartographier dynamiquement les zones à risque de débordement 
 ## Impact
 - Reduction de l'empreinte écologique de l'homme et le risque des dépôts sauvages par une action préventive efficace et une meilleure gestion des points de collecte officiels 
-<p align="justify">
+
 ## Structure du projet :
+<p align="justify">
 D’un point de vue technique, ce projet intègre l’IA afin de mettre en place une plateforme web capable de :
 - Collecter des images de poubelles (via upload et stockage)
 - Proposer une interface d’annotation manuelle (pleine / vide)
@@ -105,13 +110,15 @@ Afin de garantir la robustesse et l’innovation du projet, l’intégration d�
  
 Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 
-<p align="justify">
+
 ## Technos à utiliser :
+<p align="justify">
 - Back-end : Python (Flask,  Django, etc.),
 - Gestion des images : Pillow, os, shutil,
 - Base de données : SQLite / PostgreSQL,
 - Front-end : HTML/CSS + Bootstrap (ou autre), Chart.js (pour les graphes dynamiques),
 - Visualisation : matplotlib (Python) ou Chart.js (web).
+    
 ## Livrables :
 - Code complet de la web app (back + front),
 - Base de données structurée avec les images et annotations,
@@ -125,19 +132,22 @@ Ces deux approches se complètent et se retrouveront dans le cahier des charges.
 
 ## Niveaux de complexité 
 **Niveau 1-basique (Must)**
-<p align="justify">
 Compétences attendues :
+<p align="justify">
 - Mise en place d’une plateforme web simple (upload, affichage image, annotation), utilisation d’outils existants pour annotation comme par exemple Scalabel,  
 - Détermination des caractéristiques de base (taille, dimensions, couleur) et leur stockage dans une base de données,    
 - Définir des règles conditionnelles de classification codées en dur (directement intégrées dans le code),  
 - Visualisation des statistiques basiques via matplotlib ou graphes statiques.
-<p align="justify">
+    
+
 **Niveau 2 –Intermédiaire (Should)**
+<p align="justify">
 Compétences attendues :
 - Développement complet de l’interface d’annotation UX : navigation entre les images, raccourcis clavier, affichage des métadonnées au survol des annotations,  
 - Extension des caractéristiques extraites avancées comme (histogrammes, contraste, contours, etc.),   
 - Définir des règles de classification configurables via l’interface (utilisateur peut définir ses propres règles) avec une sauvegarde dynamique dans la base,  
 - Tableau de bord interactif avec graphes dynamiques (Chart.js) et filtres.  
+    
 **Niveau 3 –Avancé (could have)**
 Compétences attendues :
 - Intégration de module de vérification de la conformité des données stockées dans une base,  
@@ -145,7 +155,7 @@ Compétences attendues :
 - Optimisation de performance (compression image, gestion mémoire interne, gestion asynchrone de l'upload et de l'extraction de features pour ne pas bloquer l'interface, pagination pour les listes d'images, optimisation des requêtes BDD, etc.),  
 - Optimisation des performances : compression des images, gestion de la mémoire interne, gestion asynchrone de l’upload et de l’extraction des caractéristiques pour ne pas bloquer l’interface, pagination des listes d’images, optimisation des requêtes vers la BDD,  
 - Version multilingue de la plateforme.
-<p align="justify">
+
 ## Trame d’évaluation technique
 **Rappel de l’appel d’offre (2 points)**
 - Contexte : Décrire le contexte général du projet, 
@@ -169,7 +179,7 @@ Compétences attendues :
 - Démonstration des différentes fonctionnalités du projet.
 **Appréciation des Experts (2 points)** 
 - Innovation et Créativité, Impact Potentiel, Qualité de la Documentation.
-<p align="justify">
+
 ## Timeline 10 min de présentation, 5 min Demo Et 5 min de
 >>>>>>> 4aaf06b (Premier commit)
 </p>
