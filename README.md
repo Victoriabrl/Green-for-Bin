@@ -56,7 +56,7 @@ La plateforme web constitue le cœur du projet, accessible via un navigateur, et
     o	L’utilisateur peut sélectionner et envoyer une image depuis son ordinateur,       
     o	Vérifications basiques (formats acceptés : JPG, PNG...),     
     o	Stockage physique de l’image sur le serveur (dans un répertoire dédié),      
-    o	Les données sont accessibles via ce lien [Lien].    
+    o	Les données sont accessibles via le dossier "Data".      
 - Affichage de l’image à l’écran :  
     o   Après upload, l’image est affichée directement sur l’interface.  
     o	Des boutons d’annotation sont proposés : Pleine /  Vide  
