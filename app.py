@@ -102,28 +102,31 @@ def index():
 
     return render_template('index.html', filename=None)
 
+
 # Route pour visualiser les statistiques
 @app.route('/visualisations')
 def stats():
     with sqlite3.connect('db.sqlite3') as conn:
         c = conn.cursor()
         
-        # Nombre total d'annotations (nombre total d'entrées dans la table)
         c.execute("SELECT COUNT(*) FROM images")
         total_annotations = c.fetchone()[0]
 
-        # Nombre d'annotations pleines 
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NOT NULL AND annotation = 'pleine'")
+        c.execute("SELECT COUNT(*) FROM images WHERE annotation = 'pleine'")
         full_annotations = c.fetchone()[0]
 
-        # Nombre d'annotations vides 
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NOT NULL AND annotation = 'vide'")
+        c.execute("SELECT COUNT(*) FROM images WHERE annotation = 'vide'")
         empty_annotations = c.fetchone()[0]
+
+        c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
+        non_labelled_annotations = c.fetchone()[0]
 
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
-                           empty_annotations=empty_annotations)
+                           empty_annotations=empty_annotations,
+                           non_labelled_annotations=non_labelled_annotations)
+
 
 # Route pour annoter une image
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
