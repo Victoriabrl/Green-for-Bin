@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Visualisations{% endblock %}
+
+{% block content %} 
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bienvenue sur le dashboard !</title>
+</head>
+<body>
+    <h1>Vous pouvez visualiser les données de vos poubelles ici.</h1>
+    <h2>Visualisations</h2>
+    
+    <h2>Statistiques</h2>
+    <p>Nombre total d'annotations : {{ total_annotations }}</p>
+    <p>Nombre d'annotations poubelles pleines : {{ full_annotations }}</p>
+    <p>Nombre d'annotations poubelles vides : {{ empty_annotations }}</p>
+</body>
+</html>
+{% endblock %}
