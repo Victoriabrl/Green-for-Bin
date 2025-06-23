@@ -23,7 +23,6 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# Créer la BDD si elle n'existe pas
 def init_db():
     with sqlite3.connect('db.sqlite3') as conn:
         c = conn.cursor()
@@ -36,41 +35,45 @@ def init_db():
                 width INTEGER,
                 height INTEGER,
                 file_size INTEGER,
-                avg_color INTEGER,
+                avg_color TEXT,
+                hist_rgb TEXT,
+                hist_lum TEXT,
                 contrast INTEGER,
                 contour_count INTEGER
             )
         ''')
         conn.commit()
 
-
-# Extraire les métadonnées
 def extract_metadata(filepath):
     img = Image.open(filepath).convert('RGB')
     width, height = img.size
     file_size = os.path.getsize(filepath)
-
-    # Moyenne des couleurs
     np_img = np.array(img)
     avg_color = tuple(np.mean(np_img.reshape(-1, 3), axis=0).astype(int))
-
-    # Contraste avec PIL
     img_gray = img.convert('L')
     extrema = img_gray.getextrema()
     contrast = extrema[1] - extrema[0]
-
-    # Contours avec OpenCV
     img_cv = cv2.imread(filepath)
     img_gray_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2GRAY)
     sobelx = cv2.Sobel(img_gray_cv, cv2.CV_64F, 1, 0, ksize=3)
     sobely = cv2.Sobel(img_gray_cv, cv2.CV_64F, 0, 1, ksize=3)
-    edges = cv2.magnitude(sobelx, sobely)
-    edges = np.uint8(edges)
+    edges = cv2.magnitude(sobelx, sobely).astype(np.uint8)
     contour_count = int(np.sum(edges > 128))
+    hist_rgb = [[0]*256 for _ in range(3)]
+    for y in range(height):
+        for x in range(width):
+            r, g, b = img.getpixel((x, y))
+            hist_rgb[0][r] += 1
+            hist_rgb[1][g] += 1
+            hist_rgb[2][b] += 1
+    hist_lum = [0]*256
+    for y in range(height):
+        for x in range(width):
+            r, g, b = img.getpixel((x, y))
+            lum = int((r + g + b) / 3)
+            hist_lum[lum] += 1
+    return width, height, file_size, str(avg_color), contrast, contour_count, str(hist_rgb), str(hist_lum)
 
-    return width, height, file_size, str(avg_color), contrast, contour_count
-
-# Route principale pour l'upload d'image)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
@@ -83,25 +86,24 @@ def index():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
-
-            # Extraire les nouvelles métadonnées
-            width, height, file_size, avg_color, contrast, contour_count = extract_metadata(filepath)
+            width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
             upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
             with sqlite3.connect('db.sqlite3') as conn:
                 c = conn.cursor()
                 c.execute('''
                     INSERT INTO images (
-                        filename, upload_date, annotation, width, height, 
-                        file_size, avg_color, contrast, contour_count
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (filename, upload_date, '', width, height, file_size, avg_color, contrast, contour_count))
+                        filename, upload_date, annotation, width, height,
+                        file_size, avg_color, hist_rgb, hist_lum,
+                        contrast, contour_count
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    filename, upload_date, '', width, height,
+                    file_size, avg_color, hist_rgb, hist_lum,
+                    contrast, contour_count
+                ))
                 conn.commit()
-
             return redirect(url_for('annotate', filename=filename))
-
     return render_template('index.html', filename=None)
-
 
 # Route pour visualiser les statistiques
 @app.route('/visualisations')
