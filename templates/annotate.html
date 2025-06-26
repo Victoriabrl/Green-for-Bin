@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 {% extends "base.html" %}
 
-{% block title %}Galerie{% endblock %}
+{% block title %}{{ _('Annotation') }}{% endblock %}
 
 {% block content %}
 <html>
 <head>
-    <title>Annoter l'image</title>
+    <title>{{ _('Annoter l'image') }}</title>
 </head>
 <body>
-    <h2>Image uploadée</h2>
+    <h2>{{ _('Image uploadée') }}</h2>
     <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400"><br><br>
     <form method="POST">
-        <button type="submit" name="annotation" value="pleine">Pleine</button>
-        <button type="submit" name="annotation" value="vide">Vide</button>
+        <button type="submit" name="annotation" value="pleine">{{ _('Pleine') }}</button>
+        <button type="submit" name="annotation" value="vide">{{ _('Vide') }}</button>
     </form>
 </body>
 </html>
