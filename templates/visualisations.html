@@ -13,4 +13,33 @@
     <p>{{ _('Nombre d\'annotations poubelles pleines :') }} {{ full_annotations }}</p>
     <p>{{ _('Nombre d\'annotations poubelles vides :') }} {{ empty_annotations }}</p>
     <p>{{ _('Nombre d\'annotations non labelisées :') }} {{ non_labelled_annotations }}</p>
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+
+    <canvas id="repartition" style="width:100%;max-width:600px"></canvas>
+
+    <script>
+    var xValues = ["pleines","vides"];
+    var yValues = [{{ full_annotations }}, {{ empty_annotations }}];    
+    var barColors = ["#b91d47","#00aba9"];
+
+    new Chart(document.getElementById("repartition"), {
+      type: "pie",
+      data: {
+        labels: xValues,
+        datasets: [{
+          backgroundColor: barColors,
+          data: yValues
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: "Répartition des annotations"
+        }
+      }
+    });
+    </script>
+
+
 {% endblock %}
