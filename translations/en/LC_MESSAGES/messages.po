@@ -87,3 +87,20 @@ msgstr "Choose an image"
 msgid "Aucun fichier choisi"
 msgstr "No file chosen"
 
+msgid "Banque de données"
+msgstr "Database"
+
+msgid "Bienvenue sur le Dashboard !"
+msgstr "Welcome to the Dashboard!"
+
+msgid "Annoter l'image"
+msgstr "Annotate the image"
+
+msgid "Image uploadée"
+msgstr "Uploaded image"
+
+msgid "Base de données"
+msgstr "Database"
+
+msgid "Banque de données : Images Uploadées"
+msgstr "Database: Uploaded Images"
