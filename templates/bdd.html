@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Base de données{% endblock %}
+
+{% block content %}
+<h2>Banque de données : Images Uploadées</h2>
+
+<table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+    <thead style="background-color: #f0f0f0;">
+        <tr>
+            {% for col in colonnes %}
+                <th>{{ col }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+            <tr>
+                {% for col in colonnes %}
+                    <td style="max-width: 300px; word-wrap: break-word;">
+                        {% if col == 'hist_rgb' or col == 'hist_lum' %}
+                            {% if row[col] is string and row[col].startswith("data:image/png;base64") %}
+                                <img src="{{ row[col] }}" alt="{{ col }}" style="max-width: 100%; height: auto;">
+                            {% else %}
+                                {{ row[col]|safe }}
+                            {% endif %}
+                        {% else %}
+                            {{ row[col]|safe }}
+
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if not rows %}
+    <p>Aucune donnée trouvée dans la base.</p>
+{% endif %}
+{% endblock %}
