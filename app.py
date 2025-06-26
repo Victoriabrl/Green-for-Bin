@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import sqlite3
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template
+from flask import Flask, request, redirect, url_for, render_template, session
 from werkzeug.utils import secure_filename
 from PIL import Image
 import matplotlib.pyplot as plt
