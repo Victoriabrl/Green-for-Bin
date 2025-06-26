@@ -1,39 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Galerie{% endblock %}
+{% block title %}{{ _('Galerie') }}{% endblock %}
 
 {% block content %}
-<h2>Galerie des images uploadées</h2>
+    <h2>{{ _('Galerie des images uploadées') }}</h2>
 
-<h3>🫡 Images Vides</h3>
-<div style="display: flex; flex-wrap: wrap;">
-    {% for image in vides %}
-        <div style="margin: 10px;">
-            <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
-            <small>{{ image[1] }}</small>
-        </div>
-    {% endfor %}
-</div>
+    <h3>🫡 {{ _('Images Vides') }}</h3>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for image in vides %}
+            <div style="margin: 10px;">
+                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
+                <small>{{ image[1] }}</small>
+            </div>
+        {% endfor %}
+    </div>
 
-<h3>🤮 Images Pleines</h3>
-<div style="display: flex; flex-wrap: wrap;">
-    {% for image in pleines %}
-        <div style="margin: 10px;">
-            <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
-            <small>{{ image[1] }}</small>
-        </div>
-    {% endfor %}
-</div>
+    <h3>🤮 {{ _('Images Pleines') }}</h3>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for image in pleines %}
+            <div style="margin: 10px;">
+                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
+                <small>{{ image[1] }}</small>
+            </div>
+        {% endfor %}
+    </div>
 
-<h3>🧐 Images Non Annotées</h3>
-<div style="display: flex; flex-wrap: wrap;">
-    {% for image in non_labelisees %}
-        <div style="margin: 10px;">
-            <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
-            <small>{{ image[1] }}</small>
-        </div>
-    {% endfor %}
-</div>
-
+    <h3>🧐 {{ _('Images Non Annotées') }}</h3>
+    <div style="display: flex; flex-wrap: wrap;">
+        {% for image in non_labelisees %}
+            <div style="margin: 10px;">
+                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200"><br>
+                <small>{{ image[1] }}</small>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
 
