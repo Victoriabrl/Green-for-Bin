@@ -12,6 +12,7 @@ matplotlib.use('Agg')
 import base64
 import io
 import ast  
+from flask_babel import Babel, gettext as _
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -23,9 +24,21 @@ app.config['SECRET_KEY'] = 'votre_cle_secrete'  # Nécessaire pour les sessions
 app.config['BABEL_DEFAULT_LOCALE'] = 'fr'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
+#CHANGEMENT DE LANGUE
 # Fonction pour déterminer la langue
 def get_locale():
     return session.get('lang', request.accept_languages.best_match(['en', 'fr']))
+
+@app.context_processor
+def inject_locale():
+    return dict(get_locale=get_locale)
+
+babel = Babel(app, locale_selector=get_locale)
+
+@app.route('/set_language/<lang>')
+def set_language(lang):
+    session['lang'] = lang
+    return redirect(request.referrer or url_for('index'))
 
 # Créer le dossier d'upload s’il n'existe pas
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
