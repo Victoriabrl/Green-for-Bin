@@ -15,6 +15,11 @@
         <button type="submit" name="annotation" value="pleine">{{ _('Pleine') }}</button>
         <button type="submit" name="annotation" value="vide">{{ _('Vide') }}</button>
     </form>
+    {% if auto_label %}
+        <div class="alert alert-info">
+            <b>Pronostic automatique :</b> {{ auto_label|replace('_auto','')|capitalize }}
+        </div>
+    {% endif %}
 </body>
 </html>
 {% endblock %}

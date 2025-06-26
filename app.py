@@ -117,6 +117,22 @@ def index():
             width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
             upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             localisation = random_localisation_france()
+
+            # --- Début du label automatique adapté à tes données ---
+            avg_tuple = eval(avg_color)  # ex: (123, 120, 110)
+            mean_r, mean_g, mean_b = avg_tuple
+            mean_color = (mean_r + mean_g + mean_b) / 3
+            file_size_Ko = file_size / 1024  # conversion octets -> Ko
+            if file_size_Ko > 400 and contour_count > 100000:
+                auto_label = "pleine_auto"
+            elif mean_color < 110 and file_size_Ko > 100:
+                auto_label = "pleine_auto"
+            elif file_size_Ko < 250 and contour_count < 80000:
+                auto_label = "vide_auto"
+            else:
+                auto_label = "vide_auto"
+            # --- Fin du label automatique ---
+
             with sqlite3.connect('db.sqlite3') as conn:
                 c = conn.cursor()
                 c.execute('''
@@ -126,12 +142,12 @@ def index():
                         contrast, contour_count, localisation
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
-                    filename, upload_date, '', width, height,
+                    filename, upload_date, auto_label, width, height,
                     file_size, avg_color, hist_rgb, hist_lum,
                     contrast, contour_count, localisation
                 ))
                 conn.commit()
-            return redirect(url_for('annotate', filename=filename))
+            return redirect(url_for('annotate', filename=filename, auto_label=auto_label))
     return render_template('index.html', filename=None)
 
 
@@ -211,6 +227,7 @@ def stats():
 # Route pour annoter une image
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
 def annotate(filename):
+    auto_label = request.args.get('auto_label')  # récupère le label automatique
     if request.method == 'POST':
         annotation = request.form['annotation']
         with sqlite3.connect('db.sqlite3') as conn:
@@ -219,7 +236,7 @@ def annotate(filename):
             conn.commit()
         return render_template('result.html', filename=filename, annotation=annotation)
 
-    return render_template('annotate.html', filename=filename)
+    return render_template('annotate.html', filename=filename, auto_label=auto_label)
 
 
 # Route pour la galerie
@@ -250,6 +267,120 @@ def random_localisation_france():
     lat = round(random.uniform(48.82, 48.90), 6)
     lon = round(random.uniform(2.25, 2.42), 6)
     return f"{lat},{lon}"
+
+def batch_upload_images():
+    base_dirs = [
+        ('Data/train/with_label/dirty', 'dirty'),
+        ('Data/train/with_label/clean', 'clean')
+    ]
+    for dir_path, label_hint in base_dirs:
+        full_dir = os.path.join(os.getcwd(), dir_path)
+        if not os.path.exists(full_dir):
+            print(f"Le dossier {full_dir} n'existe pas.")
+            continue
+        for fname in os.listdir(full_dir):
+            if not allowed_file(fname):
+                continue
+            src_path = os.path.join(full_dir, fname)
+            # Copie l'image dans le dossier d'upload
+            dest_path = os.path.join(UPLOAD_FOLDER, fname)
+            if not os.path.exists(dest_path):
+                import shutil
+                shutil.copy(src_path, dest_path)
+            # Extraction des features
+            width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(dest_path)
+            upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            localisation = random_localisation_france()
+            avg_tuple = eval(avg_color)
+            mean_r, mean_g, mean_b = avg_tuple
+            mean_color = (mean_r + mean_g + mean_b) / 3
+            file_size_Ko = file_size / 1024
+
+            # --- Classification automatique avancée ---
+            SEUIL_SOMBRE = 100
+            SEUIL_TAILLE = 500
+            SEUIL_CONTRASTE = 80
+            SEUIL_CONTOURS = 10000
+
+            if mean_color < SEUIL_SOMBRE and file_size_Ko > SEUIL_TAILLE and contrast > SEUIL_CONTRASTE and contour_count > SEUIL_CONTOURS:
+                auto_label = "pleine_auto"
+            elif mean_color > 180 and file_size_Ko < 200 and contrast < 50 and contour_count < 5000:
+                auto_label = "vide_auto"
+            elif mean_color < SEUIL_SOMBRE and contrast > SEUIL_CONTRASTE:
+                auto_label = "pleine_auto"
+            elif mean_color > 150 and contrast < 60:
+                auto_label = "vide_auto"
+            else:
+                auto_label = "vide_auto"
+
+            # Ajoute le vrai label pour analyse (dirty/clean)
+            annotation = f"{auto_label}|{label_hint}"
+
+            with sqlite3.connect('db.sqlite3') as conn:
+                c = conn.cursor()
+                c.execute('''
+                    INSERT INTO images (
+                        filename, upload_date, annotation, width, height,
+                        file_size, avg_color, hist_rgb, hist_lum,
+                        contrast, contour_count, localisation
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    fname, upload_date, annotation, width, height,
+                    file_size, avg_color, hist_rgb, hist_lum,
+                    contrast, contour_count, localisation
+                ))
+                conn.commit()
+            print(f"{fname} : {annotation} | mean_color={mean_color:.1f} | file_size_Ko={file_size_Ko:.1f} | contrast={contrast} | contours={contour_count}")
+
+# Pour lancer le batch automatiquement au démarrage (décommente la ligne ci-dessous si tu veux)
+# batch_upload_images()
+
+def analyse_dirty_clean():
+    base_dirs = [
+        ('Data/train/with_label/dirty', 'pleine'),
+        ('Data/train/with_label/clean', 'vide')
+    ]
+    stats = {'pleine': [], 'vide': []}
+    for dir_path, label in base_dirs:
+        full_dir = os.path.join(os.getcwd(), dir_path)
+        if not os.path.exists(full_dir):
+            print(f"Le dossier {full_dir} n'existe pas.")
+            continue
+        for fname in os.listdir(full_dir):
+            if not allowed_file(fname):
+                continue
+            src_path = os.path.join(full_dir, fname)
+            width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(src_path)
+            avg_tuple = eval(avg_color)
+            mean_r, mean_g, mean_b = avg_tuple
+            mean_color = (mean_r + mean_g + mean_b) / 3
+            file_size_Ko = file_size / 1024
+            stats[label].append({
+                'filename': fname,
+                'mean_color': mean_color,
+                'file_size_Ko': file_size_Ko,
+                'contrast': contrast,
+                'contour_count': contour_count
+            })
+            print(f"{label} | {fname} | mean_color={mean_color:.1f} | file_size_Ko={file_size_Ko:.1f} | contrast={contrast} | contours={contour_count}")
+
+    # Affiche les moyennes pour chaque classe
+    for label in ['pleine', 'vide']:
+        if stats[label]:
+            mean_color = np.mean([x['mean_color'] for x in stats[label]])
+            file_size_Ko = np.mean([x['file_size_Ko'] for x in stats[label]])
+            contrast = np.mean([x['contrast'] for x in stats[label]])
+            contour_count = np.mean([x['contour_count'] for x in stats[label]])
+            print(f"\n--- {label.upper()} ---")
+            print(f"Moyenne mean_color : {mean_color:.1f}")
+            print(f"Moyenne file_size_Ko : {file_size_Ko:.1f}")
+            print(f"Moyenne contrast : {contrast:.1f}")
+            print(f"Moyenne contour_count : {contour_count:.1f}")
+        else:
+            print(f"Aucune image pour {label}")
+
+# Pour lancer l'analyse (décommente la ligne ci-dessous pour lancer une fois)
+# analyse_dirty_clean()
 
 if __name__ == '__main__':
     init_db()
