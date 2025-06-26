@@ -13,6 +13,7 @@ import base64
 import io
 import ast  
 from flask_babel import Babel, gettext as _
+import random
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -65,7 +66,8 @@ def init_db():
                 hist_rgb TEXT,
                 hist_lum TEXT,
                 contrast INTEGER,
-                contour_count INTEGER
+                contour_count INTEGER,
+                localisation TEXT
             )
         ''')
         conn.commit()
@@ -114,18 +116,19 @@ def index():
             file.save(filepath)
             width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
             upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            localisation = random_localisation_france()
             with sqlite3.connect('db.sqlite3') as conn:
                 c = conn.cursor()
                 c.execute('''
                     INSERT INTO images (
                         filename, upload_date, annotation, width, height,
                         file_size, avg_color, hist_rgb, hist_lum,
-                        contrast, contour_count
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        contrast, contour_count, localisation
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     filename, upload_date, '', width, height,
                     file_size, avg_color, hist_rgb, hist_lum,
-                    contrast, contour_count
+                    contrast, contour_count, localisation
                 ))
                 conn.commit()
             return redirect(url_for('annotate', filename=filename))
@@ -240,6 +243,13 @@ def gallery():
     return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees)
 
 
+
+def random_localisation_france():
+    # Paris centre : lat 48.8566, lon 2.3522
+    # Rayon ~10 km autour du centre (environ 0.09° latitude/longitude)
+    lat = round(random.uniform(48.82, 48.90), 6)
+    lon = round(random.uniform(2.25, 2.42), 6)
+    return f"{lat},{lon}"
 
 if __name__ == '__main__':
     init_db()
