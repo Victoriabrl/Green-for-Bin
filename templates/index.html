@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
-{% block title %}Accueil{% endblock %}
+{% block title %}{{ _("Accueil") }}{% endblock %}
 
 {% block content %}
-    <h2>Uploader une image de poubelle</h2>
+    <h2>{{ _("Uploader une image de poubelle") }}</h2>
     <form method="POST" enctype="multipart/form-data">
         <input type="file" name="image" required>
-        <button type="submit">Uploader</button>
+        <button type="submit">{{ _("Uploader") }}</button>
     </form>
 
     {% if filename %}
-        <h3>Image uploadée :</h3>
+        <h3>{{ _("Image uploadée :") }}</h3>
         <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400"><br><br>
     {% endif %}
 {% endblock %}
