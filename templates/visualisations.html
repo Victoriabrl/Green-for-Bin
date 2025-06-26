@@ -2,22 +2,15 @@
 
 {% block title %}Visualisations{% endblock %}
 
-{% block content %} 
+{% block content %}
+    <title>{{ _('Bienvenue sur le dashboard !') }}</title>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Bienvenue sur le dashboard !</title>
-</head>
-<body>
-    <h1>Vous pouvez visualiser les données de vos poubelles ici.</h1>
-    <h2>Visualisations</h2>
-    
-    <h2>Statistiques</h2>
-    <p>Nombre total d'annotations : {{ total_annotations }}</p>
-    <p>Nombre d'annotations poubelles pleines : {{ full_annotations }}</p>
-    <p>Nombre d'annotations poubelles vides : {{ empty_annotations }}</p>
-    <p><p>Nombre d'annotations non labelisées : {{ non_labelled_annotations }}</p>
-</body>
-</html>
+    <h1>{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
+    <h2>{{ _('Visualisations') }}</h2>
+
+    <h2>{{ _('Statistiques') }}</h2>
+    <p>{{ _('Nombre total d\'annotations :') }} {{ total_annotations }}</p>
+    <p>{{ _('Nombre d\'annotations poubelles pleines :') }} {{ full_annotations }}</p>
+    <p>{{ _('Nombre d\'annotations poubelles vides :') }} {{ empty_annotations }}</p>
+    <p>{{ _('Nombre d\'annotations non labelisées :') }} {{ non_labelled_annotations }}</p>
 {% endblock %}
