@@ -19,6 +19,13 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['SECRET_KEY'] = 'votre_cle_secrete'  # Nécessaire pour les sessions
+app.config['BABEL_DEFAULT_LOCALE'] = 'fr'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
+# Fonction pour déterminer la langue
+def get_locale():
+    return session.get('lang', request.accept_languages.best_match(['en', 'fr']))
 
 # Créer le dossier d'upload s’il n'existe pas
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
