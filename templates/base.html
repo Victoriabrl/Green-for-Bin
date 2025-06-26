@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ get_locale() }}">
 <head>
+    <meta charset="UTF-8">
     <title>{% block title %}Suivi des poubelles{% endblock %}</title>
     <style>
         nav {
@@ -18,15 +19,21 @@
     </style>
 </head>
 <body>
+    <header>
+        <h1>{{ _('Green For Bin') }}</h1>
+        <div style="float:right;">
+            <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
+            <a href="{{ url_for('set_language', lang='en') }}">English</a>
+        </div>
     <nav>
-        <a href="/">Accueil</a>
+        <a href="/">{{ _('Accueil') }}</a>
         
-        <a href="/gallery">Galerie</a>
+        <a href="/gallery">{{ _('Galerie') }}</a>
 
-        <a href="/visualisations">Visualisations</a>
-        <a href="/bdd">Banque de données</a>
+        <a href="/visualisations">{{ _('Visualisations') }}</a>
+        <a href="/bdd">{{ _('Banque de données') }}</a>
     </nav>
-
+ </header>
     <div>
         {% block content %}{% endblock %}
     </div>
