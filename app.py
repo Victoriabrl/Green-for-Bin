@@ -6,6 +6,12 @@ from datetime import datetime
 from flask import Flask, request, redirect, url_for, render_template
 from werkzeug.utils import secure_filename
 from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+import base64
+import io
+import ast  
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -104,6 +110,55 @@ def index():
                 conn.commit()
             return redirect(url_for('annotate', filename=filename))
     return render_template('index.html', filename=None)
+
+
+
+
+def plot_histogram(data, title=''):
+    fig, ax = plt.subplots(figsize=(4, 2))
+    if isinstance(data[0], list):  # RGB
+        colors = ['red', 'green', 'blue']
+        for i, color in enumerate(colors):
+            ax.plot(data[i], color=color, linewidth=0.7)
+    else:
+        ax.plot(data, color='black', linewidth=0.7)
+    ax.set_title(title)
+    ax.axis('off')
+
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    return base64.b64encode(buf.read()).decode('utf-8')
+
+@app.route('/bdd')
+def afficher_bdd():
+    with sqlite3.connect('db.sqlite3') as conn:
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute("SELECT * FROM images")
+        rows = c.fetchall()
+        colonnes = [description[0] for description in c.description]
+
+    processed_rows = []
+    for row in rows:
+        row_dict = dict(row)
+
+        # Remplacement des histogrammes texte par images
+        for col_name, title in [('hist_rgb', 'Histogramme RGB'), ('hist_lum', 'Histogramme Luminance')]:
+            if col_name in row_dict and row_dict[col_name]:
+                try:
+                    data = ast.literal_eval(row_dict[col_name])
+                    img = plot_histogram(data, title)
+                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}"/>'
+                except Exception:
+                    row_dict[col_name] = "Erreur d'affichage"
+
+        processed_rows.append(row_dict)
+
+    return render_template('bdd.html', rows=processed_rows, colonnes=colonnes)
+
 
 # Route pour visualiser les statistiques
 @app.route('/visualisations')
