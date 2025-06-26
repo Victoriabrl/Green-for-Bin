@@ -1,0 +1,89 @@
+# English translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-25 17:29+0200\n"
+"PO-Revision-Date: 2025-06-25 17:29+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en\n"
+
+#: templates/index.html
+msgid "Accueil"
+msgstr "Home"
+
+msgid "Uploader une image de poubelle"
+msgstr "Upload a trash bin image"
+
+msgid "Uploader"
+msgstr "Upload"
+
+msgid "Image uploadée :"
+msgstr "Uploaded image:"
+
+#: templates/gallery.html
+msgid "Galerie"
+msgstr "Gallery"
+
+msgid "Galerie des images uploadées"
+msgstr "Gallery of uploaded images"
+
+msgid "Images Vides"
+msgstr "Empty Images"
+
+msgid "Images Pleines"
+msgstr "Full Images"
+
+msgid "Images Non Annotées"
+msgstr "Unannotated Images"
+
+#: templates/result.html
+msgid "Annotation enregistrée :"
+msgstr "Annotation saved:"
+
+#: templates/visualisations.html
+msgid "Bienvenue sur le dashboard !"
+msgstr "Welcome to the dashboard!"
+
+msgid "Vous pouvez visualiser les données de vos poubelles ici."
+msgstr "You can visualize your trash bin data here."
+
+msgid "Visualisations"
+msgstr "Visualizations"
+
+msgid "Statistiques"
+msgstr "Statistics"
+
+msgid "Nombre total d'annotations :"
+msgstr "Total number of annotations:"
+
+msgid "Nombre d'annotations poubelles pleines :"
+msgstr "Number of full bin annotations:"
+
+msgid "Nombre d'annotations poubelles vides :"
+msgstr "Number of empty bin annotations:"
+
+msgid "Nombre d'annotations non labelisées :"
+msgstr "Number of unlabelled annotations:"
+
+msgid "Choisir une image"
+msgstr "Choose an image"
+
+msgid "Aucun fichier choisi"
+msgstr "No file chosen"
+

@@ -1,0 +1,121 @@
+# French translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-06-25 17:29+0200\n"
+"PO-Revision-Date: 2025-06-25 17:29+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: templates/annotate.html:3
+msgid "Annotation"
+msgstr ""
+
+#: templates/annotate.html:6
+msgid "Annoter l'image"
+msgstr ""
+
+#: templates/annotate.html:9
+msgid "Choisir une annotation :"
+msgstr ""
+
+#: templates/annotate.html:11
+msgid "Pleine"
+msgstr ""
+
+#: templates/annotate.html:14
+msgid "Vide"
+msgstr ""
+
+#: templates/annotate.html:16
+msgid "Enregistrer"
+msgstr ""
+
+#: templates/base.html:9
+msgid "Green For Bin"
+msgstr ""
+
+#: templates/base.html:15 templates/index.html:3
+msgid "Accueil"
+msgstr ""
+
+#: templates/base.html:16 templates/gallery.html:3
+msgid "Galerie"
+msgstr ""
+
+#: templates/base.html:17 templates/visualisations.html:3
+#: templates/visualisations.html:7
+msgid "Visualisations"
+msgstr ""
+
+#: templates/gallery.html:6
+msgid "Galerie des images uploadées"
+msgstr ""
+
+#: templates/gallery.html:8
+msgid "Images Vides"
+msgstr ""
+
+#: templates/gallery.html:18
+msgid "Images Pleines"
+msgstr ""
+
+#: templates/gallery.html:28
+msgid "Images Non Annotées"
+msgstr ""
+
+#: templates/index.html:6
+msgid "Uploader une image de poubelle"
+msgstr ""
+
+#: templates/index.html:9
+msgid "Uploader"
+msgstr ""
+
+#: templates/index.html:13
+msgid "Image uploadée :"
+msgstr ""
+
+#: templates/result.html:3
+msgid "Résultat"
+msgstr ""
+
+#: templates/result.html:6
+msgid "Annotation enregistrée :"
+msgstr ""
+
+#: templates/visualisations.html:6
+msgid "Vous pouvez visualiser les données de vos poubelles ici."
+msgstr ""
+
+#: templates/visualisations.html:9
+msgid "Statistiques"
+msgstr ""
+
+#: templates/visualisations.html:10
+msgid "Nombre total d'annotations :"
+msgstr ""
+
+#: templates/visualisations.html:11
+msgid "Nombre d'annotations poubelles pleines :"
+msgstr ""
+
+#: templates/visualisations.html:12
+msgid "Nombre d'annotations poubelles vides :"
+msgstr ""
+
+#: templates/visualisations.html:13
+msgid "Nombre d'annotations non labelisées :"
+msgstr ""
+
