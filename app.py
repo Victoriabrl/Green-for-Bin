@@ -15,6 +15,8 @@ import ast
 from flask_babel import Babel, gettext as _
 import random
 import collections
+import shutil
+import json
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -418,6 +420,66 @@ def analyse_dirty_clean():
 
 # Pour lancer l'analyse (décommente la ligne ci-dessous pour lancer une fois)
 # analyse_dirty_clean()
+
+#MAP
+def random_localisation_france():
+    # Paris centre : lat 48.8566, lon 2.3522
+    # Rayon ~10 km autour du centre (environ 0.09° latitude/longitude)
+    lat = round(random.uniform(48.82, 48.90), 6)
+    lon = round(random.uniform(2.25, 2.42), 6)
+    return f"{lat},{lon}"
+
+def generer_json_poubelles():
+    DB_PATH = "db.sqlite3"
+    TEMP_JSON_PATH = "data/poubelles.json"
+    FINAL_JSON_PATH = "static/data/poubelles.json"
+
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("static/data", exist_ok=True)
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT localisation, annotation, upload_date
+        FROM images
+        WHERE localisation IS NOT NULL AND annotation IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    points = []
+    for loc, remplissage, date in rows:
+        try:
+            lat_str, lon_str = loc.split(",")
+            lat = float(lat_str.strip())
+            lon = float(lon_str.strip())
+        except Exception:
+            continue
+
+        points.append({
+            "lat": lat,
+            "lon": lon,
+            "remplissage": remplissage.lower(),
+            "date": date
+            # Optionnel : "meteo": "", "marche": "", "zone": "" si tu veux les ajouter plus tard
+        })
+
+    # Sauvegarde dans data/
+    with open(TEMP_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(points, f, ensure_ascii=False, indent=4)
+
+    # Copie dans static/data/ pour Leaflet
+    shutil.copy(TEMP_JSON_PATH, FINAL_JSON_PATH)
+
+@app.route("/map")
+def map_view():
+    generer_json_poubelles()  # Génère le fichier JSON à jour
+    return render_template("map.html")  # plus besoin de passer points
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     init_db()
