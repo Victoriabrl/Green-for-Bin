@@ -24,6 +24,7 @@
         <div style="float:right;">
             <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
             <a href="{{ url_for('set_language', lang='en') }}">English</a>
+
         </div>
     <nav>
         <a href="/">{{ _('Accueil') }}</a>
@@ -32,6 +33,7 @@
 
         <a href="/visualisations">{{ _('Visualisations') }}</a>
         <a href="/bdd">{{ _('Banque de données') }}</a>
+        <a href="{{ url_for('map_view') }}">{{ _('Carte interactive') }}</a>
     </nav>
  </header>
     <div>
