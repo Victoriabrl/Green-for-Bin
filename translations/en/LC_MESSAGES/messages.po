@@ -104,3 +104,6 @@ msgstr "Database"
 
 msgid "Banque de données : Images Uploadées"
 msgstr "Database: Uploaded Images"
+
+msgid "Carte interactive"
+msgstr "Interactive map"
