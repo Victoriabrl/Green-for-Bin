@@ -224,25 +224,21 @@ th, td {
 </head>
 <body>
     <header>
-        <div class="header-content">
-            <div class="header-title">
-                <!-- Si tu veux un logo, décommente la ligne suivante et place ton logo dans /static/logo.png -->
-                <!-- <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"> -->
-                <h1>{{ _('Green For Bin') }}</h1>
-            </div>
-            <div class="lang-switch">
-                <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
-                <a href="{{ url_for('set_language', lang='en') }}">English</a>
-            </div>
+        <h1>{{ _('Green For Bin') }}</h1>
+        <div style="float:right;">
+            <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
+            <a href="{{ url_for('set_language', lang='en') }}">English</a>
         </div>
-        <nav>
-            <a href="/">{{ _('Accueil') }}</a>
-            <a href="/gallery">{{ _('Galerie') }}</a>
-            <a href="/visualisations">{{ _('Visualisations') }}</a>
-            <a href="/bdd">{{ _('Banque de données') }}</a>
-        </nav>
-    </header>
-    <div class="container">
+    <nav>
+        <a href="/">{{ _('Accueil') }}</a>
+        
+        <a href="/gallery">{{ _('Galerie') }}</a>
+
+        <a href="/visualisations">{{ _('Visualisations') }}</a>
+        <a href="/bdd">{{ _('Banque de données') }}</a>
+    </nav>
+ </header>
+    <div>
         {% block content %}{% endblock %}
     </div>
     <footer>

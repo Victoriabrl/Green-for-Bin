@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Carte interactive des poubelles</h2>
+
+<div id="map" style="height: 500px; max-width: 900px; margin: auto; border: 2px solid #ccc; border-radius: 10px;"></div>
+
+<!-- Filtres -->
+<form id="filters" style="text-align: center; margin-top: 10px;">
+    <label>
+        <input type="checkbox" id="filter-marche">
+        Poubelles dans un marché
+    </label>
+    <label style="margin-left: 20px;">
+        Zone :
+        <select id="zone-select">
+            <option value="">Toutes</option>
+        </select>
+    </label>
+</form>
+
+<!-- Toggle marchés -->
+<label style="display: block; text-align: center; margin-top: 10px;">
+    <input type="checkbox" id="toggle-marches"> Afficher les zones de marché
+</label>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+<script>
+    const map = L.map('map').setView([48.8566, 2.3522], 12);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    function getColor(level) {
+        if (level === "vide") return "green";
+        if (level === "moyen") return "orange";
+        if (level === "plein") return "red";
+        return "gray";
+    }
+
+    const markersGroup = L.layerGroup().addTo(map);
+    let marchesLayer = null;
+    let arrLayer = null;
+    let selectedZonePolygon = null;
+
+    // ➤ Charger les marchés
+    fetch('/static/data/marches-decouverts.geojson')
+        .then(res => res.json())
+        .then(geojson => {
+            marchesLayer = L.geoJSON(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circle(latlng, {
+                        radius: 120,
+                        color: "#0066cc",
+                        fillColor: "#cce5ff",
+                        fillOpacity: 0.4,
+                        weight: 1
+                    }).bindPopup(`<b>${feature.properties.nom}</b><br>${feature.properties.adr || ""}`);
+                }
+            });
+        });
+
+    // ➤ Charger les zones géographiques (arrondissements)
+    const zones = {};  // stocke chaque zone par nom
+    fetch('/static/data/arrondissements.geojson')
+        .then(res => res.json())
+        .then(geojson => {
+            arrLayer = L.geoJSON(geojson, {
+                style: {
+                    color: "#888",
+                    weight: 1,
+                    fillOpacity: 0
+                },
+                onEachFeature: function (feature, layer) {
+                    const name = feature.properties.l_ar;
+                    zones[name] = layer;
+                    const opt = document.createElement("option");
+                    opt.value = name;
+                    opt.text = name;
+                    document.getElementById("zone-select").appendChild(opt);
+                }
+            });
+        });
+
+    // ➤ Charger et filtrer les poubelles
+    function loadPoubelles(filterInMarche = false) {
+        markersGroup.clearLayers();
+        const selectedZone = document.getElementById("zone-select").value;
+
+        fetch('/static/data/poubelles.json')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(p => {
+                    const latlng = L.latLng(p.lat, p.lon);
+                    let show = true;
+
+                    // ➤ Filtrer par zone géographique (polygon)
+                    if (selectedZone && zones[selectedZone]) {
+                        const polygon = zones[selectedZone];
+                        show = polygon.getBounds().contains(latlng);  // simplifié
+                    }
+
+                    // ➤ Filtrer par zone de marché (cercle)
+                    if (show && filterInMarche && marchesLayer) {
+                        show = marchesLayer.getLayers().some(circle =>
+                            circle.getLatLng().distanceTo(latlng) <= circle.getRadius()
+                        );
+                    }
+
+                    if (show) {
+                        const marker = L.circleMarker(latlng, {
+                            radius: 8,
+                            fillColor: getColor(p.remplissage),
+                            color: "#000",
+                            weight: 1,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).bindPopup(`Niveau : ${p.remplissage}<br>Date : ${p.date}`);
+                        markersGroup.addLayer(marker);
+                    }
+                });
+            });
+    }
+
+    // ➤ Initialisation
+    loadPoubelles();
+
+    // ➤ Filtres interactifs
+    document.getElementById("filter-marche").addEventListener("change", function () {
+        loadPoubelles(this.checked);
+    });
+
+    document.getElementById("zone-select").addEventListener("change", function () {
+        const filterMarche = document.getElementById("filter-marche").checked;
+        loadPoubelles(filterMarche);
+    });
+
+    document.getElementById("toggle-marches").addEventListener("change", function () {
+        if (marchesLayer) {
+            if (this.checked) {
+                marchesLayer.addTo(map);
+                map.fitBounds(marchesLayer.getBounds());
+            } else {
+                map.removeLayer(marchesLayer);
+            }
+        }
+    });
+</script>
+{% endblock %}

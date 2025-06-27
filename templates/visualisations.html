@@ -13,4 +13,96 @@
     <p>{{ _('Nombre d\'annotations poubelles pleines :') }} {{ full_annotations }}</p>
     <p>{{ _('Nombre d\'annotations poubelles vides :') }} {{ empty_annotations }}</p>
     <p>{{ _('Nombre d\'annotations non labelisées :') }} {{ non_labelled_annotations }}</p>
+
+    <p>{{ _('Distribution des tailles de fichiers :') }} </p>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <canvas id="progressChart" class="chart-small"></canvas>
+    <canvas id="repartition" class="chart-small"></canvas>
+    <canvas id="distribution" class="chart-small"></canvas>
+    <script>
+    //Nombre total d’images uploadées
+    const donut_values = ["Nombre d'annotations", "Total d'annotations possibles"];
+    const total_annot = {{ total_annotations }};  // Variable injectée par le template
+    const total_possible = 720;
+    new Chart(document.getElementById('progressChart'), {
+      type: 'doughnut',
+      data: {
+        labels: donut_values,
+        datasets: [{
+          data: [total_annot, total_possible - total_annot],
+          backgroundColor: ['#4CAF50', '#e0e0e0'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '70%',
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
+        }
+      }
+    });
+    var xValues = ["pleines","vides"];
+    var yValues = [{{ full_annotations }}, {{ empty_annotations }}];    
+    var barColors = ["#b91d47","#00aba9"];
+
+    //Repartition des annotations : % pleines vs % vides
+    new Chart(document.getElementById("repartition"), {
+      type: "pie",
+      data: {
+        labels: xValues,
+        datasets: [{
+          backgroundColor: barColors,
+          data: yValues
+        }]
+      },
+      options: {
+        title: {
+          display: true,
+          text: "Répartition des annotations"
+        }
+      }
+    });
+
+    var x_taille_fichiers = {{ size_files | tojson }};
+    var y_nombre_fichiers_par_taille = {{ occ_size_files | tojson }};
+
+    new Chart("distribution",{
+      type: "bar",
+      data: {
+        labels: x_taille_fichiers,
+        datasets: [{
+          backgroundColor: barColors,
+          data: y_nombre_fichiers_par_taille
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: true, // <-- clé pour démarrer à 0
+            ticks: {
+              precision: 0 // optionnel : évite les décimales
+            }
+          }
+        }
+      }
+    })
+
+
+
+
+    </script>
+
+    <img src="{{ image_base64 }}" alt="Graphique">
+
+
+
 {% endblock %}

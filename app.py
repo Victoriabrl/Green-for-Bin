@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import sqlite3
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template, session
+from flask import Flask, request, redirect, url_for, render_template, session, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -15,6 +15,9 @@ import ast
 from flask_babel import Babel, gettext as _
 import random
 import ast  # utile si avg_color est stocké comme chaîne de texte dans la base
+import collections
+import shutil
+import json
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -233,12 +236,48 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
+    #affichage du graphique en camembert pour la repartition des annotations 
+    data = [full_annotations,empty_annotations]
+    labels=["pleines","vides"]
+
+    #graphique 
+    fig, ax = plt.subplots(figsize=(4, 2))
+    ax.pie(data,labels=labels,autopct='%1.1f%%')
+    ax.set_title("Exemple")
+
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    img_base64 = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
+
+    #affichage de la distribution des tailles des fichiers 
+    conn = sqlite3.connect('db.sqlite3')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT file_size, COUNT(*) as count
+    FROM images
+    WHERE file_size IS NOT NULL
+    GROUP BY file_size
+    ORDER BY file_size
+""")
+    
+    rows = cursor.fetchall()
+
+    # Formatage pour affichage
+    size_files = [file_size for file_size, _ in rows]
+    occ_size_files = [count for _, count in rows]
+
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
                            empty_annotations=empty_annotations,
-                           non_labelled_annotations=non_labelled_annotations)
-
+                           non_labelled_annotations=non_labelled_annotations,
+                           image_base64=img_base64,
+                           size_files=size_files,
+                           occ_size_files=occ_size_files)
 
 # Route pour annoter une image
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
@@ -397,6 +436,66 @@ def analyse_dirty_clean():
 
 # Pour lancer l'analyse (décommente la ligne ci-dessous pour lancer une fois)
 # analyse_dirty_clean()
+
+#MAP
+def random_localisation_france():
+    # Paris centre : lat 48.8566, lon 2.3522
+    # Rayon ~10 km autour du centre (environ 0.09° latitude/longitude)
+    lat = round(random.uniform(48.82, 48.90), 6)
+    lon = round(random.uniform(2.25, 2.42), 6)
+    return f"{lat},{lon}"
+
+def generer_json_poubelles():
+    DB_PATH = "db.sqlite3"
+    TEMP_JSON_PATH = "data/poubelles.json"
+    FINAL_JSON_PATH = "static/data/poubelles.json"
+
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("static/data", exist_ok=True)
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT localisation, annotation, upload_date
+        FROM images
+        WHERE localisation IS NOT NULL AND annotation IS NOT NULL
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    points = []
+    for loc, remplissage, date in rows:
+        try:
+            lat_str, lon_str = loc.split(",")
+            lat = float(lat_str.strip())
+            lon = float(lon_str.strip())
+        except Exception:
+            continue
+
+        points.append({
+            "lat": lat,
+            "lon": lon,
+            "remplissage": remplissage.lower(),
+            "date": date
+            # Optionnel : "meteo": "", "marche": "", "zone": "" si tu veux les ajouter plus tard
+        })
+
+    # Sauvegarde dans data/
+    with open(TEMP_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(points, f, ensure_ascii=False, indent=4)
+
+    # Copie dans static/data/ pour Leaflet
+    shutil.copy(TEMP_JSON_PATH, FINAL_JSON_PATH)
+
+@app.route("/map")
+def map_view():
+    generer_json_poubelles()  # Génère le fichier JSON à jour
+    return render_template("map.html")  # plus besoin de passer points
+
+@app.route("/")
+def home():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     init_db()
