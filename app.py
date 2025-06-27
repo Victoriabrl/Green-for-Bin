@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import sqlite3
 from datetime import datetime
-from flask import Flask, request, redirect, url_for, render_template, session
+from flask import Flask, request, redirect, url_for, render_template, session, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -14,6 +14,7 @@ import io
 import ast  
 from flask_babel import Babel, gettext as _
 import random
+import collections
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -217,12 +218,48 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
+    #affichage du graphique en camembert pour la repartition des annotations 
+    data = [full_annotations,empty_annotations]
+    labels=["pleines","vides"]
+
+    #graphique 
+    fig, ax = plt.subplots(figsize=(4, 2))
+    ax.pie(data,labels=labels,autopct='%1.1f%%')
+    ax.set_title("Exemple")
+
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    img_base64 = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
+
+    #affichage de la distribution des tailles des fichiers 
+    conn = sqlite3.connect('db.sqlite3')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT file_size, COUNT(*) as count
+    FROM images
+    WHERE file_size IS NOT NULL
+    GROUP BY file_size
+    ORDER BY file_size
+""")
+    
+    rows = cursor.fetchall()
+
+    # Formatage pour affichage
+    size_files = [file_size for file_size, _ in rows]
+    occ_size_files = [count for _, count in rows]
+
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
                            empty_annotations=empty_annotations,
-                           non_labelled_annotations=non_labelled_annotations)
-
+                           non_labelled_annotations=non_labelled_annotations,
+                           image_base64=img_base64,
+                           size_files=size_files,
+                           occ_size_files=occ_size_files)
 
 # Route pour annoter une image
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
