@@ -119,3 +119,14 @@ msgstr ""
 msgid "Nombre d'annotations non labelisées :"
 msgstr ""
 
+#: templates/index.html:12
+msgid "Choose a file"
+msgstr "Choisir un fichier"
+
+#: templates/index.html:14
+msgid "No file chosen"
+msgstr "Aucun fichier choisi"
+
+#: templates/index.html:15
+msgid "Upload"
+msgstr "Uploader"

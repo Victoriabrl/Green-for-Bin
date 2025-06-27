@@ -9,7 +9,7 @@
     <thead style="background-color: #f0f0f0;">
         <tr>
             {% for col in colonnes %}
-                <th>{{ col }}</th>
+                <th data-col="{{ col }}">{{ col }}</th>
             {% endfor %}
         </tr>
     </thead>
@@ -17,16 +17,22 @@
         {% for row in rows %}
             <tr>
                 {% for col in colonnes %}
-                    <td style="max-width: 300px; word-wrap: break-word;">
+                    <td data-label="{{ col }}"
+                        {% if col == 'hist_rgb' or col == 'hist_lum' %}
+                            style="min-width:220px; max-width:260px; word-wrap: break-word; text-align: center; vertical-align: middle;"
+                        {% else %}
+                            style="max-width: 300px; word-wrap: break-word; text-align: center; vertical-align: middle;"
+                        {% endif %}
+                    >
                         {% if col == 'hist_rgb' or col == 'hist_lum' %}
                             {% if row[col] is string and row[col].startswith("data:image/png;base64") %}
-                                <img src="{{ row[col] }}" alt="{{ col }}" style="max-width: 100%; height: auto;">
+                                <img src="{{ row[col] }}" alt="{{ col }}"
+                                     style="max-width: 220px; max-height: 120px; width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 12px; box-shadow: 0 2px 8px #b9f6ca33;">
                             {% else %}
                                 {{ row[col]|safe }}
                             {% endif %}
                         {% else %}
                             {{ row[col]|safe }}
-
                         {% endif %}
                     </td>
                 {% endfor %}

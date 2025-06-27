@@ -17,7 +17,14 @@
     </form>
     {% if auto_label %}
         <div class="alert alert-info">
-            <b>Pronostic automatique :</b> {{ auto_label|replace('_auto','')|capitalize }}
+            <b>{{ _('Pronostic automatique') }} :</b>
+            {% if auto_label.startswith('pleine') %}
+                {{ _('Pleine') }}
+            {% elif auto_label.startswith('vide') %}
+                {{ _('Vide') }}
+            {% else %}
+                {{ _('Inconnu') }}
+            {% endif %}
         </div>
     {% endif %}
 </body>

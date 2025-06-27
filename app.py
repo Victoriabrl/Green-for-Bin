@@ -14,6 +14,7 @@ import io
 import ast  
 from flask_babel import Babel, gettext as _
 import random
+import ast  # utile si avg_color est stocké comme chaîne de texte dans la base
 
 # Configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -62,7 +63,7 @@ def init_db():
                 width INTEGER,
                 height INTEGER,
                 file_size INTEGER,
-                avg_color TEXT,
+                avg_color Text,
                 hist_rgb TEXT,
                 hist_lum TEXT,
                 contrast INTEGER,
@@ -183,8 +184,22 @@ def afficher_bdd():
     processed_rows = []
     for row in rows:
         row_dict = dict(row)
+        print("DEBUG avg_color:", row_dict['avg_color'], type(row_dict['avg_color']))
 
-        # Remplacement des histogrammes texte par images
+        # ✅ Conversion avg_color en tuple de int natifs
+        if 'avg_color' in row_dict and row_dict['avg_color']:
+            try:
+                avg_str = row_dict['avg_color']
+                
+                # Évalue la chaîne même si elle contient np.int64()
+                avg_tuple = eval(avg_str, {"np": np})  # ⚠️ safe car contexte limité à numpy
+
+                row_dict['avg_color'] = tuple(int(x) for x in avg_tuple)
+            except Exception as e:
+                print("Erreur avg_color:", e)
+                row_dict['avg_color'] = "Erreur"
+
+        # ✅ Remplacement des histogrammes texte par images
         for col_name, title in [('hist_rgb', 'Histogramme RGB'), ('hist_lum', 'Histogramme Luminance')]:
             if col_name in row_dict and row_dict[col_name]:
                 try:
@@ -197,6 +212,7 @@ def afficher_bdd():
         processed_rows.append(row_dict)
 
     return render_template('bdd.html', rows=processed_rows, colonnes=colonnes)
+
 
 
 # Route pour visualiser les statistiques

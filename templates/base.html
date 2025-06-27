@@ -4,38 +4,249 @@
     <meta charset="UTF-8">
     <title>{% block title %}Suivi des poubelles{% endblock %}</title>
     <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            color: #234d20;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #234d20;
+            color: #b9f6ca;
+            padding: 0;
+            margin-bottom: 0;
+            box-shadow: 0 2px 8px #b9f6ca55;
+        }
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 32px 8px 32px;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-title img {
+            height: 48px;
+            width: 48px;
+            border-radius: 50%;
+            background: #b9f6ca;
+            object-fit: cover;
+        }
+        .header-title h1 {
+            color: #b9f6ca;
+            font-size: 2.2em;
+            letter-spacing: 2px;
+            margin: 0;
+            font-weight: bold;
+            text-shadow: 1px 2px 8px #388e3c55;
+        }
+        .lang-switch {
+            font-size: 1.1em;
+        }
+        .lang-switch a {
+            color: #b9f6ca;
+            margin-left: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .lang-switch a:hover {
+            color: #388e3c;
+        }
         nav {
-            background-color: #333;
-            padding: 10px;
+            background: #388e3c;
+            padding: 0 0 0 32px;
+            display: flex;
+            align-items: center;
+            height: 48px;
         }
         nav a {
-            color: white;
-            margin-right: 15px;
+            color: #fff;
+            margin-right: 30px;
             text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: color 0.2s;
         }
         nav a:hover {
+            color: #b9f6ca;
             text-decoration: underline;
         }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 32px 16px 80px 16px;
+        }
+        footer {
+            background: #234d20;
+            color: #b9f6ca;
+            text-align: center;
+            padding: 18px 0 10px 0;
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            font-size: 1.05em;
+            letter-spacing: 1px;
+            box-shadow: 0 -2px 8px #b9f6ca33;
+        }
+        table {
+            background: #f1f8e9;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px #b9f6ca33;
+            border-collapse: separate;
+            border-spacing: 0;
+            width: 100%;
+            margin-bottom: 2em;
+            overflow: hidden;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #b9f6ca;
+            padding: 12px 10px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 1em;
+            word-break: break-word;
+        }
+
+        th {
+            background: #388e3c;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.08em;
+            letter-spacing: 1px;
+        }
+
+        tr:nth-child(even) {
+            background: #e8f5e9;
+        }
+
+        tr:hover {
+            background: #c8e6c9;
+            transition: background 0.2s;
+        }
+
+        td img {
+            max-width: 140px;
+            max-height: 90px;
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #b9f6ca33;
+        }
+
+        /* --- Responsive Table --- */
+        @media (max-width: 900px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+            thead {
+                display: none;
+            }
+            tr {
+                margin-bottom: 1.5em;
+                background: #f1f8e9;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px #b9f6ca33;
+                padding: 10px 0;
+            }
+            td {
+                border: none;
+                border-bottom: 1px solid #b9f6ca;
+                position: relative;
+                padding-left: 50%;
+                text-align: left;
+                min-height: 40px;
+                display: flex;
+                align-items: center;
+            }
+            td:last-child {
+                border-bottom: none;
+            }
+            td:before {
+                position: absolute;
+                left: 10px;
+                width: 45%;
+                white-space: pre-wrap;
+                font-weight: bold;
+                color: #388e3c;
+                content: attr(data-label);
+                font-size: 0.98em;
+                text-align: left;
+            }
+            td img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .header-content, nav, .container {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 8px;
+            }
+            .header-title h1 {
+                font-size: 1.3em;
+            }
+            nav a {
+                margin-right: 12px;
+                font-size: 1em;
+            }
+            .container {
+                padding: 16px 4px 80px 4px;
+            }
+        }
+
+        th[data-col="hist_rgb"], th[data-col="hist_lum"],
+        td[data-label="hist_rgb"], td[data-label="hist_lum"] {
+            min-width: 220px;
+            width: 240px;
+            max-width: 260px;
+        }
+        
+
+th, td {
+    min-width: 60px;
+    width: 60px;
+    max-width: 60px;
+}
+
     </style>
 </head>
 <body>
     <header>
-        <h1>{{ _('Green For Bin') }}</h1>
-        <div style="float:right;">
-            <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
-            <a href="{{ url_for('set_language', lang='en') }}">English</a>
+        <div class="header-content">
+            <div class="header-title">
+                <!-- Si tu veux un logo, décommente la ligne suivante et place ton logo dans /static/logo.png -->
+                <!-- <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo"> -->
+                <h1>{{ _('Green For Bin') }}</h1>
+            </div>
+            <div class="lang-switch">
+                <a href="{{ url_for('set_language', lang='fr') }}">Français</a> |
+                <a href="{{ url_for('set_language', lang='en') }}">English</a>
+            </div>
         </div>
-    <nav>
-        <a href="/">{{ _('Accueil') }}</a>
-        
-        <a href="/gallery">{{ _('Galerie') }}</a>
-
-        <a href="/visualisations">{{ _('Visualisations') }}</a>
-        <a href="/bdd">{{ _('Banque de données') }}</a>
-    </nav>
- </header>
-    <div>
+        <nav>
+            <a href="/">{{ _('Accueil') }}</a>
+            <a href="/gallery">{{ _('Galerie') }}</a>
+            <a href="/visualisations">{{ _('Visualisations') }}</a>
+            <a href="/bdd">{{ _('Banque de données') }}</a>
+        </nav>
+    </header>
+    <div class="container">
         {% block content %}{% endblock %}
     </div>
+    <footer>
+        &copy; 2025 Green For Bin &mdash; Efrei Data MasterCamp &middot; {{ _('Projet éco-conçu pour la prévention des dépôts sauvages') }}
+    </footer>
 </body>
 </html>

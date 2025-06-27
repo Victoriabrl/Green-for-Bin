@@ -104,3 +104,24 @@ msgstr "Database"
 
 msgid "Banque de données : Images Uploadées"
 msgstr "Database: Uploaded Images"
+
+msgid "Pleine"
+msgstr "Full"
+
+msgid "Vide"
+msgstr "Empty"
+
+msgid "Inconnu"
+msgstr "Unknown"
+
+msgid "Pronostic automatique"
+msgstr "Automatic prediction"
+
+msgid "Choisir un fichier"
+msgstr "Choose a file"
+
+msgid "Aucun fichier choisi"
+msgstr "No file chosen"
+
+msgid "Upload"
+msgstr "Upload"
