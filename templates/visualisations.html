@@ -13,24 +13,25 @@
     <p>{{ _('Nombre d\'annotations poubelles pleines :') }} {{ full_annotations }}</p>
     <p>{{ _('Nombre d\'annotations poubelles vides :') }} {{ empty_annotations }}</p>
     <p>{{ _('Nombre d\'annotations non labelisées :') }} {{ non_labelled_annotations }}</p>
-
-    <p>{{ _('Distribution des tailles de fichiers :') }} </p>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <canvas id="progressChart" class="chart-small"></canvas>
-    <canvas id="repartition" class="chart-small"></canvas>
-    <canvas id="distribution" class="chart-small"></canvas>
+    <canvas id="progressChart" width="400px" height="300px"></canvas>
+    <canvas id="repartition" width="400px" height="300px"></canvas>
+    <canvas id="distribution" width="400px" height="300px"></canvas>
+    
     <script>
+
     //Nombre total d’images uploadées
-    const donut_values = ["Nombre d'annotations", "Total d'annotations possibles"];
-    const total_annot = {{ total_annotations }};  // Variable injectée par le template
+    const donut_values = ["Annotations actuelles", "Annotations possibles"];
+    const total_annot = {{ total_annotations | tojson }};  // Variable injectée par le template
     const total_possible = 720;
     new Chart(document.getElementById('progressChart'), {
       type: 'doughnut',
       data: {
         labels: donut_values,
         datasets: [{
+          labels: "Nombre d'images",
           data: [total_annot, total_possible - total_annot],
           backgroundColor: ['#4CAF50', '#e0e0e0'],
           borderWidth: 0
@@ -38,17 +39,23 @@
       },
       options: {
         cutout: '70%',
-        responsive: true,
+        responsive: false, // pour que le graphique reste de petite taille
         plugins: {
           legend: {
-            display: false
+            display: true
           },
+          title: {
+          display: true,
+          text: "Nombre d'images uploadées"
+        },
           tooltip: {
-            enabled: false
+            enabled: true
           }
         }
       }
     });
+
+    //Répartition des annotations : pleines vs vides
     var xValues = ["pleines","vides"];
     var yValues = [{{ full_annotations }}, {{ empty_annotations }}];    
     var barColors = ["#b91d47","#00aba9"];
@@ -64,13 +71,25 @@
         }]
       },
       options: {
+      responsive: false,
+      plugins: {
         title: {
           display: true,
-          text: "Répartition des annotations"
+          text: "Répartition des annotations (pleines vs vides)"
+        },
+        legend: {
+          display: true,
+          position: 'bottom'
+        },
+        tooltip: {
+          enabled: true
         }
       }
+    }
     });
 
+
+    //Distribution des tailles de fichiers
     var x_taille_fichiers = {{ size_files | tojson }};
     var y_nombre_fichiers_par_taille = {{ occ_size_files | tojson }};
 
@@ -79,21 +98,41 @@
       data: {
         labels: x_taille_fichiers,
         datasets: [{
-          backgroundColor: barColors,
+          label: "Nombre de fichiers par taille (ko)",
+          backgroundColor: "#4CAF50",
           data: y_nombre_fichiers_par_taille
         }]
       },
       options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true, // <-- clé pour démarrer à 0
-            ticks: {
-              precision: 0 // optionnel : évite les décimales
-            }
+        responsive: false, // pour que le graphique reste de petite taille
+        plugins: {
+        title: {
+          display: true,
+          text: "Distribution des tailles de fichiers"
+        },
+        legend: {
+          display: true,
+          position: 'bottom'
+        },
+        tooltip: {
+          enabled: true
+        }
+      },
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: "Taille des fichiers (ko)"
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0
           }
         }
       }
+    }
     })
 
 
@@ -102,6 +141,8 @@
     </script>
 
     <img src="{{ image_base64 }}" alt="Graphique">
+    <img src="{{ img_base64_distribution }}" alt="Graphique de distribution des tailles de fichiers">
+    <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images">
 
 
 
