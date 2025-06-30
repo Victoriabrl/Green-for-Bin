@@ -676,18 +676,30 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
-    # Graphique en camembert
-    data = [full_annotations, empty_annotations]
-    labels = ["Pleines", "Vides"]
 
-    fig, ax = plt.subplots(figsize=(6, 4))
-    if sum(data) > 0:
-        ax.pie(data, labels=labels, autopct='%1.1f%%', startangle=90)
-        ax.set_title("Répartition des poubelles")
-    else:
-        ax.text(0.5, 0.5, "Aucune donnée", ha='center', va='center', fontsize=14)
-        ax.set_title("Répartition des poubelles")
-        ax.axis('off')
+    # Affichage du graphique donut pour le nombre d'annotations
+    donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
+    donut_labels = ["Annotations actuelles", "Annotations possibles"]       
+    fig, ax = plt.subplots(figsize=(4, 2))
+    ax.pie(donut_values, labels=donut_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FFC107'])
+    ax.set_title("Nombre total d'images uploadées")
+    buf = io.BytesIO()
+    plt.tight_layout()
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+    img_base64_nombre = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
+
+
+
+    #affichage du graphique en camembert pour la repartition des annotations 
+    data = [full_annotations,empty_annotations]
+    labels=["pleines","vides"]
+
+    #graphique 
+    fig, ax = plt.subplots(figsize=(4, 2))
+    ax.pie(data,labels=labels,autopct='%1.1f%%')
+    ax.set_title("Répartitions des annotations")
 
     buf = io.BytesIO()
     plt.tight_layout()
@@ -696,21 +708,52 @@ def stats():
     buf.seek(0)
     img_base64 = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
 
-    # Distribution des tailles de fichiers
-    conn = sqlite3.connect(DB_PATH)
+    #affichage de la distribution des tailles des fichiers 
+    conn = sqlite3.connect('db.sqlite3')
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT file_size, COUNT(*) as count
-        FROM images
-        WHERE file_size IS NOT NULL
-        GROUP BY file_size
-        ORDER BY file_size
-    """)
-    rows = cursor.fetchall()
-    conn.close()
 
+    cursor.execute("""
+    SELECT file_size, COUNT(*) as count
+    FROM images
+    WHERE file_size IS NOT NULL
+    GROUP BY file_size
+    ORDER BY file_size
+""")
+    
+    rows = cursor.fetchall()
+
+    # Formatage pour affichage
     size_files = [file_size for file_size, _ in rows]
     occ_size_files = [count for _, count in rows]
+
+    #graphique de la distribution des tailles de fichiers
+
+    #graphique en barres     
+    fig, ax = plt.subplots(figsize=(4, 2))
+    barColors = ['#4CAF50'] * len(size_files)
+
+    # Utiliser des indices pour les x pour éviter les problèmes de taille
+    # et pour que les barres soient bien espacées
+    indices = list(range(len(size_files)))
+    ax.bar(indices, occ_size_files, color=barColors)
+
+    # Affichage des labels de tailles converties en Ko
+    ax.set_xticks(indices)
+    ax.set_xticklabels([f"{size/1024:.1f} Ko" for size in size_files], rotation=45, ha='right')
+
+    ax.set_xlabel('Taille des fichiers (Ko)')   
+    ax.set_ylabel('Nombre de fichiers')
+    ax.set_title('Distribution des tailles de fichiers')
+
+    #sauvegarde de l'image dans un buffer
+    buf = io.BytesIO()
+    plt.tight_layout()      
+    plt.savefig(buf, format='png')
+    plt.close(fig)
+    buf.seek(0)
+
+    img_base64_distribution = "data:image/png;base64," + base64.b64encode (buf.read()).decode('utf-8')
+    
 
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
@@ -719,7 +762,9 @@ def stats():
                            non_labelled_annotations=non_labelled_annotations,
                            image_base64=img_base64,
                            size_files=size_files,
-                           occ_size_files=occ_size_files)
+                           occ_size_files=occ_size_files,
+                           img_base64_distribution=img_base64_distribution,
+                           img_base64_nombre=img_base64_nombre)
 
 
 @app.route('/gallery')
