@@ -360,3 +360,9 @@ msgstr "Send"
 
 msgid "Votre message a bien été envoyé à l'administrateur."
 msgstr "Your message has been sent to the administrator."
+
+msgid "Choisir un fichier"
+msgstr "Choose a file"
+
+msgid "Aucun fichier choisi"
+msgstr "No file chosen"
