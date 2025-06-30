@@ -19,22 +19,18 @@ Palette inspirée du golf premium :
     --transition: all 0.3s cubic-bezier(.4,0,.2,1);
 }
 
-body {
-    background: var(--beige);
-    color: var(--green-dark);
-    font-family: 'Playfair Display', 'Quercus Serif', serif;
-    font-size: 1.1rem;
+html, body {
+    height: 100%;
     margin: 0;
     padding: 0;
+}
+body {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
 }
-
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', 'Quercus Serif', serif;
-    color: var(--green-dark);
-    font-weight: 700;
-    letter-spacing: 1px;
-    margin-top: 0;
+.container.mt-4 {
+    flex: 1 0 auto;
 }
 
 .navbar {
@@ -245,6 +241,27 @@ input:focus, textarea:focus, select:focus {
     font-family: 'Inter', Arial, sans-serif;
     font-size: 1.1rem;
     box-shadow: var(--shadow);
+}
+
+.footer-efrei {
+    width: 100%;
+    background: linear-gradient(90deg, #3bb273 0%, #4bbc8f 100%);
+    color: #f4f4f9;
+    border-top: 3px solid #1e2d2f;
+    box-shadow: 0 -2px 8px rgba(60, 60, 60, 0.08);
+    font-family: 'Quercus Serif', 'Montserrat', 'Quicksand', Arial, sans-serif !important;
+    font-weight: 500;
+    flex-shrink: 0;
+    /* plus besoin de position: fixed */
+}
+.footer-efrei .container {
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+@media (max-width: 991px) {
+    .footer-efrei {
+        font-size: 0.95rem;
+    }
 }
 
 /* Animations dynamiques */
