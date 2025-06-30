@@ -108,23 +108,255 @@ msgstr "Database: Uploaded Images"
 msgid "Carte interactive"
 msgstr "Interactive map"
 
+msgid "Connexion"
+msgstr "Login"
+
+msgid "Nom d'utilisateur"
+msgstr "Username"
+
+msgid "Mot de passe"
+msgstr "Password"
+
+msgid "Se connecter"
+msgstr "Log in"
+
+msgid "Pas encore de compte?"
+msgstr "No account yet?"
+
+msgid "S'inscrire"
+msgstr "Sign up"
+
+msgid "Inscription"
+msgstr "Registration"
+
+msgid "Confirmer le mot de passe"
+msgstr "Confirm password"
+
+msgid "Déjà un compte?"
+msgstr "Already have an account?"
+
+msgid "Tableau de bord"
+msgstr "Dashboard"
+
+msgid "Statistiques générales"
+msgstr "General statistics"
+
+msgid "Total d'images"
+msgstr "Total images"
+
+msgid "Poubelles pleines"
+msgstr "Full bins"
+
+msgid "Poubelles vides"
+msgstr "Empty bins"
+
+msgid "Statistiques administrateur"
+msgstr "Admin statistics"
+
+msgid "Total d'utilisateurs"
+msgstr "Total users"
+
+msgid "Administrateurs"
+msgstr "Administrators"
+
+msgid "Utilisateurs classiques"
+msgstr "Regular users"
+
+msgid "Gestion des utilisateurs"
+msgstr "User management"
+
+msgid "Rôle"
+msgstr "Role"
+
+msgid "Date de création"
+msgstr "Creation date"
+
+msgid "Dernière connexion"
+msgstr "Last login"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Jamais"
+msgstr "Never"
+
+msgid "Promouvoir admin"
+msgstr "Promote to admin"
+
+msgid "Rétrograder utilisateur"
+msgstr "Demote to user"
+
+msgid "Base de données des images"
+msgstr "Image database"
+
+msgid "Aucune donnée trouvée dans la base."
+msgstr "No data found in the database."
+
+msgid "Uploader une image"
+msgstr "Upload an image"
+
+msgid "Uploader"
+msgstr "Upload"
+
+msgid "Image uploadée :"
+msgstr "Uploaded image:"
+
+msgid "Annotation enregistrée :"
+msgstr "Annotation saved:"
+
+msgid "Résultat"
+msgstr "Result"
+
+msgid "Galerie des images uploadées"
+msgstr "Gallery of uploaded images"
+
+msgid "Images Vides"
+msgstr "Empty Images"
+
+msgid "Images Pleines"
+msgstr "Full Images"
+
+msgid "Images Non Annotées"
+msgstr "Unannotated Images"
+
+msgid "Annotation"
+msgstr "Annotation"
+
+msgid "Annoter l'image"
+msgstr "Annotate the image"
+
 msgid "Pleine"
 msgstr "Full"
 
 msgid "Vide"
 msgstr "Empty"
 
-msgid "Inconnu"
-msgstr "Unknown"
+msgid "Pronostic automatique :"
+msgstr "Automatic prediction:"
 
-msgid "Pronostic automatique"
-msgstr "Automatic prediction"
+msgid "Carte interactive des poubelles"
+msgstr "Interactive trash bin map"
 
-msgid "Choisir un fichier"
-msgstr "Choose a file"
+msgid "Poubelles dans un marché"
+msgstr "Bins in a market"
 
-msgid "Aucun fichier choisi"
-msgstr "No file chosen"
+msgid "Zone"
+msgstr "Zone"
 
-msgid "Upload"
-msgstr "Upload"
+msgid "Toutes"
+msgstr "All"
+
+msgid "Afficher les zones de marché"
+msgstr "Show market areas"
+
+msgid "Carte"
+msgstr "Map"
+
+msgid "Suivi des poubelles"
+msgstr "Bin tracking"
+
+msgid "Green for Bin"
+msgstr "Green for Bin"
+
+msgid "Déconnexion"
+msgstr "Logout"
+
+msgid "Base de données"
+msgstr "Database"
+
+msgid "Gestion utilisateurs"
+msgstr "User management"
+
+# Added from about.html
+msgid "Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique"
+msgstr "Revolutionize your waste management with our smart and eco-friendly solution"
+
+msgid "Découvrir notre solution"
+msgstr "Discover our solution"
+
+msgid "Nos Fonctionnalités"
+msgstr "Our Features"
+
+msgid "Cartographie Intelligente"
+msgstr "Smart Mapping"
+
+msgid "Visualisez en temps réel l'emplacement et l'état de toutes vos poubelles sur une carte interactive moderne."
+msgstr "See in real time the location and status of all your bins on a modern interactive map."
+
+msgid "Analyses Avancées"
+msgstr "Advanced Analytics"
+
+msgid "Obtenez des insights détaillés sur vos habitudes de consommation et votre impact environnemental."
+msgstr "Get detailed insights into your consumption habits and environmental impact."
+
+msgid "Notifications Smart"
+msgstr "Smart Notifications"
+
+msgid "Recevez des alertes personnalisées pour optimiser vos tournées de collecte et réduire les coûts."
+msgstr "Receive personalized alerts to optimize your collection rounds and reduce costs."
+
+msgid "Tableau de Bord"
+msgstr "Dashboard"
+
+msgid "Zone"
+msgstr "Zone"
+
+msgid "Poubelles"
+msgstr "Bins"
+
+msgid "Statut"
+msgstr "Status"
+
+msgid "Dernière collecte"
+msgstr "Last collection"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Zone A"
+msgstr "Zone A"
+
+msgid "Optimal"
+msgstr "Optimal"
+
+msgid "Il y a 2 jours"
+msgstr "2 days ago"
+
+msgid "Voir détails"
+msgstr "See details"
+
+msgid "Zone B"
+msgstr "Zone B"
+
+msgid "Attention"
+msgstr "Warning"
+
+msgid "Il y a 4 jours"
+msgstr "4 days ago"
+
+msgid "Zone C"
+msgstr "Zone C"
+
+msgid "Urgent"
+msgstr "Urgent"
+
+msgid "Il y a 6 jours"
+msgstr "6 days ago"
+
+msgid "Voir tous les rapports"
+msgstr "See all reports"
+
+msgid "Envoyer un message à l'administrateur"
+msgstr "Send a message to the administrator"
+
+msgid "Sujet"
+msgstr "Subject"
+
+msgid "Votre message"
+msgstr "Your message"
+
+msgid "Envoyer"
+msgstr "Send"
+
+msgid "Votre message a bien été envoyé à l'administrateur."
+msgstr "Your message has been sent to the administrator."

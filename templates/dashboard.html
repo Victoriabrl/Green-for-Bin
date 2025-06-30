@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ _('Tableau de bord') }}</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">{{ _('Statistiques générales') }}</div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ _('Total d\'images') }} : {{ stats.total_images }}</li>
+                        <li>{{ _('Poubelles pleines') }} : {{ stats.full_bins }}</li>
+                        <li>{{ _('Poubelles vides') }} : {{ stats.empty_bins }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% if session.get('role') == 'admin' %}
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">{{ _('Statistiques administrateur') }}</div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ _('Total d\'utilisateurs') }} : {{ admin_stats.total_users }}</li>
+                        <li>{{ _('Administrateurs') }} : {{ admin_stats.admin_count }}</li>
+                        <li>{{ _('Utilisateurs classiques') }} : {{ admin_stats.regular_users }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

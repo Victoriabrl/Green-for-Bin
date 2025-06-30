@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Résultat') }}{% endblock %}
+{% block title %}{{ _("Résultat") }}{% endblock %}
 
 {% block content %}
-    <h2>{{ _('Annotation enregistrée :') }} {{ annotation }}</h2>
-    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400">
+    <h2>{{ _("Annotation enregistrée :") }} {{ annotation }}</h2>
+    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400" loading="lazy">
 {% endblock %}

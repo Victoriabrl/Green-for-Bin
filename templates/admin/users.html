@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ _('Gestion des utilisateurs') }}</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Formulaire de création d'un nouvel admin -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ _('Créer un compte administrateur') }}</h5>
+            <form method="post" action="{{ url_for('create_admin') }}">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <input type="text" name="username" class="form-control" placeholder="Nom d'utilisateur" required>
+                    </div>
+                    <div class="col-md-4">
+                        <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary">{{ _('Créer admin') }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-striped table-green-text">
+        <thead>
+            <tr>
+                <th>{{ _("Nom d'utilisateur") }}</th>
+                <th>{{ _('Rôle') }}</th>
+                <th>{{ _('Date de création') }}</th>
+                <th>{{ _('Dernière connexion') }}</th>
+                <th>{{ _('Actions') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user[1] }}</td>
+                    <td>{{ user[2] }}</td>
+                    <td>{{ user[3] }}</td>
+                    <td>{{ user[4] or _('Jamais') }}</td>
+                    <td class="d-flex gap-2">
+                        {% if user[2] == 'user' %}
+                            <a href="{{ url_for('promote_user', user_id=user[0]) }}" class="btn btn-success btn-sm">{{ _('Promouvoir admin') }}</a>
+                        {% else %}
+                            <a href="{{ url_for('demote_user', user_id=user[0]) }}" class="btn btn-warning btn-sm">{{ _('Rétrograder utilisateur') }}</a>
+                        {% endif %}
+                        {% if session['user_id'] != user[0] and (user[2] != 'admin' or admin_count > 1) %}
+                            <a href="{{ url_for('delete_user', user_id=user[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer cet utilisateur ?');">{{ _('Supprimer') }}</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

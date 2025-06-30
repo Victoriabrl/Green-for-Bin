@@ -20,11 +20,11 @@ msgstr ""
 
 #: templates/annotate.html:3
 msgid "Annotation"
-msgstr ""
+msgstr "Annotation"
 
 #: templates/annotate.html:6
 msgid "Annoter l'image"
-msgstr ""
+msgstr "Annoter l'image"
 
 #: templates/annotate.html:9
 msgid "Choisir une annotation :"
@@ -32,11 +32,11 @@ msgstr ""
 
 #: templates/annotate.html:11
 msgid "Pleine"
-msgstr ""
+msgstr "Pleine"
 
 #: templates/annotate.html:14
 msgid "Vide"
-msgstr ""
+msgstr "Vide"
 
 #: templates/annotate.html:16
 msgid "Enregistrer"
@@ -48,32 +48,32 @@ msgstr ""
 
 #: templates/base.html:15 templates/index.html:3
 msgid "Accueil"
-msgstr ""
+msgstr "Accueil"
 
 #: templates/base.html:16 templates/gallery.html:3
 msgid "Galerie"
-msgstr ""
+msgstr "Galerie"
 
 #: templates/base.html:17 templates/visualisations.html:3
 #: templates/visualisations.html:7
 msgid "Visualisations"
-msgstr ""
+msgstr "Visualisations"
 
 #: templates/gallery.html:6
 msgid "Galerie des images uploadées"
-msgstr ""
+msgstr "Galerie des images uploadées"
 
 #: templates/gallery.html:8
 msgid "Images Vides"
-msgstr ""
+msgstr "Images Vides"
 
 #: templates/gallery.html:18
 msgid "Images Pleines"
-msgstr ""
+msgstr "Images Pleines"
 
 #: templates/gallery.html:28
 msgid "Images Non Annotées"
-msgstr ""
+msgstr "Images Non Annotées"
 
 #: templates/index.html:6
 msgid "Uploader une image de poubelle"
@@ -81,52 +81,266 @@ msgstr ""
 
 #: templates/index.html:9
 msgid "Uploader"
-msgstr ""
+msgstr "Uploader"
 
 #: templates/index.html:13
 msgid "Image uploadée :"
-msgstr ""
+msgstr "Image uploadée :"
 
 #: templates/result.html:3
 msgid "Résultat"
-msgstr ""
+msgstr "Résultat"
 
 #: templates/result.html:6
 msgid "Annotation enregistrée :"
-msgstr ""
+msgstr "Annotation enregistrée :"
 
 #: templates/visualisations.html:6
 msgid "Vous pouvez visualiser les données de vos poubelles ici."
-msgstr ""
+msgstr "Vous pouvez visualiser les données de vos poubelles ici."
 
 #: templates/visualisations.html:9
 msgid "Statistiques"
-msgstr ""
+msgstr "Statistiques"
 
 #: templates/visualisations.html:10
 msgid "Nombre total d'annotations :"
-msgstr ""
+msgstr "Nombre total d'annotations :"
 
 #: templates/visualisations.html:11
 msgid "Nombre d'annotations poubelles pleines :"
-msgstr ""
+msgstr "Nombre d'annotations poubelles pleines :"
 
 #: templates/visualisations.html:12
 msgid "Nombre d'annotations poubelles vides :"
-msgstr ""
+msgstr "Nombre d'annotations poubelles vides :"
 
 #: templates/visualisations.html:13
 msgid "Nombre d'annotations non labelisées :"
-msgstr ""
+msgstr "Nombre d'annotations non labelisées :"
 
-#: templates/index.html:12
-msgid "Choose a file"
-msgstr "Choisir un fichier"
+msgid "Connexion"
+msgstr "Connexion"
 
-#: templates/index.html:14
-msgid "No file chosen"
-msgstr "Aucun fichier choisi"
+msgid "Nom d'utilisateur"
+msgstr "Nom d'utilisateur"
 
-#: templates/index.html:15
-msgid "Upload"
-msgstr "Uploader"
+msgid "Mot de passe"
+msgstr "Mot de passe"
+
+msgid "Se connecter"
+msgstr "Se connecter"
+
+msgid "Pas encore de compte?"
+msgstr "Pas encore de compte?"
+
+msgid "S'inscrire"
+msgstr "S'inscrire"
+
+msgid "Inscription"
+msgstr "Inscription"
+
+msgid "Confirmer le mot de passe"
+msgstr "Confirmer le mot de passe"
+
+msgid "Déjà un compte?"
+msgstr "Déjà un compte?"
+
+msgid "Tableau de bord"
+msgstr "Tableau de bord"
+
+msgid "Statistiques générales"
+msgstr "Statistiques générales"
+
+msgid "Total d'images"
+msgstr "Total d'images"
+
+msgid "Poubelles pleines"
+msgstr "Poubelles pleines"
+
+msgid "Poubelles vides"
+msgstr "Poubelles vides"
+
+msgid "Statistiques administrateur"
+msgstr "Statistiques administrateur"
+
+msgid "Total d'utilisateurs"
+msgstr "Total d'utilisateurs"
+
+msgid "Administrateurs"
+msgstr "Administrateurs"
+
+msgid "Utilisateurs classiques"
+msgstr "Utilisateurs classiques"
+
+msgid "Gestion des utilisateurs"
+msgstr "Gestion des utilisateurs"
+
+msgid "Rôle"
+msgstr "Rôle"
+
+msgid "Date de création"
+msgstr "Date de création"
+
+msgid "Dernière connexion"
+msgstr "Dernière connexion"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Jamais"
+msgstr "Jamais"
+
+msgid "Promouvoir admin"
+msgstr "Promouvoir admin"
+
+msgid "Rétrograder utilisateur"
+msgstr "Rétrograder utilisateur"
+
+msgid "Base de données des images"
+msgstr "Base de données des images"
+
+msgid "Aucune donnée trouvée dans la base."
+msgstr "Aucune donnée trouvée dans la base."
+
+msgid "Uploader une image"
+msgstr "Uploader une image"
+
+#: templates/map.html:3
+msgid "Carte interactive des poubelles"
+msgstr "Carte interactive des poubelles"
+
+#: templates/map.html:6
+msgid "Poubelles dans un marché"
+msgstr "Poubelles dans un marché"
+
+#: templates/map.html:9
+msgid "Zone"
+msgstr "Zone"
+
+#: templates/map.html:11
+msgid "Toutes"
+msgstr "Toutes"
+
+#: templates/map.html:13
+msgid "Afficher les zones de marché"
+msgstr "Afficher les zones de marché"
+
+#: templates/map.html:15
+msgid "Carte"
+msgstr "Carte"
+
+#: templates/map.html:18
+msgid "Suivi des poubelles"
+msgstr "Suivi des poubelles"
+
+#: templates/navigation.html:3
+msgid "Green for Bin"
+msgstr "Green for Bin"
+
+#: templates/navigation.html:6
+msgid "Déconnexion"
+msgstr "Déconnexion"
+
+#: templates/navigation.html:9
+msgid "Base de données"
+msgstr "Base de données"
+
+#: templates/navigation.html:12
+msgid "Gestion utilisateurs"
+msgstr "Gestion utilisateurs"
+
+# Ajout des chaînes de about.html
+msgid "Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique"
+msgstr "Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique"
+
+msgid "Découvrir notre solution"
+msgstr "Découvrir notre solution"
+
+msgid "Nos Fonctionnalités"
+msgstr "Nos Fonctionnalités"
+
+msgid "Cartographie Intelligente"
+msgstr "Cartographie Intelligente"
+
+msgid "Visualisez en temps réel l'emplacement et l'état de toutes vos poubelles sur une carte interactive moderne."
+msgstr "Visualisez en temps réel l'emplacement et l'état de toutes vos poubelles sur une carte interactive moderne."
+
+msgid "Analyses Avancées"
+msgstr "Analyses Avancées"
+
+msgid "Obtenez des insights détaillés sur vos habitudes de consommation et votre impact environnemental."
+msgstr "Obtenez des insights détaillés sur vos habitudes de consommation et votre impact environnemental."
+
+msgid "Notifications Smart"
+msgstr "Notifications Smart"
+
+msgid "Recevez des alertes personnalisées pour optimiser vos tournées de collecte et réduire les coûts."
+msgstr "Recevez des alertes personnalisées pour optimiser vos tournées de collecte et réduire les coûts."
+
+msgid "Tableau de Bord"
+msgstr "Tableau de Bord"
+
+msgid "Zone"
+msgstr "Zone"
+
+msgid "Poubelles"
+msgstr "Poubelles"
+
+msgid "Statut"
+msgstr "Statut"
+
+msgid "Dernière collecte"
+msgstr "Dernière collecte"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Zone A"
+msgstr "Zone A"
+
+msgid "Optimal"
+msgstr "Optimal"
+
+msgid "Il y a 2 jours"
+msgstr "Il y a 2 jours"
+
+msgid "Voir détails"
+msgstr "Voir détails"
+
+msgid "Zone B"
+msgstr "Zone B"
+
+msgid "Attention"
+msgstr "Attention"
+
+msgid "Il y a 4 jours"
+msgstr "Il y a 4 jours"
+
+msgid "Zone C"
+msgstr "Zone C"
+
+msgid "Urgent"
+msgstr "Urgent"
+
+msgid "Il y a 6 jours"
+msgstr "Il y a 6 jours"
+
+msgid "Voir tous les rapports"
+msgstr "Voir tous les rapports"
+
+msgid "Envoyer un message à l'administrateur"
+msgstr "Envoyer un message à l'administrateur"
+
+msgid "Sujet"
+msgstr "Sujet"
+
+msgid "Votre message"
+msgstr "Votre message"
+
+msgid "Envoyer"
+msgstr "Envoyer"
+
+msgid "Votre message a bien été envoyé à l'administrateur."
+msgstr "Votre message a bien été envoyé à l'administrateur."
+

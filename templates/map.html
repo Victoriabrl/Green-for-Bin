@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Carte interactive des poubelles</h2>
+<h2>{{ _('Carte interactive des poubelles') }}</h2>
 
 <div id="map" style="height: 500px; max-width: 900px; margin: auto; border: 2px solid #ccc; border-radius: 10px;"></div>
 
@@ -9,19 +9,19 @@
 <form id="filters" style="text-align: center; margin-top: 10px;">
     <label>
         <input type="checkbox" id="filter-marche">
-        Poubelles dans un marché
+        {{ _('Poubelles dans un marché') }}
     </label>
     <label style="margin-left: 20px;">
-        Zone :
+        {{ _('Zone') }} :
         <select id="zone-select">
-            <option value="">Toutes</option>
+            <option value="">{{ _('Toutes') }}</option>
         </select>
     </label>
 </form>
 
 <!-- Toggle marchés -->
 <label style="display: block; text-align: center; margin-top: 10px;">
-    <input type="checkbox" id="toggle-marches"> Afficher les zones de marché
+    <input type="checkbox" id="toggle-marches"> {{ _('Afficher les zones de marché') }}
 </label>
 
 <!-- Leaflet -->

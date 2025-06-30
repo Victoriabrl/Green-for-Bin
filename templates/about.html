@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}{{ _("Green For Bin - Suivi des poubelles") }}{% endblock %}
+{% block content %}
+<!-- Hero Section -->
+<header class="hero-header" id="home">
+
+    <div class="hero-content">
+       
+        <p class="hero-subtitle">{{ _("Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique") }}</p>
+        <div class="d-flex justify-content-center mt-4 mb-5">
+            <a href="#features" class="btn btn-primary btn-lg hero-cta">{{ _("Découvrir notre solution") }}</a>
+        </div>
+    </div>
+</header>
+
+<!-- Features Section avec 3 boxes hoover -->
+<section class="section" id="features">
+    <div class="container">
+        <h2 class="section-title">{{ _("Nos Fonctionnalités") }}</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-4 mb-4">
+                <div class="modern-card fade-in-up">
+                    <div class="card-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <h3 class="card-title">{{ _("Cartographie Intelligente") }}</h3>
+                    <p class="card-text">{{ _("Visualisez en temps réel l'emplacement et l'état de toutes vos poubelles sur une carte interactive moderne.") }}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="modern-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title">{{ _("Analyses Avancées") }}</h3>
+                    <p class="card-text">{{ _("Obtenez des insights détaillés sur vos habitudes de consommation et votre impact environnemental.") }}</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="modern-card fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="card-title">{{ _("Notifications Smart") }}</h3>
+                    <p class="card-text">{{ _("Recevez des alertes personnalisées pour optimiser vos tournées de collecte et réduire les coûts.") }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="section" id="stats" style="background: white;">
+    <div class="container">
+        <h2 class="section-title">{{ _("Tableau de Bord") }}</h2>
+        <div class="row">
+            <div class="col-12">
+                <div class="modern-table">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ _("Zone") }}</th>
+                                <th>{{ _("Poubelles") }}</th>
+                                <th>{{ _("Statut") }}</th>
+                                <th>{{ _("Dernière collecte") }}</th>
+                                <th>{{ _("Actions") }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ _("Zone A") }}</td>
+                                <td>24</td>
+                                <td><span class="badge bg-success">{{ _("Optimal") }}</span></td>
+                                <td>{{ _("Il y a 2 jours") }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ _("Zone B") }}</td>
+                                <td>18</td>
+                                <td><span class="badge bg-warning">{{ _("Attention") }}</span></td>
+                                <td>{{ _("Il y a 4 jours") }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>{{ _("Zone C") }}</td>
+                                <td>31</td>
+                                <td><span class="badge bg-danger">{{ _("Urgent") }}</span></td>
+                                <td>{{ _("Il y a 6 jours") }}</td>
+                                <td>
+                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5 mb-5">
+            <a href="{{ url_for('stats') }}" class="btn btn-primary btn-lg">{{ _("Voir tous les rapports") }}</a>
+        </div>
+    </div>
+</section>
+
+<!-- Formulaire de contact admin -->
+<div class="container mt-5" style="max-width:600px;">
+    <h3 class="mb-3">{{ _("Envoyer un message à l'administrateur") }}</h3>
+    <form method="POST" action="{{ url_for('about') }}">
+        <div class="mb-3">
+            <input type="text" name="subject" class="form-control" placeholder="{{ _('Sujet') }}" required>
+        </div>
+        <div class="mb-3">
+            <textarea name="message" class="form-control" rows="4" placeholder="{{ _('Votre message') }}" required></textarea>
+        </div>
+        <button type="submit" name="send_message" class="btn btn-success">{{ _("Envoyer") }}</button>
+    </form>
+    {% if message_sent %}
+        <div class="alert alert-success mt-3">{{ _("Votre message a bien été envoyé à l'administrateur.") }}</div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ _('Base de données des images') }}</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-green-text">
+            <thead>
+                <tr>
+                    {% for col in colonnes %}
+                        <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                    <tr>
+                        {% for col in colonnes %}
+                            <td>{% if row[col] is string and row[col].startswith('<img') %}{{ row[col]|safe }}{% else %}{{ row[col] }}{% endif %}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "pagination.html" %}
+</div>
+{% endblock %}

@@ -4,29 +4,15 @@
 {% block title %}{{ _('Annotation') }}{% endblock %}
 
 {% block content %}
-<html>
-<head>
-    <title>{{ _("Annoter l'image") }}</title>
-</head>
-<body>
     <h2>{{ _('Image uploadée') }}</h2>
-    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400"><br><br>
-    <form method="POST">
-        <button type="submit" name="annotation" value="pleine">{{ _('Pleine') }}</button>
-        <button type="submit" name="annotation" value="vide">{{ _('Vide') }}</button>
+    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400" loading="lazy"><br><br>
+    <form method="POST" class="d-flex gap-3">
+        <button type="submit" name="annotation" value="pleine" class="btn btn-success btn-lg">{{ _('Pleine') }}</button>
+        <button type="submit" name="annotation" value="vide" class="btn btn-outline-success btn-lg">{{ _('Vide') }}</button>
     </form>
     {% if auto_label %}
-        <div class="alert alert-info">
-            <b>{{ _('Pronostic automatique') }} :</b>
-            {% if auto_label.startswith('pleine') %}
-                {{ _('Pleine') }}
-            {% elif auto_label.startswith('vide') %}
-                {{ _('Vide') }}
-            {% else %}
-                {{ _('Inconnu') }}
-            {% endif %}
+        <div class="alert alert-info mt-3">
+            <b>{{ _('Pronostic automatique :') }}</b> {{ auto_label|replace('_auto','')|capitalize }}
         </div>
     {% endif %}
-</body>
-</html>
 {% endblock %}

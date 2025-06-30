@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ _("Uploader une image") }}</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form id="upload-form" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <input type="file" name="image" accept=".jpg, .jpeg, .png" required>
+        <button type="submit">Uploader</button>
+    </form>
+    {% if session.role != 'admin' %}
+    <div id="progress-container" class="progress mt-3" style="height: 30px; display: none;">
+        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; height: 100%;">0%</div>
+    </div>
+    <div id="prediction-result" class="mt-3"></div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if session.role != 'admin' %}
+<script src="{{ url_for('static', filename='js/upload_progress.js') }}"></script>
+{% endif %}
+{% endblock %}
