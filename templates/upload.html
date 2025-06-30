@@ -11,21 +11,12 @@
         {% endif %}
     {% endwith %}
     <form id="upload-form" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-        <label for="file-upload" style="
-            border: 2px solid #333;
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 10px;
-            background: #fafafa;
-            font-weight: bold;
-        ">
+        <label for="file-upload" class="btn btn-success" style="margin-right: 10px;">
             {{ _('Choisir un fichier') }}
         </label>
         <input id="file-upload" type="file" name="image" accept=".jpg, .jpeg, .png" style="display:none" required>
         <span id="file-name">{{ _('Aucun fichier choisi') }}</span>
-        <button type="submit" style="margin-left:10px;">Uploader</button>
+        <button type="submit" class="btn btn-outline-success" style="margin-left:10px;">Uploader</button>
     </form>
     {% if session.role != 'admin' %}
     <div id="progress-container" class="progress mt-3" style="height: 30px; display: none;">
@@ -37,6 +28,12 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
+document.getElementById('file-upload').addEventListener('change', function() {
+    var fileName = this.files.length > 0 ? this.files[0].name : "{{ _('Aucun fichier choisi') }}";
+    document.getElementById('file-name').textContent = fileName;
+});
+</script>
 {% if session.role != 'admin' %}
 <script src="{{ url_for('static', filename='js/upload_progress.js') }}"></script>
 {% endif %}
