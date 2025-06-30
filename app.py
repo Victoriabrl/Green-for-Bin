@@ -39,6 +39,7 @@ import shutil
 import json
 from threading import Thread
 from math import ceil
+from shapely.geometry import shape, Point
 
 # ==================== CONFIGURATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -361,7 +362,38 @@ def classify_bin_automatically(avg_color, file_size, contrast, contour_count):
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('about.html')
+    # Ajout : stats arrondissements (3 premières lignes) pour la page d'accueil
+    arr_stats = []
+    try:
+        with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        with open(os.path.join('static', 'data', 'poubelles.json'), encoding='utf-8') as f:
+            poubelles = json.load(f)
+        arr_polys = []
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arr_poly = shape(feature['geometry'])
+            arr_polys.append((arr_name, arr_poly))
+        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        for pb in poubelles:
+            if pb.get('remplissage', '').startswith('pleine'):
+                pt = Point(pb['lon'], pb['lat'])
+                for arr_name, arr_poly in arr_polys:
+                    if arr_poly.contains(pt):
+                        arr_full_bins[arr_name] += 1
+                        break
+        for arr_name, _ in arr_polys:
+            arr_stats.append({
+                'arr': arr_name,
+                'nb_pleines': arr_full_bins[arr_name]
+            })
+    except Exception as e:
+        print(f"[INDEX] Erreur lors du calcul des stats par arrondissement: {e}")
+        arr_stats = [
+            {'arr': f"{i}e", 'nb_pleines': 0}
+            for i in range(1, 21)
+        ]
+    return render_template('about.html', arr_stats=arr_stats)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -493,7 +525,38 @@ def about():
             with open(messages_path, 'w', encoding='utf-8') as f:
                 json.dump(messages, f, ensure_ascii=False, indent=2)
             message_sent = True
-    return render_template('about.html', message_sent=message_sent)
+    # Ajout : stats arrondissements (3 premières lignes)
+    arr_stats = []
+    try:
+        with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        with open(os.path.join('static', 'data', 'poubelles.json'), encoding='utf-8') as f:
+            poubelles = json.load(f)
+        arr_polys = []
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arr_poly = shape(feature['geometry'])
+            arr_polys.append((arr_name, arr_poly))
+        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        for pb in poubelles:
+            if pb.get('remplissage', '').startswith('pleine'):
+                pt = Point(pb['lon'], pb['lat'])
+                for arr_name, arr_poly in arr_polys:
+                    if arr_poly.contains(pt):
+                        arr_full_bins[arr_name] += 1
+                        break
+        for arr_name, _ in arr_polys:
+            arr_stats.append({
+                'arr': arr_name,
+                'nb_pleines': arr_full_bins[arr_name]
+            })
+    except Exception as e:
+        print(f"[ABOUT] Erreur lors du calcul des stats par arrondissement: {e}")
+        arr_stats = [
+            {'arr': f"{i}e", 'nb_pleines': 0}
+            for i in range(1, 21)
+        ]
+    return render_template('about.html', message_sent=message_sent, arr_stats=arr_stats)
 
 
 # ==================== ROUTES ADMIN ====================
@@ -676,6 +739,43 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
+    # --- Ajout : stats par arrondissement basées sur les données de la carte ---
+    arr_stats = []
+    try:
+        # Charger les arrondissements
+        with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        # Charger les poubelles
+        with open(os.path.join('static', 'data', 'poubelles.json'), encoding='utf-8') as f:
+            poubelles = json.load(f)
+        # Préparer les polygones
+        arr_polys = []
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arr_poly = shape(feature['geometry'])
+            arr_polys.append((arr_name, arr_poly))
+        # Compter les poubelles pleines par arrondissement
+        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        for pb in poubelles:
+            if pb.get('remplissage', '').startswith('pleine'):
+                pt = Point(pb['lon'], pb['lat'])
+                for arr_name, arr_poly in arr_polys:
+                    if arr_poly.contains(pt):
+                        arr_full_bins[arr_name] += 1
+                        break
+        # Construire arr_stats
+        for arr_name, _ in arr_polys:
+            arr_stats.append({
+                'arr': arr_name,
+                'nb_pleines': arr_full_bins[arr_name]
+            })
+    except Exception as e:
+        print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
+        # Fallback: ancienne méthode
+        arr_stats = [
+            {'arr': f"{i}e", 'nb_pleines': 0}
+            for i in range(1, 21)
+        ]
 
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
@@ -764,7 +864,8 @@ def stats():
                            size_files=size_files,
                            occ_size_files=occ_size_files,
                            img_base64_distribution=img_base64_distribution,
-                           img_base64_nombre=img_base64_nombre)
+                           img_base64_nombre=img_base64_nombre,
+                           arr_stats=arr_stats)
 
 
 @app.route('/gallery')

@@ -59,41 +59,17 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>{{ _("Zone") }}</th>
-                                <th>{{ _("Poubelles") }}</th>
-                                <th>{{ _("Statut") }}</th>
-                                <th>{{ _("Dernière collecte") }}</th>
-                                <th>{{ _("Actions") }}</th>
+                                <th>{{ _("Arrondissement") }}</th>
+                                <th>{{ _("Poubelles pleines") }}</th>
                             </tr>
                         </thead>
                         <tbody>
+                        {% for stat in arr_stats[:3] %}
                             <tr>
-                                <td>{{ _("Zone A") }}</td>
-                                <td>24</td>
-                                <td><span class="badge bg-success">{{ _("Optimal") }}</span></td>
-                                <td>{{ _("Il y a 2 jours") }}</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
-                                </td>
+                                <td>{{ stat.arr }}</td>
+                                <td>{{ stat.nb_pleines }}</td>
                             </tr>
-                            <tr>
-                                <td>{{ _("Zone B") }}</td>
-                                <td>18</td>
-                                <td><span class="badge bg-warning">{{ _("Attention") }}</span></td>
-                                <td>{{ _("Il y a 4 jours") }}</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{{ _("Zone C") }}</td>
-                                <td>31</td>
-                                <td><span class="badge bg-danger">{{ _("Urgent") }}</span></td>
-                                <td>{{ _("Il y a 6 jours") }}</td>
-                                <td>
-                                    <a href="#" class="btn btn-sm btn-outline-custom">{{ _("Voir détails") }}</a>
-                                </td>
-                            </tr>
+                        {% endfor %}
                         </tbody>
                     </table>
                 </div>
