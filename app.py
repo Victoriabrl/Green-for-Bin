@@ -470,8 +470,24 @@ def upload():
                         contrast, contour_count, localisation
                     ))
                     conn.commit()
+                # Ajout des métadonnées dans la réponse JSON AJAX
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return jsonify(success=True, auto_label=auto_label.replace('_auto','').capitalize())
+                    # Calcul de la luminosité moyenne (grayscale) et du contraste (écart-type)
+                    img = Image.open(filepath).convert('L')
+                    np_img = np.array(img)
+                    luminosity = round(float(np.mean(np_img)), 2)
+                    contrast_std = round(float(np.std(np_img)), 2)
+                    metadata = {
+                        'width': width,
+                        'height': height,
+                        'luminosity': luminosity,
+                        'contrast': contrast_std
+                    }
+                    return jsonify(
+                        success=True,
+                        auto_label=auto_label.replace('_auto', '').capitalize(),
+                        metadata=metadata
+                    )
                 flash('Image uploadée avec succès! Prédiction : ' + auto_label.replace('_auto','').capitalize(), 'success')
                 return redirect(url_for('upload'))
         else:
@@ -494,11 +510,41 @@ def annotate(filename):
             c = conn.cursor()
             c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
             conn.commit()
-
         flash('Annotation sauvegardée!', 'success')
         return render_template('result.html', filename=filename, annotation=annotation)
 
-    return render_template('annotate.html', filename=filename, auto_label=auto_label)
+    # --- Récupération des métadonnées depuis la BDD ---
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute('''
+            SELECT width, height, contrast
+            FROM images
+            WHERE filename = ?
+        ''', (filename,))
+        row = c.fetchone()
+        if row:
+            width, height, contrast = row
+        else:
+            width, height, contrast = None, None, None
+
+    # Calcul de la luminosité moyenne à partir du fichier image
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    luminosity = None
+    try:
+        img = Image.open(image_path).convert('L')
+        np_img = np.array(img)
+        luminosity = round(float(np.mean(np_img)), 2)
+    except Exception as e:
+        print(f"[ANNOTATE] Erreur calcul luminosité : {e}")
+
+    metadata = {
+        'width': width,
+        'height': height,
+        'contrast': contrast,
+        'luminosity': luminosity
+    }
+
+    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata)
 
 
 @app.route('/about', methods=['GET', 'POST'])

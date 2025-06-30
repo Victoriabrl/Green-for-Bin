@@ -148,7 +148,7 @@
                                 <a class="nav-link" href="{{ url_for('admin_users') }}">{{ _('Gestion utilisateurs') }}</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ url_for('admin_messages') }}">Messages</a>
+                                <a class="nav-link" href="{{ url_for('admin_messages') }}">{{ _('Messages') }}</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -162,10 +162,10 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('set_language', lang='fr') }}">Français</a>
+                            <a class="nav-link" href="{{ url_for('set_language', lang='fr') }}">{{ _('Français') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('set_language', lang='en') }}">English</a>
+                            <a class="nav-link" href="{{ url_for('set_language', lang='en') }}">{{ _('English') }}</a>
                         </li>
                     </ul>
                 </div>

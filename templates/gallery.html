@@ -10,7 +10,7 @@
         {% for image in vides %}
             <div style="margin: 10px;">
                 <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ image[1] }}</small>
+                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
             </div>
         {% endfor %}
     </div>
@@ -20,7 +20,7 @@
         {% for image in pleines %}
             <div style="margin: 10px;">
                 <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ image[1] }}</small>
+                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
             </div>
         {% endfor %}
     </div>
@@ -30,7 +30,7 @@
         {% for image in non_labelisees %}
             <div style="margin: 10px;">
                 <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ image[1] }}</small>
+                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
             </div>
         {% endfor %}
     </div>

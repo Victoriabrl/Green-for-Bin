@@ -366,3 +366,33 @@ msgstr "Choose a file"
 
 msgid "Aucun fichier choisi"
 msgstr "No file chosen"
+
+msgid "Métadonnées de l'image"
+msgstr "Image metadata"
+
+msgid "Taille"
+msgstr "Size"
+
+msgid "Luminosité moyenne"
+msgstr "Average brightness"
+
+msgid "Contraste"
+msgstr "Contrast"
+
+msgid "Image à annoter"
+msgstr "Image to annotate"
+
+msgid "Pleine"
+msgstr "Full"
+
+msgid "Vide"
+msgstr "Empty"
+
+msgid "Pronostic automatique :"
+msgstr "Automatic prediction:"
+
+msgid "Précédent"
+msgstr "Previous"
+
+msgid "Suivant"
+msgstr "Next"
