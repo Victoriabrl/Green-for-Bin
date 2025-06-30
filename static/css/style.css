@@ -215,6 +215,7 @@ input:focus, textarea:focus, select:focus {
     background: #e6f7e6;
     color: var(--green-dark);
     border: 1.5px solid var(--green-light);
+    border-radius: 1.5rem;
 }
 .alert-error {
     background: #fbeaea;
@@ -263,6 +264,92 @@ input:focus, textarea:focus, select:focus {
         font-size: 0.95rem;
     }
 }
+
+/* ================= Ajout styles déplacés de about.html et base.html ================= */
+.hero-header {
+    background: var(--green-dark);
+    color: var(--beige);
+    padding: 2.5rem 0 1.5rem 0;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+.hero-content {
+    text-align: center;
+}
+.section {
+    background: var(--beige);
+    border-radius: var(--radius);
+    margin-bottom: 2.5rem;
+    padding: 2.5rem 0;
+}
+.modern-card {
+    background: var(--white);
+    border-radius: 2rem;
+    box-shadow: var(--shadow);
+    padding: 2rem 1.5rem;
+    color: var(--green-dark);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+.modern-card:hover {
+    box-shadow: 0 8px 32px rgba(34,51,42,0.18);
+    transform: translateY(-6px) scale(1.03);
+}
+.card-title {
+    color: var(--green-dark);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+}
+.card-icon i {
+    color: var(--green-light);
+    font-size: 2.2rem;
+    margin-bottom: 0.7rem;
+}
+.modern-table {
+    background: var(--white);
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 8px rgba(34,51,42,0.08);
+    padding: 1.5rem;
+}
+.table th {
+    background: var(--green-dark);
+    color: var(--white) !important;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+.table td {
+    color: var(--green-dark);
+    font-weight: 600;
+}
+.table-hover tbody tr:hover {
+    background: var(--beige);
+}
+form .form-control {
+    background: var(--beige);
+    color: var(--green-dark);
+    border: 2px solid var(--green-light);
+    border-radius: 1.5rem;
+    font-size: 1.08rem;
+}
+form .form-control:focus {
+    border-color: var(--green-dark);
+    background: var(--white);
+}
+
+/* Harmonisation des boutons pour cohérence */
+.btn-primary, .btn-success {
+    background: var(--green-dark) !important;
+    color: var(--beige) !important;
+    border: none;
+    border-radius: 2rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: background 0.3s, color 0.3s;
+}
+.btn-primary:hover, .btn-success:hover {
+    background: var(--green-light) !important;
+    color: var(--white) !important;
+}
+
+/* header h1, .navbar, .footer déjà stylés dans style.css, donc pas recopiés */
 
 /* Animations dynamiques */
 @keyframes pop {
