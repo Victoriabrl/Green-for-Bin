@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 import os
+import sqlite3
+from datetime import datetime
+
+DB_PATH = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
 
 def classify_bin(image_path, debug=False):
     image = cv2.imread(image_path)
@@ -44,16 +48,14 @@ def classify_bin(image_path, debug=False):
     v_vals = v[mask_surrounding == 255]
 
     # 6. Calcul de l’hétérogénéité (écarts types)
-    std_h = np.std(h_vals)
-    std_s = np.std(s_vals)
-    std_v = np.std(v_vals)
+    std_h = float(np.std(h_vals))
+    std_s = float(np.std(s_vals))
+    std_v = float(np.std(v_vals))
 
     # 7. Seuils que j'ai déterminé manuellement : si beaucoup de variation → dépôts présents
-    
     seuil_h = 50 # seuil de variation de teinte (couleur)
     seuil_s = 34 # seuil de variation de saturation (intensité)
     seuil_v = 49 # seuil de variation de luminosité
-    
 
     if (
         (std_v > seuil_v and (std_h > seuil_h or std_s > seuil_s)) 
@@ -65,13 +67,44 @@ def classify_bin(image_path, debug=False):
         (std_h > seuil_h and std_v < seuil_v)
         or
         (std_s > seuil_s and std_v < seuil_v)
-        
         ):
-        
-        
+        label = "pleine"
         print(f"Poubelle pleine (dépôts autour détectés)")
-        return
-        
     else:
+        label = "vide"
         print("Poubelle vide (pas de dépôt autour)")
-        return
+
+    # --- Sauvegarde dans la base de données ---
+    filename = os.path.basename(image_path)
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute('''
+                INSERT INTO images (
+                    filename, upload_date, annotation, width, height, file_size,
+                    avg_color, hist_rgb, hist_lum, contrast, contour_count, localisation,
+                    std_h, std_s, std_v
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                filename,
+                now,
+                label,
+                image.shape[1],  # width
+                image.shape[0],  # height
+                os.path.getsize(image_path),
+                str(tuple(np.mean(image.reshape(-1, 3), axis=0).astype(int))),
+                None,  # hist_rgb (optionnel)
+                None,  # hist_lum (optionnel)
+                std_v,  # on met l'écart-type de la luminosité comme "contrast"
+                int(cv2.contourArea(largest_contour)),
+                None,  # localisation (optionnel)
+                std_h,
+                std_s,
+                std_v
+            ))
+            conn.commit()
+        print(f"Image {filename} enregistrée dans la base avec annotation '{label}' et stats auto_label")
+    except Exception as e:
+        print(f"Erreur lors de l'insertion dans la base : {e}")
+    return label

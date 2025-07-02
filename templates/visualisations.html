@@ -52,9 +52,33 @@
         </div>
     </div>
 
+
     <img src="{{ image_base64 }}" alt="Graphique" class="img-fluid mb-2">
     <img src="{{ img_base64_distribution }}" alt="Graphique de distribution des tailles de fichiers" class="img-fluid mb-2">
     <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-4">
+
+    <!-- Tableau des moyennes std_h, std_s, std_v -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5>{{ _('Moyennes des écarts-types HSV (std_h, std_s, std_v)') }}</h5>
+            <table class="table table-bordered table-striped w-auto" style="max-width:400px">
+                <thead>
+                    <tr>
+                        <th>std_h</th>
+                        <th>std_s</th>
+                        <th>std_v</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ std_h_mean|default('N/A')|round(2) if std_h_mean is not none else 'N/A' }}</td>
+                        <td>{{ std_s_mean|default('N/A')|round(2) if std_s_mean is not none else 'N/A' }}</td>
+                        <td>{{ std_v_mean|default('N/A')|round(2) if std_v_mean is not none else 'N/A' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- NOUVEAU : Tableau par arrondissement -->
     <section class="section" id="arrondissements-stats" style="background: #fff;">

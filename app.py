@@ -122,7 +122,7 @@ def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
-        # Table pour les images
+        # Table pour les images (ajout std_h, std_s, std_v si non présents)
         c.execute('''
             CREATE TABLE IF NOT EXISTS images (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,9 +137,18 @@ def init_db():
                 hist_lum TEXT,
                 contrast INTEGER,
                 contour_count INTEGER,
-                localisation TEXT
+                localisation TEXT,
+                std_h REAL,
+                std_s REAL,
+                std_v REAL
             )
         ''')
+        # Migration : ajout des colonnes si elles n'existent pas déjà
+        for col in ['std_h', 'std_s', 'std_v']:
+            try:
+                c.execute(f"ALTER TABLE images ADD COLUMN {col} REAL")
+            except sqlite3.OperationalError:
+                pass  # colonne déjà existante
 
         # Table pour les utilisateurs
         c.execute('''
@@ -463,25 +472,42 @@ def upload():
                         localisation = random_localisation_paris()
                     # Utilisation correcte de la classification automatique
                     auto_label_result = auto_label.classify_bin(filepath)
-                    if auto_label_result == "pleine":
-                        auto_label_str = "pleine_auto"
-                    elif auto_label_result == "vide":
-                        auto_label_str = "vide_auto"
+                    if isinstance(auto_label_result, dict):
+                        std_h = auto_label_result.get('std_h')
+                        std_s = auto_label_result.get('std_s')
+                        std_v = auto_label_result.get('std_v')
+                        label = auto_label_result.get('label', 'vide')
+                        auto_label_str = f"{label}_auto"
                     else:
-                        auto_label_str = "vide_auto"
+                        std_h = std_s = std_v = None
+                        if auto_label_result == "pleine":
+                            auto_label_str = "pleine_auto"
+                        elif auto_label_result == "vide":
+                            auto_label_str = "vide_auto"
+                        else:
+                            auto_label_str = "vide_auto"
+                    # Détection dynamique des colonnes existantes
                     with sqlite3.connect(DB_PATH) as conn:
                         c = conn.cursor()
-                        c.execute('''
-                            INSERT INTO images (
-                                filename, upload_date, annotation, width, height,
-                                file_size, avg_color, hist_rgb, hist_lum,
-                                contrast, contour_count, localisation
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ''', (
+                        c.execute("PRAGMA table_info(images)")
+                        columns = [row[1] for row in c.fetchall()]
+                        insert_cols = [
+                            'filename', 'upload_date', 'annotation', 'width', 'height',
+                            'file_size', 'avg_color', 'hist_rgb', 'hist_lum',
+                            'contrast', 'contour_count', 'localisation'
+                        ]
+                        values = [
                             filename, upload_date, auto_label_str, width, height,
                             file_size, avg_color, hist_rgb, hist_lum,
                             contrast, contour_count, localisation
-                        ))
+                        ]
+                        # Ajout std_h, std_s, std_v si présents dans la table
+                        for col, val in zip(['std_h', 'std_s', 'std_v'], [std_h, std_s, std_v]):
+                            if col in columns:
+                                insert_cols.append(col)
+                                values.append(val)
+                        placeholders = ','.join(['?'] * len(insert_cols))
+                        c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                         conn.commit()
                     flash('Image uploadée avec succès! Veuillez annoter.', 'success')
                     return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label_str}')
@@ -495,25 +521,41 @@ def upload():
                 upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 localisation = random_localisation_france()
                 auto_label_result = auto_label.classify_bin(filepath)
-                if auto_label_result == "pleine":
-                    auto_label_str = "pleine_auto"
-                elif auto_label_result == "vide":
-                    auto_label_str = "vide_auto"
+                if isinstance(auto_label_result, dict):
+                    std_h = auto_label_result.get('std_h')
+                    std_s = auto_label_result.get('std_s')
+                    std_v = auto_label_result.get('std_v')
+                    label = auto_label_result.get('label', 'vide')
+                    auto_label_str = f"{label}_auto"
                 else:
-                    auto_label_str = "vide_auto"
+                    std_h = std_s = std_v = None
+                    if auto_label_result == "pleine":
+                        auto_label_str = "pleine_auto"
+                    elif auto_label_result == "vide":
+                        auto_label_str = "vide_auto"
+                    else:
+                        auto_label_str = "vide_auto"
+                # Détection dynamique des colonnes existantes
                 with sqlite3.connect(DB_PATH) as conn:
                     c = conn.cursor()
-                    c.execute('''
-                        INSERT INTO images (
-                            filename, upload_date, annotation, width, height,
-                            file_size, avg_color, hist_rgb, hist_lum,
-                            contrast, contour_count, localisation
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (
+                    c.execute("PRAGMA table_info(images)")
+                    columns = [row[1] for row in c.fetchall()]
+                    insert_cols = [
+                        'filename', 'upload_date', 'annotation', 'width', 'height',
+                        'file_size', 'avg_color', 'hist_rgb', 'hist_lum',
+                        'contrast', 'contour_count', 'localisation'
+                    ]
+                    values = [
                         filename, upload_date, auto_label_str, width, height,
                         file_size, avg_color, hist_rgb, hist_lum,
                         contrast, contour_count, localisation
-                    ))
+                    ]
+                    for col, val in zip(['std_h', 'std_s', 'std_v'], [std_h, std_s, std_v]):
+                        if col in columns:
+                            insert_cols.append(col)
+                            values.append(val)
+                    placeholders = ','.join(['?'] * len(insert_cols))
+                    c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                     conn.commit()
                 # Ajout des métadonnées dans la réponse JSON AJAX
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -763,7 +805,20 @@ def afficher_bdd():
         c = conn.cursor()
         c.execute("SELECT COUNT(*) FROM images")
         total_rows = c.fetchone()[0]
-        c.execute("SELECT * FROM images ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
+        # Ajout explicite des colonnes std_h, std_s, std_v si elles existent
+        try:
+            c.execute("SELECT * FROM images LIMIT 1")
+            all_cols = [description[0] for description in c.description]
+            has_std_h = 'std_h' in all_cols
+            has_std_s = 'std_s' in all_cols
+            has_std_v = 'std_v' in all_cols
+        except Exception:
+            has_std_h = has_std_s = has_std_v = False
+        # Sélection dynamique des colonnes
+        select_cols = '*'
+        if has_std_h and has_std_s and has_std_v:
+            select_cols = '*, std_h, std_s, std_v'
+        c.execute(f"SELECT * FROM images ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
         rows = c.fetchall()
         colonnes = [description[0] for description in c.description]
     processed_rows = []
@@ -778,6 +833,13 @@ def afficher_bdd():
                 except Exception as e:
                     print(f"[ADMIN BDD] Erreur d'affichage pour {col_name} (valeur={row_dict[col_name]}): {e}")
                     row_dict[col_name] = "Erreur d'affichage"
+        # Ajout : conversion std_h, std_s, std_v en float arrondis si présents
+        for std_col in ['std_h', 'std_s', 'std_v']:
+            if std_col in row_dict and row_dict[std_col] is not None:
+                try:
+                    row_dict[std_col] = round(float(row_dict[std_col]), 2)
+                except Exception:
+                    pass
         processed_rows.append(row_dict)
     total_pages = max(ceil(total_rows / per_page), 1)
     return render_template('admin/bdd.html', rows=processed_rows, colonnes=colonnes, page=page, total_pages=total_pages)
@@ -952,6 +1014,17 @@ def stats():
     img_base64_distribution = "data:image/png;base64," + base64.b64encode (buf.read()).decode('utf-8')
     
 
+    # Ajout : récupération des moyennes std_h, std_s, std_v si elles existent
+    std_h_mean = std_s_mean = std_v_mean = None
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        try:
+            c.execute("SELECT AVG(std_h), AVG(std_s), AVG(std_v) FROM images WHERE std_h IS NOT NULL AND std_s IS NOT NULL AND std_v IS NOT NULL")
+            res = c.fetchone()
+            if res:
+                std_h_mean, std_s_mean, std_v_mean = res
+        except Exception:
+            pass
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
@@ -962,7 +1035,10 @@ def stats():
                            occ_size_files=occ_size_files,
                            img_base64_distribution=img_base64_distribution,
                            img_base64_nombre=img_base64_nombre,
-                           arr_stats=arr_stats)
+                           arr_stats=arr_stats,
+                           std_h_mean=std_h_mean,
+                           std_s_mean=std_s_mean,
+                           std_v_mean=std_v_mean)
 
 
 @app.route('/gallery')
