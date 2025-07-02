@@ -461,7 +461,7 @@ def upload():
                         localisation = random_localisation_in_arrondissement(selected_arr)
                     else:
                         localisation = random_localisation_paris()
-                    auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
+                    auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
                     localisation = random_localisation_paris()
                     auto_label_result = auto_label.classify_bin(filepath)
                     if auto_label_result == "pleine":
