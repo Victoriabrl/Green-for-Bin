@@ -40,6 +40,7 @@ import json
 from threading import Thread
 from math import ceil
 from shapely.geometry import shape, Point
+import auto_label
 
 # ==================== CONFIGURATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -334,27 +335,18 @@ def extract_metadata(filepath):
     return width, height, file_size, str(avg_color), contrast, contour_count, str(hist_rgb), str(hist_lum)
 
 
-def classify_bin_automatically(avg_color, file_size, contrast, contour_count):
-    """Classification automatique d'une poubelle"""
-    avg_tuple = eval(avg_color)
-    mean_r, mean_g, mean_b = avg_tuple
-    mean_color = (mean_r + mean_g + mean_b) / 3
-    file_size_Ko = file_size / 1024
-
-    # Seuils de classification
-    SEUIL_SOMBRE = 110
-    SEUIL_TAILLE = 400
-    SEUIL_CONTOURS = 100000
-
-    if file_size_Ko > SEUIL_TAILLE and contour_count > SEUIL_CONTOURS:
-        return "pleine_auto"
-    elif mean_color < SEUIL_SOMBRE and file_size_Ko > 100:
-        return "pleine_auto"
-    elif file_size_Ko < 250 and contour_count < 80000:
-        return "vide_auto"
-    else:
-        return "vide_auto"
-
+def classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=None):
+    # Si image_path est fourni, on utilise la vraie image
+    if image_path is not None:
+        result = auto_label.classify_bin(image_path)
+        if result == "pleine":
+            return "pleine_auto"
+        elif result == "vide":
+            return "vide_auto"
+        else:
+            return "vide_auto"  # fallback
+    # Fallback si pas d'image (pour compatibilité)
+   
 
 # ==================== ROUTES PRINCIPALES ====================
 
@@ -428,8 +420,14 @@ def upload():
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                     upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    localisation = random_localisation_paris()  # localisation dans Paris
-                    auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
+                    localisation = random_localisation_paris()
+                    auto_label_result = auto_label.classify_bin(filepath)
+                    if auto_label_result == "pleine":
+                        auto_label_str = "pleine_auto"
+                    elif auto_label_result == "vide":
+                        auto_label_str = "vide_auto"
+                    else:
+                        auto_label_str = "vide_auto"
                     with sqlite3.connect(DB_PATH) as conn:
                         c = conn.cursor()
                         c.execute('''
@@ -439,13 +437,13 @@ def upload():
                                 contrast, contour_count, localisation
                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         ''', (
-                            filename, upload_date, auto_label, width, height,
+                            filename, upload_date, auto_label_str, width, height,
                             file_size, avg_color, hist_rgb, hist_lum,
                             contrast, contour_count, localisation
                         ))
                         conn.commit()
                     flash('Image uploadée avec succès! Veuillez annoter.', 'success')
-                    return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label}')
+                    return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label_str}')
                 except Exception as e:
                     print(f"[ADMIN UPLOAD ERROR] {e}")
                     flash('Erreur lors du traitement de l\'image (admin): ' + str(e), 'error')
@@ -454,8 +452,14 @@ def upload():
                 # Traitement asynchrone pour les autres
                 width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                 upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                localisation = random_localisation_paris()  # localisation dans Paris
-                auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
+                localisation = random_localisation_france()
+                auto_label_result = auto_label.classify_bin(filepath)
+                if auto_label_result == "pleine":
+                    auto_label_str = "pleine_auto"
+                elif auto_label_result == "vide":
+                    auto_label_str = "vide_auto"
+                else:
+                    auto_label_str = "vide_auto"
                 with sqlite3.connect(DB_PATH) as conn:
                     c = conn.cursor()
                     c.execute('''
@@ -465,7 +469,7 @@ def upload():
                             contrast, contour_count, localisation
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
-                        filename, upload_date, auto_label, width, height,
+                        filename, upload_date, auto_label_str, width, height,
                         file_size, avg_color, hist_rgb, hist_lum,
                         contrast, contour_count, localisation
                     ))
@@ -485,10 +489,10 @@ def upload():
                     }
                     return jsonify(
                         success=True,
-                        auto_label=auto_label.replace('_auto', '').capitalize(),
+                        auto_label=auto_label_str.replace('_auto', '').capitalize(),
                         metadata=metadata
                     )
-                flash('Image uploadée avec succès! Prédiction : ' + auto_label.replace('_auto','').capitalize(), 'success')
+                flash('Image uploadée avec succès! Prédiction : ' + auto_label_str.replace('_auto','').capitalize(), 'success')
                 return redirect(url_for('upload'))
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
