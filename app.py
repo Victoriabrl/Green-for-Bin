@@ -428,7 +428,7 @@ def upload():
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                     upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    localisation = random_localisation_france()
+                    localisation = random_localisation_paris()  # localisation dans Paris
                     auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
                     with sqlite3.connect(DB_PATH) as conn:
                         c = conn.cursor()
@@ -454,7 +454,7 @@ def upload():
                 # Traitement asynchrone pour les autres
                 width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                 upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                localisation = random_localisation_france()
+                localisation = random_localisation_paris()  # localisation dans Paris
                 auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
                 with sqlite3.connect(DB_PATH) as conn:
                     c = conn.cursor()
@@ -941,8 +941,19 @@ def gallery():
 
 # ==================== CARTE ====================
 
+def random_localisation_paris():
+    """Génère une localisation aléatoire à l'intérieur de la zone Paris intramuros réduite."""
+    PARIS_MIN_LAT = 48.84
+    PARIS_MAX_LAT = 48.89
+    PARIS_MIN_LON = 2.28
+    PARIS_MAX_LON = 2.41
+    lat = round(random.uniform(PARIS_MIN_LAT, PARIS_MAX_LAT), 6)
+    lon = round(random.uniform(PARIS_MIN_LON, PARIS_MAX_LON), 6)
+    return f"{lat},{lon}"
+
+
 def generer_json_poubelles():
-    """Génère le fichier JSON pour la carte"""
+    """Génère le fichier JSON pour la carte (utilise la localisation stockée en base, qui est déjà dans Paris)"""
     FINAL_JSON_PATH = os.path.join(BASE_DIR, 'static', 'data', 'poubelles.json')
 
     conn = sqlite3.connect(DB_PATH)
@@ -962,13 +973,9 @@ def generer_json_poubelles():
             lat_str, lon_str = loc.split(",")
             lat = float(lat_str.strip())
             lon = float(lon_str.strip())
-            # Vérification des bornes géographiques (autour de Paris)
-            if not (48.0 < lat < 49.0 and 2.0 < lon < 3.0):
-                continue
         except Exception as e:
             print(f"[WARN] Localisation mal formée ignorée: '{loc}' ({e})")
             continue
-
         points.append({
             "lat": lat,
             "lon": lon,
