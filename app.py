@@ -461,8 +461,7 @@ def upload():
                         localisation = random_localisation_in_arrondissement(selected_arr)
                     else:
                         localisation = random_localisation_paris()
-                    auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
-                    localisation = random_localisation_paris()
+                    # Utilisation correcte de la classification automatique
                     auto_label_result = auto_label.classify_bin(filepath)
                     if auto_label_result == "pleine":
                         auto_label_str = "pleine_auto"
@@ -1090,8 +1089,16 @@ def batch_upload_images():
             upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             localisation = random_localisation_france()
 
-            auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
-            annotation = f"{auto_label}|{label_hint}"
+
+            # Utilisation correcte de la classification automatique
+            auto_label_result = auto_label.classify_bin(dest_path)
+            if auto_label_result == "pleine":
+                auto_label_str = "pleine_auto"
+            elif auto_label_result == "vide":
+                auto_label_str = "vide_auto"
+            else:
+                auto_label_str = "vide_auto"
+            annotation = f"{auto_label_str}|{label_hint}"
 
             with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
