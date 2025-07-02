@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <div class="row align-items-center">
         <div class="col-md-6 text-center">
-            <img src="{{ url_for('static', filename='uploads/' ~ filename) }}" alt="{{ _('Image à annoter') }}" class="img-fluid mb-3" style="max-height:350px;" loading="lazy">
+            <img src="{{ url_for('static', filename='uploads/' ~ filename.rsplit('.', 1)[0] ~ '.webp') }}" alt="{{ _('Image à annoter') }}" class="img-fluid mb-3" style="max-height:350px;" loading="lazy">
         </div>
         <div class="col-md-6">
             <div class="card bg-creme shadow-sm mb-3">

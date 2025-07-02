@@ -729,7 +729,7 @@ def afficher_bdd():
                 try:
                     data = ast.literal_eval(row_dict[col_name])
                     img = plot_histogram(data, title)
-                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}"/>'
+                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}" alt="{title}" loading="lazy"/>'
                 except Exception as e:
                     print(f"[ADMIN BDD] Erreur d'affichage pour {col_name} (valeur={row_dict[col_name]}): {e}")
                     row_dict[col_name] = "Erreur d'affichage"
@@ -1066,11 +1066,11 @@ def batch_upload_images():
 
 
 def compress_image(input_path, output_path, quality=70, max_size=(1024, 1024)):
-    """Compresse et redimensionne l'image pour optimiser la taille."""
     img = Image.open(input_path)
-    # Utilise LANCZOS (équivalent moderne d'ANTIALIAS)
     img.thumbnail(max_size, Image.LANCZOS)
-    img.save(output_path, optimize=True, quality=quality)
+    # Convertir en WebP si possible
+    webp_path = output_path.rsplit('.', 1)[0] + '.webp'
+    img.save(webp_path, 'WEBP', optimize=True, quality=quality)
     img.close()
 
 
