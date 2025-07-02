@@ -1,3 +1,23 @@
+def random_localisation_in_arrondissement(arr_name):
+    """Génère une localisation aléatoire à l'intérieur d'un arrondissement donné (par nom)."""
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            feature_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            if feature_name == arr_name:
+                arr_poly = shape(feature['geometry'])
+                minx, miny, maxx, maxy = arr_poly.bounds
+                for _ in range(100):  # 100 essais max
+                    lon = random.uniform(minx, maxx)
+                    lat = random.uniform(miny, maxy)
+                    pt = Point(lon, lat)
+                    if arr_poly.contains(pt):
+                        return f"{lat},{lon}"
+    except Exception as e:
+        print(f"[ARRONDISSEMENT LOC] Erreur: {e}")
+    return random_localisation_paris()
 '''
     SOMMAIRE :
 CONFIGURATION
@@ -392,6 +412,20 @@ def index():
 @login_required
 def upload():
     """Upload d'images (utilisateurs connectés seulement) avec compression et traitement asynchrone pour users, synchrone pour admin. Retour JSON si AJAX."""
+    # Préparer la liste des arrondissements pour la barre déroulante (admin)
+    arrondissements = []
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arrondissements.append(arr_name)
+        arrondissements = sorted(arrondissements)
+    except Exception as e:
+        print(f"[UPLOAD] Erreur chargement arrondissements: {e}")
+        arrondissements = []
+
     if request.method == 'POST':
         if 'image' not in request.files:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -405,6 +439,9 @@ def upload():
                 return jsonify(success=False, error='Aucun fichier sélectionné.')
             flash('Aucun fichier sélectionné.', 'error')
             return redirect(request.url)
+
+        # Pour admin : récupération du choix d'arrondissement
+        selected_arr = request.form.get('arrondissement') if session.get('role') == 'admin' else None
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -420,6 +457,11 @@ def upload():
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                     upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if selected_arr and selected_arr.strip():
+                        localisation = random_localisation_in_arrondissement(selected_arr)
+                    else:
+                        localisation = random_localisation_paris()
+                    auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
                     localisation = random_localisation_paris()
                     auto_label_result = auto_label.classify_bin(filepath)
                     if auto_label_result == "pleine":
@@ -499,7 +541,7 @@ def upload():
                 return jsonify(success=False, error='Type de fichier non autorisé.')
             flash('Type de fichier non autorisé.', 'error')
 
-    return render_template('upload.html')
+    return render_template('upload.html', arrondissements=arrondissements)
 
 
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
@@ -733,7 +775,7 @@ def afficher_bdd():
                 try:
                     data = ast.literal_eval(row_dict[col_name])
                     img = plot_histogram(data, title)
-                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}"/>'
+                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}" alt="{title}" loading="lazy"/>'
                 except Exception as e:
                     print(f"[ADMIN BDD] Erreur d'affichage pour {col_name} (valeur={row_dict[col_name]}): {e}")
                     row_dict[col_name] = "Erreur d'affichage"
@@ -1070,11 +1112,11 @@ def batch_upload_images():
 
 
 def compress_image(input_path, output_path, quality=70, max_size=(1024, 1024)):
-    """Compresse et redimensionne l'image pour optimiser la taille."""
     img = Image.open(input_path)
-    # Utilise LANCZOS (équivalent moderne d'ANTIALIAS)
     img.thumbnail(max_size, Image.LANCZOS)
-    img.save(output_path, optimize=True, quality=quality)
+    # Convertir en WebP si possible
+    webp_path = output_path.rsplit('.', 1)[0] + '.webp'
+    img.save(webp_path, 'WEBP', optimize=True, quality=quality)
     img.close()
 
 

@@ -16,6 +16,18 @@
         </label>
         <input id="file-upload" type="file" name="image" accept=".jpg, .jpeg, .png" style="display:none" required>
         <span id="file-name">{{ _('Aucun fichier choisi') }}</span>
+        
+        {% if session.role == 'admin' %}
+        <div class="form-group mt-3">
+            <label for="arrondissement">Choisir un arrondissement (optionnel) :</label>
+            <select class="form-control" id="arrondissement" name="arrondissement">
+                <option value="">-- Aucun (aléatoire dans Paris) --</option>
+                {% for arr in arrondissements %}
+                    <option value="{{ arr }}">{{ arr }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
         <button type="submit" class="btn btn-outline-success" style="margin-left:10px;">Uploader</button>
     </form>
     {% if session.role != 'admin' %}
