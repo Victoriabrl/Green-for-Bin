@@ -38,7 +38,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     try {
                         const resp = JSON.parse(xhr.responseText);
                         if (resp.success) {
-                            predictionDiv.innerHTML = '<b>Prédiction automatique :</b> ' + resp.auto_label;
+                            let meta = resp.metadata;
+                            let metaHtml = '';
+                            if (meta) {
+                                metaHtml = `
+                                    <ul class="list-group mt-2 mb-2">
+                                        <li class="list-group-item">Taille : <b>${meta.width} x ${meta.height}</b> px</li>
+                                        <li class="list-group-item">Luminosité moyenne : <b>${meta.luminosity}</b></li>
+                                        <li class="list-group-item">Contraste : <b>${meta.contrast}</b></li>
+                                    </ul>
+                                `;
+                            }
+                            predictionDiv.innerHTML = '<b>Prédiction automatique :</b> ' + resp.auto_label + metaHtml;
                         } else {
                             predictionDiv.innerHTML = '<span style="color:red">' + (resp.error || 'Erreur lors du traitement.') + '</span>';
                         }

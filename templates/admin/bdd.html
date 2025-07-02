@@ -16,7 +16,13 @@
                 {% for row in rows %}
                     <tr>
                         {% for col in colonnes %}
-                            <td>{% if row[col] is string and row[col].startswith('<img') %}{{ row[col]|safe }}{% else %}{{ row[col] }}{% endif %}</td>
+                            <td>
+                                {% if row[col] is string and row[col].startswith('<img') %}
+                                    {{ row[col]|replace('<img ', '<img loading="lazy" ')|safe }}
+                                {% else %}
+                                    {{ row[col] }}
+                                {% endif %}
+                            </td>
                         {% endfor %}
                     </tr>
                 {% endfor %}

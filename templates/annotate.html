@@ -4,8 +4,25 @@
 {% block title %}{{ _('Annotation') }}{% endblock %}
 
 {% block content %}
+<div class="container mt-4">
+    <div class="row align-items-center">
+        <div class="col-md-6 text-center">
+            <img src="{{ url_for('static', filename='uploads/' ~ filename) }}" alt="{{ _('Image à annoter') }}" class="img-fluid mb-3" style="max-height:350px;" loading="lazy">
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-creme shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ _("Métadonnées de l'image") }}</h5>
+                    <ul class="list-group">
+                        <li class="list-group-item">{{ _('Taille') }} : <b>{{ metadata.width }} x {{ metadata.height }}</b> px</li>
+                        <li class="list-group-item">{{ _('Luminosité moyenne') }} : <b>{{ metadata.luminosity }}</b></li>
+                        <li class="list-group-item">{{ _('Contraste') }} : <b>{{ metadata.contrast }}</b></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
     <h2>{{ _('Image uploadée') }}</h2>
-    <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400" loading="lazy"><br><br>
     <form method="POST" class="d-flex gap-3">
         <button type="submit" name="annotation" value="pleine" class="btn btn-success btn-lg">{{ _('Pleine') }}</button>
         <button type="submit" name="annotation" value="vide" class="btn btn-outline-success btn-lg">{{ _('Vide') }}</button>
@@ -16,4 +33,5 @@
             {{ _('Vide') if auto_label.startswith('vide') else _('Pleine') }}
         </div>
     {% endif %}
+</div>
 {% endblock %}

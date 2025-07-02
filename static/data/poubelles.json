@@ -1,8 +1,75 @@
 [
     {
-        "lat": 48.855114,
-        "lon": 2.29061,
+        "lat": 48.897543,
+        "lon": 2.380962,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:39:25"
+    },
+    {
+        "lat": 48.855484,
+        "lon": 2.315055,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:39:39"
+    },
+    {
+        "lat": 48.824193,
+        "lon": 2.414246,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:39:49"
+    },
+    {
+        "lat": 48.866259,
+        "lon": 2.309077,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:41:51"
+    },
+    {
+        "lat": 48.834941,
+        "lon": 2.386839,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:42:01"
+    },
+    {
+        "lat": 48.855829,
+        "lon": 2.380891,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:42:26"
+    },
+    {
+        "lat": 48.882215,
+        "lon": 2.36908,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:42:35"
+    },
+    {
+        "lat": 48.840408,
+        "lon": 2.35546,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:42:47"
+    },
+    {
+        "lat": 48.844135,
+        "lon": 2.303724,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:45:24"
+    },
+    {
+        "lat": 48.846056,
+        "lon": 2.387796,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:45:35"
+    },
+    {
+        "lat": 48.846539,
+        "lon": 2.331176,
+        "remplissage": "vide_auto",
+        "date": "2025-06-30 16:56:59"
+    },
+    {
+        "lat": 48.882789,
+        "lon": 2.301299,
         "remplissage": "vide",
+<<<<<<< HEAD
         "date": "2025-06-29 12:31:40"
     },
     {
@@ -208,5 +275,8 @@
         "lon": 2.255128,
         "remplissage": "pleine",
         "date": "2025-06-30 15:57:53"
+=======
+        "date": "2025-06-30 16:57:20"
+>>>>>>> d87be871fecfca9d077da0fad61073f3dd281112
     }
 ]
