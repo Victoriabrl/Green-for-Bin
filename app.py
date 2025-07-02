@@ -1,3 +1,23 @@
+def random_localisation_in_arrondissement(arr_name):
+    """Génère une localisation aléatoire à l'intérieur d'un arrondissement donné (par nom)."""
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            feature_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            if feature_name == arr_name:
+                arr_poly = shape(feature['geometry'])
+                minx, miny, maxx, maxy = arr_poly.bounds
+                for _ in range(100):  # 100 essais max
+                    lon = random.uniform(minx, maxx)
+                    lat = random.uniform(miny, maxy)
+                    pt = Point(lon, lat)
+                    if arr_poly.contains(pt):
+                        return f"{lat},{lon}"
+    except Exception as e:
+        print(f"[ARRONDISSEMENT LOC] Erreur: {e}")
+    return random_localisation_paris()
 '''
     SOMMAIRE :
 CONFIGURATION
@@ -400,6 +420,20 @@ def index():
 @login_required
 def upload():
     """Upload d'images (utilisateurs connectés seulement) avec compression et traitement asynchrone pour users, synchrone pour admin. Retour JSON si AJAX."""
+    # Préparer la liste des arrondissements pour la barre déroulante (admin)
+    arrondissements = []
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arrondissements.append(arr_name)
+        arrondissements = sorted(arrondissements)
+    except Exception as e:
+        print(f"[UPLOAD] Erreur chargement arrondissements: {e}")
+        arrondissements = []
+
     if request.method == 'POST':
         if 'image' not in request.files:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -413,6 +447,9 @@ def upload():
                 return jsonify(success=False, error='Aucun fichier sélectionné.')
             flash('Aucun fichier sélectionné.', 'error')
             return redirect(request.url)
+
+        # Pour admin : récupération du choix d'arrondissement
+        selected_arr = request.form.get('arrondissement') if session.get('role') == 'admin' else None
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -428,7 +465,10 @@ def upload():
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
                     upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    localisation = random_localisation_paris()  # localisation dans Paris
+                    if selected_arr and selected_arr.strip():
+                        localisation = random_localisation_in_arrondissement(selected_arr)
+                    else:
+                        localisation = random_localisation_paris()
                     auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
                     with sqlite3.connect(DB_PATH) as conn:
                         c = conn.cursor()
@@ -495,7 +535,7 @@ def upload():
                 return jsonify(success=False, error='Type de fichier non autorisé.')
             flash('Type de fichier non autorisé.', 'error')
 
-    return render_template('upload.html')
+    return render_template('upload.html', arrondissements=arrondissements)
 
 
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
