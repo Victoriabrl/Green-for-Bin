@@ -508,8 +508,14 @@ def annotate(filename):
         annotation = request.form['annotation']
         with sqlite3.connect(DB_PATH) as conn:
             c = conn.cursor()
-            c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
-            conn.commit()
+            if annotation == 'annuler':
+                c.execute('UPDATE images SET annotation = NULL WHERE filename = ?', (filename,))
+                conn.commit()
+                flash("Annotation annulée !", 'info')
+                return redirect(url_for('annotate', filename=filename))
+            else:
+                c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
+                conn.commit()
         flash('Annotation sauvegardée!', 'success')
         return render_template('result.html', filename=filename, annotation=annotation)
 

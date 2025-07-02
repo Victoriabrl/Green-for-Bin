@@ -5,4 +5,8 @@
 {% block content %}
     <h2>{{ _("Annotation enregistrée :") }} {{ annotation }}</h2>
     <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400" loading="lazy">
+    <div class="mt-4 d-flex gap-3">
+        <a href="{{ url_for('annotate', filename=filename) }}" class="btn btn-warning btn-lg">{{ _('Modifier l\'annotation') }}</a>
+        <a href="{{ url_for('gallery') }}" class="btn btn-success btn-lg">OK</a>
+    </div>
 {% endblock %}
