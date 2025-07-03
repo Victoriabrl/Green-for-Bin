@@ -993,12 +993,15 @@ def plot_histogram(data, title=''):
 
 
 
+
 @app.route('/visualisations')
 @login_required
 def stats():
     """Visualisations et statistiques"""
-    # Suppression de la pagination : on affiche tous les arrondissements
-
+    # Pagination pour les arrondissements : 5 par page
+    page = int(request.args.get('page', 1))
+    # print(f"[VISU] page demandée (visualisations): {page} (AJAX: {request.headers.get('X-Requested-With')})")
+    per_page = 5
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -1017,69 +1020,88 @@ def stats():
     # --- Ajout : stats par arrondissement basées sur la base de données ---
     arr_stats = []
     try:
+        # Charger le GeoJSON une seule fois et préparer les polygones
+        arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        arr_polys = []  # Liste de tuples (nom, polygone)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arr_poly = shape(feature['geometry'])
+            arr_polys.append((arr_name, arr_poly))
+
+        # Initialiser les compteurs
+        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        arr_empty_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+
+        # Récupérer toutes les localisations et annotations
         with sqlite3.connect(DB_PATH) as conn:
             c = conn.cursor()
             c.execute("SELECT localisation, annotation FROM images WHERE annotation IS NOT NULL AND localisation IS NOT NULL AND localisation != ''")
-            arr_full_bins = {}
-            arr_empty_bins = {}
-            for row in c.fetchall():
-                loc, annotation = row
-                # On suppose que la localisation est sous forme "lat,lon"
+            for loc, annotation in c.fetchall():
                 try:
                     lat, lon = map(float, loc.split(","))
                 except Exception:
                     continue
-                # Trouver l'arrondissement correspondant
-                arr_name = None
-                with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-                    arr_geo = json.load(f)
-                    for feature in arr_geo['features']:
-                        poly_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-                        arr_poly = shape(feature['geometry'])
-                        if arr_poly.contains(Point(lon, lat)):
-                            arr_name = poly_name
-                            break
-                if not arr_name:
+                pt = Point(lon, lat)
+                arr_name_found = None
+                for arr_name, arr_poly in arr_polys:
+                    if arr_poly.contains(pt):
+                        arr_name_found = arr_name
+                        break
+                if not arr_name_found:
                     continue
                 if annotation.startswith('pleine'):
-                    arr_full_bins[arr_name] = arr_full_bins.get(arr_name, 0) + 1
+                    arr_full_bins[arr_name_found] += 1
                 elif annotation.startswith('vide'):
-                    arr_empty_bins[arr_name] = arr_empty_bins.get(arr_name, 0) + 1
-            # Charger tous les arrondissements pour garantir l'affichage
-            with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-                arr_geo = json.load(f)
-                for feature in arr_geo['features']:
-                    arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-                    nb_pleines = arr_full_bins.get(arr_name, 0)
-                    nb_vides = arr_empty_bins.get(arr_name, 0)
-                    # Notification logic
-                    if nb_pleines > 10:
-                        notify_admin(
-                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
-                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
-                            urgent=True
-                        )
-                    elif nb_pleines >= 7:
-                        notify_admin(
-                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
-                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
-                            urgent=False
-                        )
-                    arr_stats.append({
-                        'arr': arr_name,
-                        'nb_pleines': nb_pleines,
-                        'nb_vides': nb_vides
-                    })
+                    arr_empty_bins[arr_name_found] += 1
+
+        # Construire la liste finale pour l'affichage
+        for arr_name, _ in arr_polys:
+            nb_pleines = arr_full_bins.get(arr_name, 0)
+            nb_vides = arr_empty_bins.get(arr_name, 0)
+            # Notification logic
+            if nb_pleines > 10:
+                notify_admin(
+                    subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                    urgent=True
+                )
+            elif nb_pleines >= 7:
+                notify_admin(
+                    subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                    urgent=False
+                )
+            arr_stats.append({
+                'arr': arr_name,
+                'nb_pleines': nb_pleines,
+                'nb_vides': nb_vides
+            })
     except Exception as e:
-        print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
+        # print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
         # Fallback: ancienne méthode
         arr_stats = [
-            {'arr': f"{i}e", 'nb_pleines': 0}
+            {'arr': f"{i}e", 'nb_pleines': 0, 'nb_vides': 0}
             for i in range(1, 21)
         ]
 
-    # On affiche tous les arrondissements, pas de pagination
-    arr_stats_page = arr_stats  # Pour compatibilité temporaire, mais on va nettoyer plus bas
+    # Tri par numéro d'arrondissement (si possible)
+    def arrondissement_key(stat):
+        import re
+        match = re.match(r"(\d+)", stat['arr'])
+        return int(match.group(1)) if match else 0
+
+    arr_stats = sorted(arr_stats, key=arrondissement_key)
+    arr_stats_all = arr_stats.copy()  # Pour les graphiques (tous les arrondissements)
+
+    # Pagination sur arr_stats (pour le tableau)
+    total_arr = len(arr_stats)
+    total_pages = max(1, (total_arr + per_page - 1) // per_page)
+    start = (page - 1) * per_page
+    end = start + per_page
+    arr_stats_page = arr_stats[start:end]
+    # Suppression du print de debug, affichage normal des pages
 
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
@@ -1167,6 +1189,9 @@ def stats():
                 std_h_mean, std_s_mean, std_v_mean = res
         except Exception:
             pass
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Si AJAX, ne renvoyer que le tableau paginé (HTML partiel)
+        return render_template('_arr_table.html', arr_stats=arr_stats_page, page=page, total_pages=total_pages)
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
@@ -1177,10 +1202,13 @@ def stats():
                            occ_size_files=occ_size_files,
                            img_base64_distribution=img_base64_distribution,
                            img_base64_nombre=img_base64_nombre,
-                           arr_stats=arr_stats,
+                           arr_stats=arr_stats_page,  # Pour le tableau (paginé)
+                           arr_stats_all=arr_stats_all,  # Pour les graphiques (complet)
                            std_h_mean=std_h_mean,
                            std_s_mean=std_s_mean,
-                           std_v_mean=std_v_mean)
+                           std_v_mean=std_v_mean,
+                           page=page,
+                           total_pages=total_pages)
 
 
 

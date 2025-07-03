@@ -1,0 +1,53 @@
+
+<div id="arr-table-container">
+    <table id="arr-table" class="table table-hover mb-0 custom-table-center" style="max-width:900px; margin:auto;">
+        <thead>
+            <tr>
+                <th>{{ _('Arrondissement') }}</th>
+                <th>{{ _('Poubelles pleines') }}</th>
+                <th>{{ _('Poubelles vides') }}</th>
+                <th>{{ _('%% Pleines') }}</th>
+                <th>{{ _('%% Vides') }}</th>
+                <th>{{ _('Statut') }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in arr_stats %}
+            <tr>
+                <td>{{ stat.arr }}</td>
+                <td>{{ stat.nb_pleines }}</td>
+                <td>{{ stat.nb_vides if stat.nb_vides is defined else 'N/A' }}</td>
+                <td>
+                    {% set total = (stat.nb_pleines + (stat.nb_vides if stat.nb_vides is defined else 0)) %}
+                    {% if total > 0 %}{{ ((stat.nb_pleines / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                </td>
+                <td>
+                    {% if total > 0 %}{{ ((stat.nb_vides / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                </td>
+                <td>
+                    {% if stat.nb_pleines < 7 %}
+                        <span class="badge bg-success">{{ _('Optimal') }}</span>
+                    {% elif stat.nb_pleines <= 10 %}
+                        <span class="badge bg-warning">{{ _('Attention') }}</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ _('Zone à risque') }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <nav aria-label="Pagination Arrondissements" class="my-3" id="arr-pagination-nav">
+        <ul class="pagination justify-content-center mb-0">
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ page - 1 }}#arr-table" tabindex="-1">&laquo; {{ _('Précédent') }}</a>
+            </li>
+            {% for p in range(1, total_pages + 1) %}
+                <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="?page={{ p }}#arr-table">{{ p }}</a></li>
+            {% endfor %}
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <a class="page-link" href="?page={{ page + 1 }}#arr-table">{{ _('Suivant') }} &raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</div>
