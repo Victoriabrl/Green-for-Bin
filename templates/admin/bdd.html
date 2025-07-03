@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="container mt-4">
+    <h2 class="text-center" style="margin-bottom: 2.5rem;">{{ _('Base de données des images') }}</h2>
     <h2>{{ _('Base de données des images') }}</h2>
     <form method="get" class="mb-3 d-flex align-items-center">
         <label for="date_filter" class="mr-2 mb-0">Filtrer par date :</label>
@@ -12,7 +13,7 @@
         {% endif %}
     </form>
     <div class="table-responsive">
-        <table class="table table-bordered table-striped table-green-text">
+        <table class="table table-bordered table-striped table-green-text no-rounded">
             <thead>
                 <tr>
                     {% for col in colonnes %}
@@ -41,4 +42,16 @@
     </div>
     {% include "pagination.html" %}
 </div>
+<style>
+/* Supprime les coins arrondis du tableau de la BDD admin */
+.no-rounded th,
+.no-rounded td {
+    border-radius: 0 !important;
+}
+/* Supprime le hover sur les images du tableau BDD admin */
+table.no-rounded img:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+</style>
 {% endblock %}
