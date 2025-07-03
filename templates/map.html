@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
-{% block content %}
-<h2>{{ _('Carte interactive des poubelles') }}</h2>
 
-<div id="map" style="height: 500px; max-width: 900px; margin: auto; border: 2px solid #ccc; border-radius: 10px;"></div>
+{% block content %}
+<h2 class="text-center mt-4 mb-4">{{ _('Carte interactive des poubelles') }}</h2>
+
+<div id="map" style="height: 500px; max-width: 900px; margin: 40px auto 40px auto; border: 2px solid #ccc; border-radius: 10px;"></div>
 
 <!-- Filtres -->
 <form id="filters" style="text-align: center; margin-top: 10px;">

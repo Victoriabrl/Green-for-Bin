@@ -3,11 +3,11 @@
 {% block title %}Visualisations{% endblock %}
 
 {% block content %}
-    <h1>{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
+    <h1 class="text-center">{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
 
-    <h2>{{ _('Statistiques') }}</h2>
-    <div class="table-responsive">
-        <table id="stats-table" class="table table-striped table-hover align-middle">
+    <h2 class="text-center">{{ _('Statistiques') }}</h2>
+    <div class="table-responsive d-flex justify-content-center">
+        <table id="stats-table" class="table table-striped table-hover align-middle custom-table-center" style="max-width: 600px;">
             <thead>
                 <tr>
                     <th>{{ _('Type') }}</th>
@@ -24,50 +24,98 @@
                     <td>{{ full_annotations }}</td>
                 </tr>
                 <tr>
+                    <td>{{ _('Pourcentage pleines') }}</td>
+                    <td>
+                        {% if total_annotations > 0 %}
+                            {{ ((full_annotations / total_annotations) * 100) | round(1) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <td>{{ _('Nombre d\'annotations poubelles vides') }}</td>
                     <td>{{ empty_annotations }}</td>
+                </tr>
+                <tr>
+                    <td>{{ _('Pourcentage vides') }}</td>
+                    <td>
+                        {% if total_annotations > 0 %}
+                            {{ ((empty_annotations / total_annotations) * 100) | round(1) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>{{ _('Nombre d\'annotations non labelisées') }}</td>
                     <td>{{ non_labelled_annotations }}</td>
                 </tr>
+                
+                
             </tbody>
         </table>
     </div>
 
-    <h2 class="mt-4">{{ _('Visualisations') }}</h2>
-    <div class="row mb-4">
-        <div class="col-md-6">
+    <h2 class="mt-4 text-center">{{ _('Visualisations') }}</h2>
+    <div class="row mb-4 justify-content-center">
+        <div class="col-md-6 d-flex justify-content-center">
             <canvas id="progressChart" style="max-width: 100%; height: 260px;"></canvas>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 d-flex justify-content-center">
             <canvas id="repartition" style="max-width: 100%; height: 260px;"></canvas>
         </div>
     </div>
 
+
+
     <div class="row mb-4">
         <div class="col-12">
-            <h5>{{ _('Distribution des tailles de fichiers :') }}</h5>
-            <canvas id="distribution" style="max-width: 100%; height: 260px;"></canvas>
+            <canvas id="arrondissementChart" style="max-width: 400px; height: 300px; margin: auto; display: block;"></canvas>
         </div>
     </div>
 
     <img src="{{ image_base64 }}" alt="Graphique" class="img-fluid mb-2">
-    <img src="{{ img_base64_distribution }}" alt="Graphique de distribution des tailles de fichiers" class="img-fluid mb-2">
     <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-4">
+
+    <!-- Tableau des moyennes std_h, std_s, std_v -->
+    <div class="row mb-4 justify-content-center">
+        <div class="col-12 text-center">
+            <h5>{{ _('Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)') }}</h5>
+            <table class="table table-bordered table-striped w-auto custom-table-center" style="max-width:400px">
+                <thead>
+                    <tr>
+                        <th>Couleur</th>
+                        <th>Saturation</th>
+                        <th>Luminosité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ std_h_mean|default('N/A')|round(2) if std_h_mean is not none else 'N/A' }}</td>
+                        <td>{{ std_s_mean|default('N/A')|round(2) if std_s_mean is not none else 'N/A' }}</td>
+                        <td>{{ std_v_mean|default('N/A')|round(2) if std_v_mean is not none else 'N/A' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
     <!-- NOUVEAU : Tableau par arrondissement -->
     <section class="section" id="arrondissements-stats" style="background: #fff;">
         <div class="container">
-            <h2 class="section-title">{{ _('Tableau de Bord par Arrondissement') }}</h2>
-            <div class="row">
+            <h2 class="section-title text-center">{{ _('Tableau de Bord par Arrondissement') }}</h2>
+            <div class="row justify-content-center">
                 <div class="col-12">
                     <div class="modern-table">
-                        <table class="table table-hover mb-0">
+                        <table id="arr-table" class="table table-hover mb-0 custom-table-center" style="max-width:900px; margin:auto;">
                             <thead>
                                 <tr>
                                     <th>{{ _('Arrondissement') }}</th>
                                     <th>{{ _('Poubelles pleines') }}</th>
+                                    <th>{{ _('Poubelles vides') }}</th>
+                                    <th>{{ _('%% Pleines') }}</th>
+                                    <th>{{ _('%% Vides') }}</th>
                                     <th>{{ _('Statut') }}</th>
                                 </tr>
                             </thead>
@@ -76,6 +124,14 @@
                                 <tr>
                                     <td>{{ stat.arr }}</td>
                                     <td>{{ stat.nb_pleines }}</td>
+                                    <td>{{ stat.nb_vides if stat.nb_vides is defined else 'N/A' }}</td>
+                                    <td>
+                                        {% set total = (stat.nb_pleines + (stat.nb_vides if stat.nb_vides is defined else 0)) %}
+                                        {% if total > 0 %}{{ ((stat.nb_pleines / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if total > 0 %}{{ ((stat.nb_vides / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                                    </td>
                                     <td>
                                         {% if stat.nb_pleines < 7 %}
                                             <span class="badge bg-success">{{ _('Optimal') }}</span>
@@ -88,7 +144,10 @@
                                 </tr>
                                 {% endfor %}
                             </tbody>
+
                         </table>
+                        <!-- Pagination Controls -->
+                        {# Pagination supprimée, affichage direct de tout le tableau #}
                     </div>
                 </div>
             </div>
@@ -97,6 +156,75 @@
 
     <!-- CSS + JS externes -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"/>
+    <style>
+    /* Coins arrondis uniquement sur les coins extérieurs du tableau */
+    .custom-table-center {
+        margin-left: auto;
+        margin-right: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .custom-table-center thead th:first-child {
+        border-top-left-radius: 16px;
+    }
+    .custom-table-center thead th:last-child {
+        border-top-right-radius: 16px;
+    }
+    .custom-table-center tbody tr:last-child td:first-child {
+        border-bottom-left-radius: 16px;
+    }
+    .custom-table-center tbody tr:last-child td:last-child {
+        border-bottom-right-radius: 16px;
+    }
+
+    /* Pagination DataTables : 7 carrés verts, chiffres blancs, sans coins arrondis */
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.2rem;
+        gap: 0.3rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        background: var(--light-green, #7fb069) !important;
+        color: var(--cream, #fefefe) !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: 2.3em;
+        height: 2.3em;
+        min-width: 2.3em;
+        min-height: 2.3em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1em;
+        font-family: 'Inter', Arial, sans-serif;
+        transition: background 0.18s, color 0.18s;
+        box-shadow: none !important;
+        cursor: pointer;
+        outline: none;
+        margin: 0 0.08em;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:focus {
+        background: var(--light-green, #7fb069) !important;
+        color: var(--cream, #fefefe) !important;
+        border: none !important;
+        box-shadow: 0 0 0 2px var(--primary-green, #4a7c59);
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: var(--sage-green, #8fbc8f) !important;
+        color: var(--cream, #fefefe) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        background: var(--soft-gray, #e9ecef) !important;
+        color: var(--text-secondary, #636e72) !important;
+        border: none !important;
+    }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -106,25 +234,39 @@
     <script>
         var xValues = ["{{ _('pleines') }}", "{{ _('vides') }}"];
         var yValues = [{{ full_annotations|tojson }}, {{ empty_annotations|tojson }}];
-        var barColors = ["#388e3c", "#a5d6a7"];
+        var barColors = ["#8fbc8f", "#fefefe"];
         var nbFichiersLabel = "{{ _('Nombre de fichiers') }}";
         var tailleOctetsLabel = "{{ _('Taille (octets)') }}";
         var aucuneDonnee = "{{ _('Aucune donnée disponible') }}";
         var total_annot = {{ total_annotations | tojson }};
         var total_possible = 720;
-        {% if size_files and occ_size_files %}
-        var sizeFiles = {{ size_files|tojson }};
-        var occSizeFiles = {{ occ_size_files|tojson }};
-        {% else %}
-        var sizeFiles = [];
-        var occSizeFiles = [];
-        {% endif %}
+        var arrLabels = [
+            {% for stat in arr_stats %}
+                "{{ stat.arr }}"{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+        var arrPleines = [
+            {% for stat in arr_stats %}
+                {{ stat.nb_pleines }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
     </script>
 
     <!-- JS principal -->
     <script>
     $(document).ready(function() {
         $('#stats-table').DataTable({
+            paging: false,
+            searching: false,
+            info: false,
+            ordering: false,
+            responsive: true,
+            language: {
+                emptyTable: aucuneDonnee
+            }
+        });
+        // Tableau arrondissements : pas de pagination JS, tout s'affiche
+        $('#arr-table').DataTable({
             paging: false,
             searching: false,
             info: false,
@@ -143,7 +285,7 @@
             labels: ["{{ _('Annotations actuelles') }}", "{{ _('Annotations possibles') }}"],
             datasets: [{
                 data: [total_annot, total_possible - total_annot],
-                backgroundColor: ['#4CAF50', '#e0e0e0'],
+                backgroundColor: ['#8fbc8f', '#e9ecef'], // sage-green, soft-gray
                 borderWidth: 0
             }]
         },
@@ -166,7 +308,7 @@
         data: {
             labels: xValues,
             datasets: [{
-                backgroundColor: barColors,
+                backgroundColor: ["#8fbc8f", "#fefefe"], // sage-green, cream
                 data: yValues
             }]
         },
@@ -182,16 +324,24 @@
         }
     });
 
-    // Graphique barres : distribution des tailles de fichiers
-    if(sizeFiles.length && occSizeFiles.length) {
-        new Chart(document.getElementById("distribution"), {
-            type: "bar",
+
+     // <-- AJOUTE CETTE ACCOLADE FERMANTE
+
+    // Graphique barres : répartition des poubelles pleines par arrondissement
+    if(arrLabels.length && arrPleines.length) {
+        new Chart(document.getElementById("arrondissementChart"), {
+            type: "pie",
             data: {
-                labels: sizeFiles,
+                labels: arrLabels,
                 datasets: [{
-                    label: nbFichiersLabel,
-                    backgroundColor: "#4CAF50",
-                    data: occSizeFiles
+                    label: "{{ _('Poubelles pleines') }}",
+                    backgroundColor: [
+                        "#388e3c", "#43a047", "#66bb6a", "#81c784", "#a5d6a7",
+                        "#c8e6c9", "#e8f5e9", "#b2dfdb", "#80cbc4", "#4dd0e1",
+                        "#26c6da", "#00bcd4", "#039be5", "#0288d1", "#0277bd",
+                        "#01579b", "#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6"
+                    ],
+                    data: arrPleines
                 }]
             },
             options: {
@@ -199,13 +349,9 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: "{{ _('Distribution des tailles de fichiers') }}"
+                        text: "{{ _('Répartition des poubelles pleines par arrondissement') }}"
                     },
-                    legend: { display: false }
-                },
-                scales: {
-                    x: { title: { display: true, text: tailleOctetsLabel } },
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                    legend: { position: 'bottom' }
                 }
             }
         });

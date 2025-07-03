@@ -1,3 +1,56 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+def notify_admin(subject, message, urgent=False):
+    # Notification logic: flash for now, email if urgent
+    # 1. Flash notification (if in request context)
+    try:
+        if urgent:
+            flash('ALERTE URGENTE ADMIN : ' + message, 'danger')
+        else:
+            flash('Notification admin : ' + message, 'warning')
+    except Exception:
+        pass
+    # 2. Send email if urgent
+    if urgent:
+        sender_email = "blablablablliblibli@gmail.com"
+        receiver_email = "blablablablliblibli@gmail.com"
+        password = "mghs irrv kmgp kyox"
+        smtp_server = "smtp.gmail.com"
+        port = 587
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = sender_email
+            msg['To'] = receiver_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+        except Exception as e:
+            print(f"[EMAIL ERROR] {e}")
+def random_localisation_in_arrondissement(arr_name):
+    """Génère une localisation aléatoire à l'intérieur d'un arrondissement donné (par nom)."""
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            feature_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            if feature_name == arr_name:
+                arr_poly = shape(feature['geometry'])
+                minx, miny, maxx, maxy = arr_poly.bounds
+                for _ in range(100):  # 100 essais max
+                    lon = random.uniform(minx, maxx)
+                    lat = random.uniform(miny, maxy)
+                    pt = Point(lon, lat)
+                    if arr_poly.contains(pt):
+                        return f"{lat},{lon}"
+    except Exception as e:
+        print(f"[ARRONDISSEMENT LOC] Erreur: {e}")
+    return random_localisation_paris()
 '''
     SOMMAIRE :
 CONFIGURATION
@@ -40,12 +93,13 @@ import json
 from threading import Thread
 from math import ceil
 from shapely.geometry import shape, Point
+import auto_label
 
 # ==================== CONFIGURATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -101,7 +155,7 @@ def init_db():
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
-        # Table pour les images
+        # Table pour les images (ajout std_h, std_s, std_v si non présents)
         c.execute('''
             CREATE TABLE IF NOT EXISTS images (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -116,9 +170,18 @@ def init_db():
                 hist_lum TEXT,
                 contrast INTEGER,
                 contour_count INTEGER,
-                localisation TEXT
+                localisation TEXT,
+                std_h REAL,
+                std_s REAL,
+                std_v REAL
             )
         ''')
+        # Migration : ajout des colonnes si elles n'existent pas déjà
+        for col in ['std_h', 'std_s', 'std_v']:
+            try:
+                c.execute(f"ALTER TABLE images ADD COLUMN {col} REAL")
+            except sqlite3.OperationalError:
+                pass  # colonne déjà existante
 
         # Table pour les utilisateurs
         c.execute('''
@@ -334,27 +397,18 @@ def extract_metadata(filepath):
     return width, height, file_size, str(avg_color), contrast, contour_count, str(hist_rgb), str(hist_lum)
 
 
-def classify_bin_automatically(avg_color, file_size, contrast, contour_count):
-    """Classification automatique d'une poubelle"""
-    avg_tuple = eval(avg_color)
-    mean_r, mean_g, mean_b = avg_tuple
-    mean_color = (mean_r + mean_g + mean_b) / 3
-    file_size_Ko = file_size / 1024
-
-    # Seuils de classification
-    SEUIL_SOMBRE = 110
-    SEUIL_TAILLE = 400
-    SEUIL_CONTOURS = 100000
-
-    if file_size_Ko > SEUIL_TAILLE and contour_count > SEUIL_CONTOURS:
-        return "pleine_auto"
-    elif mean_color < SEUIL_SOMBRE and file_size_Ko > 100:
-        return "pleine_auto"
-    elif file_size_Ko < 250 and contour_count < 80000:
-        return "vide_auto"
-    else:
-        return "vide_auto"
-
+def classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=None):
+    # Si image_path est fourni, on utilise la vraie image
+    if image_path is not None:
+        result = auto_label.classify_bin(image_path)
+        if result == "pleine":
+            return "pleine_auto"
+        elif result == "vide":
+            return "vide_auto"
+        else:
+            return "vide_auto"  # fallback
+    # Fallback si pas d'image (pour compatibilité)
+   
 
 # ==================== ROUTES PRINCIPALES ====================
 
@@ -393,6 +447,16 @@ def index():
             {'arr': f"{i}e", 'nb_pleines': 0}
             for i in range(1, 21)
         ]
+    print("arr_stats:", arr_stats)
+    # ...après avoir rempli arr_stats...
+    def arrondissement_key(stat):
+        # Extrait le numéro au début (ex: "1er", "2e", "10e", etc.)
+        import re
+        match = re.match(r"(\d+)", stat['arr'])
+        return int(match.group(1)) if match else 0
+
+    arr_stats = sorted(arr_stats, key=arrondissement_key)
+
     return render_template('about.html', arr_stats=arr_stats)
 
 
@@ -400,6 +464,20 @@ def index():
 @login_required
 def upload():
     """Upload d'images (utilisateurs connectés seulement) avec compression et traitement asynchrone pour users, synchrone pour admin. Retour JSON si AJAX."""
+    # Préparer la liste des arrondissements pour la barre déroulante (admin)
+    arrondissements = []
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arrondissements.append(arr_name)
+        arrondissements = sorted(arrondissements)
+    except Exception as e:
+        print(f"[UPLOAD] Erreur chargement arrondissements: {e}")
+        arrondissements = []
+
     if request.method == 'POST':
         if 'image' not in request.files:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -414,6 +492,15 @@ def upload():
             flash('Aucun fichier sélectionné.', 'error')
             return redirect(request.url)
 
+        # Pour admin : récupération du choix d'arrondissement et de la date/heure
+        selected_arr = request.form.get('arrondissement')
+        selected_date = request.form.get('date_upload')
+        # Formatage de la date/heure si fournie (pour tous)
+        if selected_date:
+            selected_date = selected_date.replace('T', ' ')
+            if len(selected_date) == 16:
+                selected_date += ':00'
+
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -427,25 +514,53 @@ def upload():
                 try:
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
-                    upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    localisation = random_localisation_france()
-                    auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
+                    upload_date = selected_date if selected_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    if selected_arr and selected_arr.strip():
+                        localisation = random_localisation_in_arrondissement(selected_arr)
+                    else:
+                        localisation = random_localisation_paris()
+                    # Utilisation correcte de la classification automatique
+                    auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
+                    auto_label_result = auto_label.classify_bin(filepath)
+                    if isinstance(auto_label_result, dict):
+                        std_h = auto_label_result.get('std_h')
+                        std_s = auto_label_result.get('std_s')
+                        std_v = auto_label_result.get('std_v')
+                        label = auto_label_result.get('label', 'vide')
+                        auto_label_str = f"{label}_auto"
+                    else:
+                        std_h = std_s = std_v = None
+                        if auto_label_result == "pleine":
+                            auto_label_str = "pleine_auto"
+                        elif auto_label_result == "vide":
+                            auto_label_str = "vide_auto"
+                        else:
+                            auto_label_str = "vide_auto"
+                    # Détection dynamique des colonnes existantes
                     with sqlite3.connect(DB_PATH) as conn:
                         c = conn.cursor()
-                        c.execute('''
-                            INSERT INTO images (
-                                filename, upload_date, annotation, width, height,
-                                file_size, avg_color, hist_rgb, hist_lum,
-                                contrast, contour_count, localisation
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ''', (
-                            filename, upload_date, auto_label, width, height,
+                        c.execute("PRAGMA table_info(images)")
+                        columns = [row[1] for row in c.fetchall()]
+                        insert_cols = [
+                            'filename', 'upload_date', 'annotation', 'width', 'height',
+                            'file_size', 'avg_color', 'hist_rgb', 'hist_lum',
+                            'contrast', 'contour_count', 'localisation'
+                        ]
+                        values = [
+                            filename, upload_date, auto_label_str, width, height,
                             file_size, avg_color, hist_rgb, hist_lum,
                             contrast, contour_count, localisation
-                        ))
+                        ]
+                        # Ajout std_h, std_s, std_v si présents dans la table
+                        for col, val in zip(['std_h', 'std_s', 'std_v'], [std_h, std_s, std_v]):
+                            if col in columns:
+                                insert_cols.append(col)
+                                values.append(val)
+                        placeholders = ','.join(['?'] * len(insert_cols))
+                        c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                         conn.commit()
                     flash('Image uploadée avec succès! Veuillez annoter.', 'success')
-                    return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label}')
+                    return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label_str}')
                 except Exception as e:
                     print(f"[ADMIN UPLOAD ERROR] {e}")
                     flash('Erreur lors du traitement de l\'image (admin): ' + str(e), 'error')
@@ -453,22 +568,47 @@ def upload():
             else:
                 # Traitement asynchrone pour les autres
                 width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
-                upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                localisation = random_localisation_france()
-                auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
+                upload_date = selected_date if selected_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                if selected_arr and selected_arr.strip():
+                    localisation = random_localisation_in_arrondissement(selected_arr)
+                else:
+                    localisation = random_localisation_france()
+                auto_label_result = auto_label.classify_bin(filepath)
+                if isinstance(auto_label_result, dict):
+                    std_h = auto_label_result.get('std_h')
+                    std_s = auto_label_result.get('std_s')
+                    std_v = auto_label_result.get('std_v')
+                    label = auto_label_result.get('label', 'vide')
+                    auto_label_str = f"{label}_auto"
+                else:
+                    std_h = std_s = std_v = None
+                    if auto_label_result == "pleine":
+                        auto_label_str = "pleine_auto"
+                    elif auto_label_result == "vide":
+                        auto_label_str = "vide_auto"
+                    else:
+                        auto_label_str = "vide_auto"
+                # Détection dynamique des colonnes existantes
                 with sqlite3.connect(DB_PATH) as conn:
                     c = conn.cursor()
-                    c.execute('''
-                        INSERT INTO images (
-                            filename, upload_date, annotation, width, height,
-                            file_size, avg_color, hist_rgb, hist_lum,
-                            contrast, contour_count, localisation
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (
-                        filename, upload_date, auto_label, width, height,
+                    c.execute("PRAGMA table_info(images)")
+                    columns = [row[1] for row in c.fetchall()]
+                    insert_cols = [
+                        'filename', 'upload_date', 'annotation', 'width', 'height',
+                        'file_size', 'avg_color', 'hist_rgb', 'hist_lum',
+                        'contrast', 'contour_count', 'localisation'
+                    ]
+                    values = [
+                        filename, upload_date, auto_label_str, width, height,
                         file_size, avg_color, hist_rgb, hist_lum,
                         contrast, contour_count, localisation
-                    ))
+                    ]
+                    for col, val in zip(['std_h', 'std_s', 'std_v'], [std_h, std_s, std_v]):
+                        if col in columns:
+                            insert_cols.append(col)
+                            values.append(val)
+                    placeholders = ','.join(['?'] * len(insert_cols))
+                    c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                     conn.commit()
                 # Ajout des métadonnées dans la réponse JSON AJAX
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -485,33 +625,76 @@ def upload():
                     }
                     return jsonify(
                         success=True,
-                        auto_label=auto_label.replace('_auto', '').capitalize(),
+                        auto_label=auto_label_str.replace('_auto', '').capitalize(),
                         metadata=metadata
                     )
-                flash('Image uploadée avec succès! Prédiction : ' + auto_label.replace('_auto','').capitalize(), 'success')
+                flash('Image uploadée avec succès! Prédiction : ' + auto_label_str.replace('_auto','').capitalize(), 'success')
                 return redirect(url_for('upload'))
         else:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify(success=False, error='Type de fichier non autorisé.')
             flash('Type de fichier non autorisé.', 'error')
 
-    return render_template('upload.html')
+    return render_template('upload.html', arrondissements=arrondissements)
 
 
 @app.route('/annotate/<filename>', methods=['GET', 'POST'])
 @login_required
 def annotate(filename):
     """Annotation d'une image"""
+
     auto_label = request.args.get('auto_label')
+    custom_auto_label_result = None
 
     if request.method == 'POST':
-        annotation = request.form['annotation']
-        with sqlite3.connect(DB_PATH) as conn:
-            c = conn.cursor()
-            c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
-            conn.commit()
-        flash('Annotation sauvegardée!', 'success')
-        return render_template('result.html', filename=filename, annotation=annotation)
+        # Si annotation classique (pleine/vide)
+        if 'annotation' in request.form:
+            annotation = request.form['annotation']
+            with sqlite3.connect(DB_PATH) as conn:
+                c = conn.cursor()
+                if annotation == 'annuler':
+                    c.execute('UPDATE images SET annotation = NULL WHERE filename = ?', (filename,))
+                    conn.commit()
+                    flash("Annotation annulée !", 'info')
+                    return redirect(url_for('annotate', filename=filename))
+                else:
+                    c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
+                    conn.commit()
+            flash('Annotation sauvegardée!', 'success')
+            return render_template('result.html', filename=filename, annotation=annotation)
+        # Si auto-label personnalisé
+        elif 'custom_auto_label' in request.form:
+            # Récupérer les choix utilisateur
+            use_std_h = 'use_std_h' in request.form
+            use_std_s = 'use_std_s' in request.form
+            use_std_v = 'use_std_v' in request.form
+            try:
+                seuil_h = float(request.form.get('seuil_h', 50))
+            except Exception:
+                seuil_h = 50
+            try:
+                seuil_s = float(request.form.get('seuil_s', 34))
+            except Exception:
+                seuil_s = 34
+            try:
+                seuil_v = float(request.form.get('seuil_v', 49))
+            except Exception:
+                seuil_v = 49
+
+            # Appel à la fonction d'auto-label personnalisée
+            from auto_label import classify_bin_custom
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            custom_auto_label_result = classify_bin_custom(
+                image_path,
+                use_std_h=use_std_h,
+                use_std_s=use_std_s,
+                use_std_v=use_std_v,
+                seuil_h=seuil_h,
+                seuil_s=seuil_s,
+                seuil_v=seuil_v
+            )
+
+    # --- Récupération des métadonnées depuis la BDD ---
 
     # --- Récupération des métadonnées depuis la BDD ---
     with sqlite3.connect(DB_PATH) as conn:
@@ -544,7 +727,7 @@ def annotate(filename):
         'luminosity': luminosity
     }
 
-    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata)
+    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata, custom_auto_label_result=custom_auto_label_result)
 
 
 @app.route('/about', methods=['GET', 'POST'])
@@ -700,34 +883,77 @@ def demote_user(user_id):
     return redirect(url_for('admin_users'))
 
 
+
 @app.route('/admin/bdd')
 @admin_required
 def afficher_bdd():
-    """Affichage de la base de données (admin seulement) avec pagination"""
+    """Affichage de la base de données (admin seulement) avec pagination et filtre date"""
     page = int(request.args.get('page', 1))
     per_page = 5
     offset = (page - 1) * per_page
+    date_filter = request.args.get('date_filter')
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM images")
-        total_rows = c.fetchone()[0]
-        c.execute("SELECT * FROM images ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
+        # Ajout explicite des colonnes std_h, std_s, std_v si elles existent
+        try:
+            c.execute("SELECT * FROM images LIMIT 1")
+            all_cols = [description[0] for description in c.description]
+            has_std_h = 'std_h' in all_cols
+            has_std_s = 'std_s' in all_cols
+            has_std_v = 'std_v' in all_cols
+        except Exception:
+            has_std_h = has_std_s = has_std_v = False
+        # Sélection dynamique des colonnes
+        select_cols = '*'
+        if has_std_h and has_std_s and has_std_v:
+            select_cols = '*, std_h, std_s, std_v'
+        # Renommer la colonne upload_date en date dans l'affichage
+        c.execute("PRAGMA table_info(images)")
+        colonnes = [col[1] for col in c.fetchall()]
+        colonnes = ["date" if col == "upload_date" else col for col in colonnes]
+        # Construction de la requête SQL avec filtre date
+        base_query = "SELECT * FROM images"
+        params = []
+        if date_filter:
+            base_query += " WHERE date(upload_date) = ?"
+            params.append(date_filter)
+        base_query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+        params.extend([per_page, offset])
+        c.execute(base_query, params)
         rows = c.fetchall()
-        colonnes = [description[0] for description in c.description]
     processed_rows = []
     for row in rows:
         row_dict = dict(row)
+        # Renommer la clé upload_date en date pour l'affichage
+        if 'upload_date' in row_dict:
+            row_dict['date'] = row_dict.pop('upload_date')
         for col_name, title in [('hist_rgb', 'Histogramme RGB'), ('hist_lum', 'Histogramme Luminance')]:
             if col_name in row_dict and row_dict[col_name]:
                 try:
                     data = ast.literal_eval(row_dict[col_name])
                     img = plot_histogram(data, title)
-                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}"/>'
+                    row_dict[col_name] = f'<img src="data:image/png;base64,{img}" alt="{title}" loading="lazy"/>'
                 except Exception as e:
                     print(f"[ADMIN BDD] Erreur d'affichage pour {col_name} (valeur={row_dict[col_name]}): {e}")
                     row_dict[col_name] = "Erreur d'affichage"
+        # Ajout : conversion std_h, std_s, std_v en float arrondis si présents
+        for std_col in ['std_h', 'std_s', 'std_v']:
+            if std_col in row_dict and row_dict[std_col] is not None:
+                try:
+                    row_dict[std_col] = round(float(row_dict[std_col]), 2)
+                except Exception:
+                    pass
         processed_rows.append(row_dict)
+    # Nombre total de lignes pour la pagination (avec ou sans filtre)
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        if date_filter:
+            c.execute("SELECT COUNT(*) FROM images WHERE date(upload_date) = ?", (date_filter,))
+            total_rows = c.fetchone()[0]
+        else:
+            c.execute("SELECT COUNT(*) FROM images")
+            total_rows = c.fetchone()[0]
     total_pages = max(ceil(total_rows / per_page), 1)
     return render_template('admin/bdd.html', rows=processed_rows, colonnes=colonnes, page=page, total_pages=total_pages)
 
@@ -766,10 +992,13 @@ def plot_histogram(data, title=''):
     return base64.b64encode(buf.read()).decode('utf-8')
 
 
+
 @app.route('/visualisations')
 @login_required
 def stats():
     """Visualisations et statistiques"""
+    # Suppression de la pagination : on affiche tous les arrondissements
+
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -785,36 +1014,62 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
-    # --- Ajout : stats par arrondissement basées sur les données de la carte ---
+    # --- Ajout : stats par arrondissement basées sur la base de données ---
     arr_stats = []
     try:
-        # Charger les arrondissements
-        with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-            arr_geo = json.load(f)
-        # Charger les poubelles
-        with open(os.path.join('static', 'data', 'poubelles.json'), encoding='utf-8') as f:
-            poubelles = json.load(f)
-        # Préparer les polygones
-        arr_polys = []
-        for feature in arr_geo['features']:
-            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-            arr_poly = shape(feature['geometry'])
-            arr_polys.append((arr_name, arr_poly))
-        # Compter les poubelles pleines par arrondissement
-        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
-        for pb in poubelles:
-            if pb.get('remplissage', '').startswith('pleine'):
-                pt = Point(pb['lon'], pb['lat'])
-                for arr_name, arr_poly in arr_polys:
-                    if arr_poly.contains(pt):
-                        arr_full_bins[arr_name] += 1
-                        break
-        # Construire arr_stats
-        for arr_name, _ in arr_polys:
-            arr_stats.append({
-                'arr': arr_name,
-                'nb_pleines': arr_full_bins[arr_name]
-            })
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute("SELECT localisation, annotation FROM images WHERE annotation IS NOT NULL AND localisation IS NOT NULL AND localisation != ''")
+            arr_full_bins = {}
+            arr_empty_bins = {}
+            for row in c.fetchall():
+                loc, annotation = row
+                # On suppose que la localisation est sous forme "lat,lon"
+                try:
+                    lat, lon = map(float, loc.split(","))
+                except Exception:
+                    continue
+                # Trouver l'arrondissement correspondant
+                arr_name = None
+                with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+                    arr_geo = json.load(f)
+                    for feature in arr_geo['features']:
+                        poly_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                        arr_poly = shape(feature['geometry'])
+                        if arr_poly.contains(Point(lon, lat)):
+                            arr_name = poly_name
+                            break
+                if not arr_name:
+                    continue
+                if annotation.startswith('pleine'):
+                    arr_full_bins[arr_name] = arr_full_bins.get(arr_name, 0) + 1
+                elif annotation.startswith('vide'):
+                    arr_empty_bins[arr_name] = arr_empty_bins.get(arr_name, 0) + 1
+            # Charger tous les arrondissements pour garantir l'affichage
+            with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+                arr_geo = json.load(f)
+                for feature in arr_geo['features']:
+                    arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                    nb_pleines = arr_full_bins.get(arr_name, 0)
+                    nb_vides = arr_empty_bins.get(arr_name, 0)
+                    # Notification logic
+                    if nb_pleines > 10:
+                        notify_admin(
+                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                            urgent=True
+                        )
+                    elif nb_pleines >= 7:
+                        notify_admin(
+                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                            urgent=False
+                        )
+                    arr_stats.append({
+                        'arr': arr_name,
+                        'nb_pleines': nb_pleines,
+                        'nb_vides': nb_vides
+                    })
     except Exception as e:
         print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
         # Fallback: ancienne méthode
@@ -823,11 +1078,16 @@ def stats():
             for i in range(1, 21)
         ]
 
+    # On affiche tous les arrondissements, pas de pagination
+    arr_stats_page = arr_stats  # Pour compatibilité temporaire, mais on va nettoyer plus bas
+
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
-    donut_labels = ["Annotations actuelles", "Annotations possibles"]       
+    donut_labels = ["Annotations actuelles", "Annotations possibles"]
     fig, ax = plt.subplots(figsize=(4, 2))
-    ax.pie(donut_values, labels=donut_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FFC107'])
+    # Utilisation des couleurs CSS variables
+    donut_colors = ['#8fbc8f', '#e9ecef']  # sage-green, soft-gray
+    ax.pie(donut_values, labels=donut_labels, autopct='%1.1f%%', startangle=90, colors=donut_colors)
     ax.set_title("Nombre total d'images uploadées")
     buf = io.BytesIO()
     plt.tight_layout()
@@ -836,17 +1096,13 @@ def stats():
     buf.seek(0)
     img_base64_nombre = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
 
-
-
-    #affichage du graphique en camembert pour la repartition des annotations 
-    data = [full_annotations,empty_annotations]
-    labels=["pleines","vides"]
-
-    #graphique 
+    # Affichage du graphique en camembert pour la répartition des annotations
+    data = [full_annotations, empty_annotations]
+    labels = ["pleines", "vides"]
+    pie_colors = ['#8fbc8f', '#fefefe']  # sage-green, cream
     fig, ax = plt.subplots(figsize=(4, 2))
-    ax.pie(data,labels=labels,autopct='%1.1f%%')
+    ax.pie(data, labels=labels, autopct='%1.1f%%', colors=pie_colors)
     ax.set_title("Répartitions des annotations")
-
     buf = io.BytesIO()
     plt.tight_layout()
     plt.savefig(buf, format='png')
@@ -872,35 +1128,45 @@ def stats():
     size_files = [file_size for file_size, _ in rows]
     occ_size_files = [count for _, count in rows]
 
-    #graphique de la distribution des tailles de fichiers
-
-    #graphique en barres     
+    # Graphique de la distribution des tailles de fichiers
     fig, ax = plt.subplots(figsize=(4, 2))
-    barColors = ['#4CAF50'] * len(size_files)
-
-    # Utiliser des indices pour les x pour éviter les problèmes de taille
-    # et pour que les barres soient bien espacées
+    barColors = ['#8fbc8f'] * len(size_files)  # sage-green
     indices = list(range(len(size_files)))
-    ax.bar(indices, occ_size_files, color=barColors)
-
-    # Affichage des labels de tailles converties en Ko
+    ax.bar(indices, occ_size_files, color=barColors, edgecolor='#e9ecef')  # soft-gray
     ax.set_xticks(indices)
     ax.set_xticklabels([f"{size/1024:.1f} Ko" for size in size_files], rotation=45, ha='right')
-
-    ax.set_xlabel('Taille des fichiers (Ko)')   
+    ax.set_xlabel('Taille des fichiers (Ko)')
     ax.set_ylabel('Nombre de fichiers')
     ax.set_title('Distribution des tailles de fichiers')
-
-    #sauvegarde de l'image dans un buffer
+    ax.set_facecolor('#fefefe')  # cream
+    fig.patch.set_facecolor('#fefefe')
+    # Modifier la couleur des axes et labels pour plus de cohérence
+    ax.spines['bottom'].set_color('#8fbc8f')
+    ax.spines['left'].set_color('#8fbc8f')
+    ax.xaxis.label.set_color('#8fbc8f')
+    ax.yaxis.label.set_color('#8fbc8f')
+    ax.title.set_color('#8fbc8f')
+    ax.tick_params(axis='x', colors='#636e72')  # text-secondary
+    ax.tick_params(axis='y', colors='#636e72')
     buf = io.BytesIO()
-    plt.tight_layout()      
+    plt.tight_layout()
     plt.savefig(buf, format='png')
     plt.close(fig)
     buf.seek(0)
-
-    img_base64_distribution = "data:image/png;base64," + base64.b64encode (buf.read()).decode('utf-8')
+    img_base64_distribution = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
     
 
+    # Ajout : récupération des moyennes std_h, std_s, std_v si elles existent
+    std_h_mean = std_s_mean = std_v_mean = None
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        try:
+            c.execute("SELECT AVG(std_h), AVG(std_s), AVG(std_v) FROM images WHERE std_h IS NOT NULL AND std_s IS NOT NULL AND std_v IS NOT NULL")
+            res = c.fetchone()
+            if res:
+                std_h_mean, std_s_mean, std_v_mean = res
+        except Exception:
+            pass
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
@@ -911,38 +1177,58 @@ def stats():
                            occ_size_files=occ_size_files,
                            img_base64_distribution=img_base64_distribution,
                            img_base64_nombre=img_base64_nombre,
-                           arr_stats=arr_stats)
+                           arr_stats=arr_stats,
+                           std_h_mean=std_h_mean,
+                           std_s_mean=std_s_mean,
+                           std_v_mean=std_v_mean)
+
 
 
 @app.route('/gallery')
 @login_required
 def gallery():
-    """Galerie d'images avec pagination"""
+    """Galerie d'images avec pagination et carrousel, métadonnées au clic"""
     page = int(request.args.get('page', 1))
     per_page = 5
     offset = (page - 1) * per_page
     with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
+        # Images vides
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        vides = [dict(row) for row in c.fetchall()]
+        # Images pleines
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        pleines = [dict(row) for row in c.fetchall()]
+        # Images non annotées
+        c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        non_labelisees = [dict(row) for row in c.fetchall()]
+        # Nombre total pour la pagination
         c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%vide%'")
         total_vides = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation LIKE '%vide%' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        vides = c.fetchall()
         c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%pleine%'")
         total_pleines = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation LIKE '%pleine%' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        pleines = c.fetchall()
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         total_non_label = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        non_labelisees = c.fetchall()
     total_pages = max(ceil(max(total_vides, total_pleines, total_non_label) / per_page), 1)
     return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees, page=page, total_pages=total_pages)
 
 
 # ==================== CARTE ====================
 
+def random_localisation_paris():
+    """Génère une localisation aléatoire à l'intérieur de la zone Paris intramuros réduite."""
+    PARIS_MIN_LAT = 48.84
+    PARIS_MAX_LAT = 48.89
+    PARIS_MIN_LON = 2.28
+    PARIS_MAX_LON = 2.41
+    lat = round(random.uniform(PARIS_MIN_LAT, PARIS_MAX_LAT), 6)
+    lon = round(random.uniform(PARIS_MIN_LON, PARIS_MAX_LON), 6)
+    return f"{lat},{lon}"
+
+
 def generer_json_poubelles():
-    """Génère le fichier JSON pour la carte"""
+    """Génère le fichier JSON pour la carte (utilise la localisation stockée en base, qui est déjà dans Paris)"""
     FINAL_JSON_PATH = os.path.join(BASE_DIR, 'static', 'data', 'poubelles.json')
 
     conn = sqlite3.connect(DB_PATH)
@@ -962,13 +1248,9 @@ def generer_json_poubelles():
             lat_str, lon_str = loc.split(",")
             lat = float(lat_str.strip())
             lon = float(lon_str.strip())
-            # Vérification des bornes géographiques (autour de Paris)
-            if not (48.0 < lat < 49.0 and 2.0 < lon < 3.0):
-                continue
         except Exception as e:
             print(f"[WARN] Localisation mal formée ignorée: '{loc}' ({e})")
             continue
-
         points.append({
             "lat": lat,
             "lon": lon,
@@ -1031,8 +1313,16 @@ def batch_upload_images():
             upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             localisation = random_localisation_france()
 
-            auto_label = classify_bin_automatically(avg_color, file_size, contrast, contour_count)
-            annotation = f"{auto_label}|{label_hint}"
+
+            # Utilisation correcte de la classification automatique
+            auto_label_result = auto_label.classify_bin(dest_path)
+            if auto_label_result == "pleine":
+                auto_label_str = "pleine_auto"
+            elif auto_label_result == "vide":
+                auto_label_str = "vide_auto"
+            else:
+                auto_label_str = "vide_auto"
+            annotation = f"{auto_label_str}|{label_hint}"
 
             with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
@@ -1053,11 +1343,13 @@ def batch_upload_images():
 
 
 def compress_image(input_path, output_path, quality=70, max_size=(1024, 1024)):
-    """Compresse et redimensionne l'image pour optimiser la taille."""
     img = Image.open(input_path)
-    # Utilise LANCZOS (équivalent moderne d'ANTIALIAS)
     img.thumbnail(max_size, Image.LANCZOS)
+    # Sauvegarde dans le format d'origine (jpeg, png, webp, etc.)
     img.save(output_path, optimize=True, quality=quality)
+    # Sauvegarde aussi en webp pour compatibilité future
+    webp_path = output_path.rsplit('.', 1)[0] + '.webp'
+    img.save(webp_path, 'WEBP', optimize=True, quality=quality)
     img.close()
 
 

@@ -7,7 +7,7 @@
 <div class="container mt-4">
     <div class="row align-items-center">
         <div class="col-md-6 text-center">
-            <img src="{{ url_for('static', filename='uploads/' ~ filename) }}" alt="{{ _('Image à annoter') }}" class="img-fluid mb-3" style="max-height:350px;">
+            <img src="{{ url_for('static', filename='uploads/' ~ filename.rsplit('.', 1)[0] ~ '.webp') }}" alt="{{ _('Image à annoter') }}" class="img-fluid mb-3" style="max-height:350px;" loading="lazy">
         </div>
         <div class="col-md-6">
             <div class="card bg-creme shadow-sm mb-3">
@@ -23,10 +23,49 @@
         </div>
     </div>
     <h2>{{ _('Image uploadée') }}</h2>
-    <form method="POST" class="d-flex gap-3">
+    <form method="POST" class="d-flex gap-3 mb-4">
         <button type="submit" name="annotation" value="pleine" class="btn btn-success btn-lg">{{ _('Pleine') }}</button>
         <button type="submit" name="annotation" value="vide" class="btn btn-outline-success btn-lg">{{ _('Vide') }}</button>
     </form>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">{{ _('Auto-label personnalisé') }}</h5>
+            <form method="POST" class="row g-3 align-items-end">
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="use_std_h" id="use_std_h" checked>
+                        <label class="form-check-label" for="use_std_h">Couleur</label>
+                    </div>
+                    <input type="number" step="any" class="form-control mt-1" name="seuil_h" id="seuil_h" placeholder="Seuil H (ex: 50)" value="50">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="use_std_s" id="use_std_s" checked>
+                        <label class="form-check-label" for="use_std_s">Saturation</label>
+                    </div>
+                    <input type="number" step="any" class="form-control mt-1" name="seuil_s" id="seuil_s" placeholder="Seuil S (ex: 34)" value="34">
+                </div>
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="use_std_v" id="use_std_v" checked>
+                        <label class="form-check-label" for="use_std_v">Luminosité</label>
+                    </div>
+                    <input type="number" step="any" class="form-control mt-1" name="seuil_v" id="seuil_v" placeholder="Seuil V (ex: 49)" value="49">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" name="custom_auto_label" value="1" class="btn btn-primary">{{ _('Lancer auto-label personnalisé') }}</button>
+                </div>
+            </form>
+            {% if custom_auto_label_result %}
+                <div class="alert alert-info mt-3">
+                    <b>{{ _('Résultat auto-label personnalisé :') }}</b>
+                    {{ _('Vide') if custom_auto_label_result.startswith('vide') else _('Pleine') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     {% if auto_label %}
         <div class="alert alert-info mt-3">
             <b>{{ _('Pronostic automatique :') }}</b>
