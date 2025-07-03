@@ -130,7 +130,7 @@
     <script>
         var xValues = ["{{ _('pleines') }}", "{{ _('vides') }}"];
         var yValues = [{{ full_annotations|tojson }}, {{ empty_annotations|tojson }}];
-        var barColors = ["#388e3c", "#a5d6a7"];
+        var barColors = ["#8fbc8f", "#fefefe"];
         var nbFichiersLabel = "{{ _('Nombre de fichiers') }}";
         var tailleOctetsLabel = "{{ _('Taille (octets)') }}";
         var aucuneDonnee = "{{ _('Aucune donnée disponible') }}";
@@ -167,7 +167,7 @@
             labels: ["{{ _('Annotations actuelles') }}", "{{ _('Annotations possibles') }}"],
             datasets: [{
                 data: [total_annot, total_possible - total_annot],
-                backgroundColor: ['#4CAF50', '#e0e0e0'],
+                backgroundColor: ['#8fbc8f', '#e9ecef'], // sage-green, soft-gray
                 borderWidth: 0
             }]
         },
@@ -190,7 +190,7 @@
         data: {
             labels: xValues,
             datasets: [{
-                backgroundColor: barColors,
+                backgroundColor: ["#8fbc8f", "#fefefe"], // sage-green, cream
                 data: yValues
             }]
         },

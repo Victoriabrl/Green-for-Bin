@@ -940,9 +940,11 @@ def stats():
 
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
-    donut_labels = ["Annotations actuelles", "Annotations possibles"]       
+    donut_labels = ["Annotations actuelles", "Annotations possibles"]
     fig, ax = plt.subplots(figsize=(4, 2))
-    ax.pie(donut_values, labels=donut_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FFC107'])
+    # Utilisation des couleurs CSS variables
+    donut_colors = ['#8fbc8f', '#e9ecef']  # sage-green, soft-gray
+    ax.pie(donut_values, labels=donut_labels, autopct='%1.1f%%', startangle=90, colors=donut_colors)
     ax.set_title("Nombre total d'images uploadées")
     buf = io.BytesIO()
     plt.tight_layout()
@@ -953,15 +955,13 @@ def stats():
 
 
 
-    #affichage du graphique en camembert pour la repartition des annotations 
-    data = [full_annotations,empty_annotations]
-    labels=["pleines","vides"]
-
-    #graphique 
+    # Affichage du graphique en camembert pour la répartition des annotations
+    data = [full_annotations, empty_annotations]
+    labels = ["pleines", "vides"]
+    pie_colors = ['#8fbc8f', '#fefefe']  # sage-green, cream
     fig, ax = plt.subplots(figsize=(4, 2))
-    ax.pie(data,labels=labels,autopct='%1.1f%%')
+    ax.pie(data, labels=labels, autopct='%1.1f%%', colors=pie_colors)
     ax.set_title("Répartitions des annotations")
-
     buf = io.BytesIO()
     plt.tight_layout()
     plt.savefig(buf, format='png')
@@ -987,33 +987,32 @@ def stats():
     size_files = [file_size for file_size, _ in rows]
     occ_size_files = [count for _, count in rows]
 
-    #graphique de la distribution des tailles de fichiers
-
-    #graphique en barres     
+    # Graphique de la distribution des tailles de fichiers
     fig, ax = plt.subplots(figsize=(4, 2))
-    barColors = ['#4CAF50'] * len(size_files)
-
-    # Utiliser des indices pour les x pour éviter les problèmes de taille
-    # et pour que les barres soient bien espacées
+    barColors = ['#8fbc8f'] * len(size_files)  # sage-green
     indices = list(range(len(size_files)))
-    ax.bar(indices, occ_size_files, color=barColors)
-
-    # Affichage des labels de tailles converties en Ko
+    ax.bar(indices, occ_size_files, color=barColors, edgecolor='#e9ecef')  # soft-gray
     ax.set_xticks(indices)
     ax.set_xticklabels([f"{size/1024:.1f} Ko" for size in size_files], rotation=45, ha='right')
-
-    ax.set_xlabel('Taille des fichiers (Ko)')   
+    ax.set_xlabel('Taille des fichiers (Ko)')
     ax.set_ylabel('Nombre de fichiers')
     ax.set_title('Distribution des tailles de fichiers')
-
-    #sauvegarde de l'image dans un buffer
+    ax.set_facecolor('#fefefe')  # cream
+    fig.patch.set_facecolor('#fefefe')
+    # Modifier la couleur des axes et labels pour plus de cohérence
+    ax.spines['bottom'].set_color('#8fbc8f')
+    ax.spines['left'].set_color('#8fbc8f')
+    ax.xaxis.label.set_color('#8fbc8f')
+    ax.yaxis.label.set_color('#8fbc8f')
+    ax.title.set_color('#8fbc8f')
+    ax.tick_params(axis='x', colors='#636e72')  # text-secondary
+    ax.tick_params(axis='y', colors='#636e72')
     buf = io.BytesIO()
-    plt.tight_layout()      
+    plt.tight_layout()
     plt.savefig(buf, format='png')
     plt.close(fig)
     buf.seek(0)
-
-    img_base64_distribution = "data:image/png;base64," + base64.b64encode (buf.read()).decode('utf-8')
+    img_base64_distribution = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
     
 
     # Ajout : récupération des moyennes std_h, std_s, std_v si elles existent
