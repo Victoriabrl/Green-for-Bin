@@ -1,3 +1,36 @@
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+def notify_admin(subject, message, urgent=False):
+    # Notification logic: flash for now, email if urgent
+    # 1. Flash notification (if in request context)
+    try:
+        if urgent:
+            flash('ALERTE URGENTE ADMIN : ' + message, 'danger')
+        else:
+            flash('Notification admin : ' + message, 'warning')
+    except Exception:
+        pass
+    # 2. Send email if urgent
+    if urgent:
+        sender_email = "blablablablliblibli@gmail.com"
+        receiver_email = "blablablablliblibli@gmail.com"
+        password = "mghs irrv kmgp kyox"
+        smtp_server = "smtp.gmail.com"
+        port = 587
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = sender_email
+            msg['To'] = receiver_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
+            server = smtplib.SMTP(smtp_server, port)
+            server.starttls()
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.quit()
+        except Exception as e:
+            print(f"[EMAIL ERROR] {e}")
 def random_localisation_in_arrondissement(arr_name):
     """Génère une localisation aléatoire à l'intérieur d'un arrondissement donné (par nom)."""
     arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
@@ -1004,12 +1037,27 @@ def stats():
                     elif pb.get('remplissage', '').startswith('vide'):
                         arr_empty_bins[arr_name] += 1
                     break
-        # Construire arr_stats
+        # Construire arr_stats et notifier si besoin
         for arr_name, _ in arr_polys:
+            nb_pleines = arr_full_bins[arr_name]
+            nb_vides = arr_empty_bins[arr_name]
+            # Notification logic
+            if nb_pleines > 10:
+                notify_admin(
+                    subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                    urgent=True
+                )
+            elif nb_pleines >= 7:
+                notify_admin(
+                    subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                    urgent=False
+                )
             arr_stats.append({
                 'arr': arr_name,
-                'nb_pleines': arr_full_bins[arr_name],
-                'nb_vides': arr_empty_bins[arr_name]
+                'nb_pleines': nb_pleines,
+                'nb_vides': nb_vides
             })
     except Exception as e:
         print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
