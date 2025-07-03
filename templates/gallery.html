@@ -1,79 +1,4 @@
-{% block scripts %}
-<style>
-/* Carrousel custom pour un look moderne */
-.carousel {
-  background: transparent;
-  border-radius: 18px;
-  box-shadow: none;
-  padding: 32px 0 24px 0;
-  margin-bottom: 2.5rem;
-}
-.carousel-inner {
-  min-height: 320px;
-}
-.carousel-item img {
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(44,124,89,0.13);
-  background: #fff;
-  max-height: 320px;
-  object-fit: contain;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-.carousel-control-prev-icon, .carousel-control-next-icon {
-  filter: invert(1);
-  background-color: #4a7c59;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(44,124,89,0.18);
-}
-.carousel-control-prev, .carousel-control-next {
-  width: 5%;
-}
-.carousel-indicators li {
-  background-color: #4a7c59;
-}
-</style>
-<script>
-// Initialisation Bootstrap Carousel (auto défilement)
-$(function() {
-  $('.carousel').carousel({
-    interval: 5000,
-    wrap: true
-  });
-
-  // Affichage des métadonnées dans le modal au clic sur l'image
-  $(document).on('click', '.carousel-item img', function() {
-    var meta = $(this).data('meta');
-    if (typeof meta === 'string') {
-      try { meta = JSON.parse(meta); } catch(e) { meta = {}; }
-    }
-    var html = '<ul class="list-group">';
-    var fields = [
-      ['filename', 'Nom du fichier'],
-      ['date', 'Date'],
-      ['annotation', 'Annotation'],
-      ['width', 'Largeur'],
-      ['height', 'Hauteur'],
-      ['file_size', 'Taille (octets)'],
-      ['avg_color', 'Couleur moyenne'],
-      ['contour_count', 'Contours'],
-      ['localisation', 'Localisation']
-    ];
-    fields.forEach(function(f) {
-      if(meta && meta[f[0]] !== undefined) {
-        html += '<li class="list-group-item"><b>' + f[1] + ':</b> ' + meta[f[0]] + '</li>';
-      }
-    });
-    html += '</ul>';
-    $('#metaModalBody').html(html);
-    $('#metaModal').modal('show');
-  });
-});
-</script>
-{% endblock %}
+{# Suppression du premier block scripts pour éviter le doublon #}
 {% extends "base.html" %}
 
 
@@ -123,17 +48,17 @@ $(function() {
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in vides %}
                 <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
                     <div class="meta-hover">
                         <b>Métadonnées :</b><br>
-                        Nom : {{ image[0] }}<br>
-                        Date : {{ image[1] }}<br>
-                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
-                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
-                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
-                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                        Nom : {{ image['filename'] }}<br>
+                        Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                        {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                        {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
+                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -145,17 +70,17 @@ $(function() {
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in pleines %}
                 <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
                     <div class="meta-hover">
                         <b>Métadonnées :</b><br>
-                        Nom : {{ image[0] }}<br>
-                        Date : {{ image[1] }}<br>
-                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
-                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
-                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
-                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                        Nom : {{ image['filename'] }}<br>
+                        Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                        {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                        {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
+                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -167,17 +92,17 @@ $(function() {
         <div style="display: flex; flex-wrap: wrap;">
             {% for image in non_labelisees %}
                 <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
                     <div class="meta-hover">
                         <b>Métadonnées :</b><br>
-                        Nom : {{ image[0] }}<br>
-                        Date : {{ image[1] }}<br>
-                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
-                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
-                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
-                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                        Nom : {{ image['filename'] }}<br>
+                        Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                        {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                        {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
+                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -294,21 +219,5 @@ $(function() {
     {% include "pagination.html" %}
 {% endblock %}
 
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const filter = document.getElementById('imageFilter');
-        const vides = document.getElementById('videsSection');
-        const pleines = document.getElementById('pleinesSection');
-        const nonLabelisees = document.getElementById('nonLabeliseesSection');
-        function updateDisplay() {
-            vides.style.display = (filter.value === 'all' || filter.value === 'vides') ? '' : 'none';
-            pleines.style.display = (filter.value === 'all' || filter.value === 'pleines') ? '' : 'none';
-            nonLabelisees.style.display = (filter.value === 'all' || filter.value === 'non_labelisees') ? '' : 'none';
-        }
-        filter.addEventListener('change', updateDisplay);
-        updateDisplay();
-    });
-</script>
-{% endblock %}
+{# Un seul block scripts doit être présent dans le template. Fusionnez les scripts si besoin. #}
 
