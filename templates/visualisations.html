@@ -24,13 +24,35 @@
                     <td>{{ full_annotations }}</td>
                 </tr>
                 <tr>
+                    <td>{{ _('Pourcentage pleines') }}</td>
+                    <td>
+                        {% if total_annotations > 0 %}
+                            {{ ((full_annotations / total_annotations) * 100) | round(1) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
                     <td>{{ _('Nombre d\'annotations poubelles vides') }}</td>
                     <td>{{ empty_annotations }}</td>
+                </tr>
+                <tr>
+                    <td>{{ _('Pourcentage vides') }}</td>
+                    <td>
+                        {% if total_annotations > 0 %}
+                            {{ ((empty_annotations / total_annotations) * 100) | round(1) }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
                 </tr>
                 <tr>
                     <td>{{ _('Nombre d\'annotations non labelisées') }}</td>
                     <td>{{ non_labelled_annotations }}</td>
                 </tr>
+                
+                
             </tbody>
         </table>
     </div>
@@ -60,13 +82,13 @@
     <!-- Tableau des moyennes std_h, std_s, std_v -->
     <div class="row mb-4">
         <div class="col-12">
-            <h5>{{ _('Moyennes des écarts-types HSV (std_h, std_s, std_v)') }}</h5>
+            <h5>{{ _('Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)') }}</h5>
             <table class="table table-bordered table-striped w-auto" style="max-width:400px">
                 <thead>
                     <tr>
-                        <th>std_h</th>
-                        <th>std_s</th>
-                        <th>std_v</th>
+                        <th>Couleur</th>
+                        <th>Saturation</th>
+                        <th>Luminosité</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,6 +114,9 @@
                                 <tr>
                                     <th>{{ _('Arrondissement') }}</th>
                                     <th>{{ _('Poubelles pleines') }}</th>
+                                    <th>{{ _('Poubelles vides') }}</th>
+                                    <th>{{ _('%% Pleines') }}</th>
+                                    <th>{{ _('%% Vides') }}</th>
                                     <th>{{ _('Statut') }}</th>
                                 </tr>
                             </thead>
@@ -100,6 +125,14 @@
                                 <tr>
                                     <td>{{ stat.arr }}</td>
                                     <td>{{ stat.nb_pleines }}</td>
+                                    <td>{{ stat.nb_vides if stat.nb_vides is defined else 'N/A' }}</td>
+                                    <td>
+                                        {% set total = (stat.nb_pleines + (stat.nb_vides if stat.nb_vides is defined else 0)) %}
+                                        {% if total > 0 %}{{ ((stat.nb_pleines / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if total > 0 %}{{ ((stat.nb_vides / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
+                                    </td>
                                     <td>
                                         {% if stat.nb_pleines < 7 %}
                                             <span class="badge bg-success">{{ _('Optimal') }}</span>
