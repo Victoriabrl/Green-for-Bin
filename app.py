@@ -471,6 +471,8 @@ def upload():
                     else:
                         localisation = random_localisation_paris()
                     # Utilisation correcte de la classification automatique
+                    auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
+                    localisation = random_localisation_paris()
                     auto_label_result = auto_label.classify_bin(filepath)
                     if isinstance(auto_label_result, dict):
                         std_h = auto_label_result.get('std_h')
