@@ -5,36 +5,125 @@
 {% block content %}
     <h2>{{ _('Galerie des images uploadées') }}</h2>
 
-    <h3>{{ _('Images Vides') }}</h3>
-    <div style="display: flex; flex-wrap: wrap;">
-        {% for image in vides %}
-            <div style="margin: 10px;">
-                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
-            </div>
-        {% endfor %}
+    <label for="imageFilter"><b>{{ _('Filtrer par type d\'image') }} :</b></label>
+    <select id="imageFilter" style="margin-bottom: 20px;">
+        <option value="all">{{ _('Toutes') }}</option>
+        <option value="vides">{{ _('Images Vides') }}</option>
+        <option value="pleines">{{ _('Images Pleines') }}</option>
+        <option value="non_labelisees">{{ _('Images Non Annotées') }}</option>
+    </select>
+
+    <style>
+        .image-container {
+            position: relative;
+            margin: 10px;
+            display: inline-block;
+        }
+        .meta-hover {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(255,255,255,0.95);
+            color: #222;
+            border: 1px solid #8fbc8f;
+            border-radius: 8px;
+            padding: 10px;
+            z-index: 10;
+            min-width: 180px;
+            max-width: 250px;
+            font-size: 0.95em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .image-container:hover .meta-hover {
+            display: block;
+        }
+    </style>
+
+    <div id="videsSection">
+        <h3>{{ _('Images Vides') }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in vides %}
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <div class="meta-hover">
+                        <b>Métadonnées :</b><br>
+                        Nom : {{ image[0] }}<br>
+                        Date : {{ image[1] }}<br>
+                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
+                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
+                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
+                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
-    <h3>{{ _('Images Pleines') }}</h3>
-    <div style="display: flex; flex-wrap: wrap;">
-        {% for image in pleines %}
-            <div style="margin: 10px;">
-                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
-            </div>
-        {% endfor %}
+    <div id="pleinesSection">
+        <h3>{{ _('Images Pleines') }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in pleines %}
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <div class="meta-hover">
+                        <b>Métadonnées :</b><br>
+                        Nom : {{ image[0] }}<br>
+                        Date : {{ image[1] }}<br>
+                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
+                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
+                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
+                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
-    <h3>{{ _('Images Non Annotées') }}</h3>
-    <div style="display: flex; flex-wrap: wrap;">
-        {% for image in non_labelisees %}
-            <div style="margin: 10px;">
-                <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
-                <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
-            </div>
-        {% endfor %}
+    <div id="nonLabeliseesSection">
+        <h3>{{ _('Images Non Annotées') }}</h3>
+        <div style="display: flex; flex-wrap: wrap;">
+            {% for image in non_labelisees %}
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename='uploads/' + image[0]) }}" width="200" loading="lazy"><br>
+                    <small>{{ _('Aperçu de l\'image') }} : {{ image[1] }}</small>
+                    <div class="meta-hover">
+                        <b>Métadonnées :</b><br>
+                        Nom : {{ image[0] }}<br>
+                        Date : {{ image[1] }}<br>
+                        {% if image[2] is defined %}Largeur : {{ image[2] }} px<br>{% endif %}
+                        {% if image[3] is defined %}Hauteur : {{ image[3] }} px<br>{% endif %}
+                        {% if image[4] is defined %}Taille : {{ (image[4]/1024)|round(1) }} Ko<br>{% endif %}
+                        {% if image[5] is defined %}Contraste : {{ image[5] }}<br>{% endif %}
+                        {% if image[6] is defined %}Luminosité : {{ image[6] }}<br>{% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
     {% include "pagination.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filter = document.getElementById('imageFilter');
+        const vides = document.getElementById('videsSection');
+        const pleines = document.getElementById('pleinesSection');
+        const nonLabelisees = document.getElementById('nonLabeliseesSection');
+        function updateDisplay() {
+            vides.style.display = (filter.value === 'all' || filter.value === 'vides') ? '' : 'none';
+            pleines.style.display = (filter.value === 'all' || filter.value === 'pleines') ? '' : 'none';
+            nonLabelisees.style.display = (filter.value === 'all' || filter.value === 'non_labelisees') ? '' : 'none';
+        }
+        filter.addEventListener('change', updateDisplay);
+        updateDisplay();
+    });
+</script>
 {% endblock %}
 
