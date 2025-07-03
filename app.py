@@ -66,7 +66,7 @@ import auto_label
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -414,6 +414,15 @@ def index():
             {'arr': f"{i}e", 'nb_pleines': 0}
             for i in range(1, 21)
         ]
+    print("arr_stats:", arr_stats)
+    # ...après avoir rempli arr_stats...
+    def arrondissement_key(stat):
+        # Extrait le numéro au début (ex: "1er", "2e", "10e", etc.)
+        import re
+        match = re.match(r"(\d+)", stat['arr'])
+        return int(match.group(1)) if match else 0
+
+    arr_stats = sorted(arr_stats, key=arrondissement_key)
     return render_template('about.html', arr_stats=arr_stats)
 
 
@@ -1236,7 +1245,9 @@ def batch_upload_images():
 def compress_image(input_path, output_path, quality=70, max_size=(1024, 1024)):
     img = Image.open(input_path)
     img.thumbnail(max_size, Image.LANCZOS)
-    # Convertir en WebP si possible
+    # Sauvegarde dans le format d'origine (jpeg, png, webp, etc.)
+    img.save(output_path, optimize=True, quality=quality)
+    # Sauvegarde aussi en webp pour compatibilité future
     webp_path = output_path.rsplit('.', 1)[0] + '.webp'
     img.save(webp_path, 'WEBP', optimize=True, quality=quality)
     img.close()
