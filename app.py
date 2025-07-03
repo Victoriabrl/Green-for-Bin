@@ -591,22 +591,59 @@ def upload():
 @login_required
 def annotate(filename):
     """Annotation d'une image"""
+
     auto_label = request.args.get('auto_label')
+    custom_auto_label_result = None
 
     if request.method == 'POST':
-        annotation = request.form['annotation']
-        with sqlite3.connect(DB_PATH) as conn:
-            c = conn.cursor()
-            if annotation == 'annuler':
-                c.execute('UPDATE images SET annotation = NULL WHERE filename = ?', (filename,))
-                conn.commit()
-                flash("Annotation annulée !", 'info')
-                return redirect(url_for('annotate', filename=filename))
-            else:
-                c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
-                conn.commit()
-        flash('Annotation sauvegardée!', 'success')
-        return render_template('result.html', filename=filename, annotation=annotation)
+        # Si annotation classique (pleine/vide)
+        if 'annotation' in request.form:
+            annotation = request.form['annotation']
+            with sqlite3.connect(DB_PATH) as conn:
+                c = conn.cursor()
+                if annotation == 'annuler':
+                    c.execute('UPDATE images SET annotation = NULL WHERE filename = ?', (filename,))
+                    conn.commit()
+                    flash("Annotation annulée !", 'info')
+                    return redirect(url_for('annotate', filename=filename))
+                else:
+                    c.execute('UPDATE images SET annotation = ? WHERE filename = ?', (annotation, filename))
+                    conn.commit()
+            flash('Annotation sauvegardée!', 'success')
+            return render_template('result.html', filename=filename, annotation=annotation)
+        # Si auto-label personnalisé
+        elif 'custom_auto_label' in request.form:
+            # Récupérer les choix utilisateur
+            use_std_h = 'use_std_h' in request.form
+            use_std_s = 'use_std_s' in request.form
+            use_std_v = 'use_std_v' in request.form
+            try:
+                seuil_h = float(request.form.get('seuil_h', 50))
+            except Exception:
+                seuil_h = 50
+            try:
+                seuil_s = float(request.form.get('seuil_s', 34))
+            except Exception:
+                seuil_s = 34
+            try:
+                seuil_v = float(request.form.get('seuil_v', 49))
+            except Exception:
+                seuil_v = 49
+
+            # Appel à la fonction d'auto-label personnalisée
+            from auto_label import classify_bin_custom
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            custom_auto_label_result = classify_bin_custom(
+                image_path,
+                use_std_h=use_std_h,
+                use_std_s=use_std_s,
+                use_std_v=use_std_v,
+                seuil_h=seuil_h,
+                seuil_s=seuil_s,
+                seuil_v=seuil_v
+            )
+
+    # --- Récupération des métadonnées depuis la BDD ---
 
     # --- Récupération des métadonnées depuis la BDD ---
     with sqlite3.connect(DB_PATH) as conn:
@@ -639,7 +676,7 @@ def annotate(filename):
         'luminosity': luminosity
     }
 
-    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata)
+    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata, custom_auto_label_result=custom_auto_label_result)
 
 
 @app.route('/about', methods=['GET', 'POST'])

@@ -1,3 +1,48 @@
+def classify_bin_custom(image_path, use_std_h=True, use_std_s=True, use_std_v=True, seuil_h=50, seuil_s=34, seuil_v=49):
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"{image_path} : image introuvable.")
+        return None
+
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    lower_green = np.array([60, 40, 40])
+    upper_green = np.array([120, 255, 255])
+    mask_green = cv2.inRange(hsv_image, lower_green, upper_green)
+    contours, _ = cv2.findContours(mask_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        print(f"{os.path.basename(image_path)} : Contour vert non détecté")
+        return "erreur"
+    largest_contour = max(contours, key=cv2.contourArea)
+    mask_bin = np.zeros_like(mask_green)
+    cv2.drawContours(mask_bin, [largest_contour], -1, 255, cv2.FILLED)
+    kernel = np.ones((15, 15), np.uint8)
+    mask_dilated = cv2.dilate(mask_bin, kernel, iterations=1)
+    mask_surrounding = cv2.bitwise_xor(mask_dilated, mask_bin)
+    surrounding_pixels = cv2.bitwise_and(image, image, mask=mask_surrounding)
+    hsv_surrounding = cv2.cvtColor(surrounding_pixels, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv_surrounding)
+    h_vals = h[mask_surrounding == 255]
+    s_vals = s[mask_surrounding == 255]
+    v_vals = v[mask_surrounding == 255]
+    std_h = float(np.std(h_vals))
+    std_s = float(np.std(s_vals))
+    std_v = float(np.std(v_vals))
+
+    
+    # Logique personnalisée selon les choix utilisateur
+    conditions = []
+    if use_std_h:
+        conditions.append(std_h > seuil_h)
+    if use_std_s:
+        conditions.append(std_s > seuil_s)
+    if use_std_v:
+        conditions.append(std_v > seuil_v)
+    # Si au moins 2 conditions sur 3 sont vraies (ou majorité), on considère "pleine"
+    if sum(conditions) >= max(1, (use_std_h + use_std_s + use_std_v) // 2 + 1):
+        label = "pleine"
+    else:
+        label = "vide"
+    return label
 import cv2
 import numpy as np
 import os
