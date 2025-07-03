@@ -952,20 +952,24 @@ def stats():
             arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
             arr_poly = shape(feature['geometry'])
             arr_polys.append((arr_name, arr_poly))
-        # Compter les poubelles pleines par arrondissement
+        # Compter les poubelles pleines et vides par arrondissement
         arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        arr_empty_bins = {arr_name: 0 for arr_name, _ in arr_polys}
         for pb in poubelles:
-            if pb.get('remplissage', '').startswith('pleine'):
-                pt = Point(pb['lon'], pb['lat'])
-                for arr_name, arr_poly in arr_polys:
-                    if arr_poly.contains(pt):
+            pt = Point(pb['lon'], pb['lat'])
+            for arr_name, arr_poly in arr_polys:
+                if arr_poly.contains(pt):
+                    if pb.get('remplissage', '').startswith('pleine'):
                         arr_full_bins[arr_name] += 1
-                        break
+                    elif pb.get('remplissage', '').startswith('vide'):
+                        arr_empty_bins[arr_name] += 1
+                    break
         # Construire arr_stats
         for arr_name, _ in arr_polys:
             arr_stats.append({
                 'arr': arr_name,
-                'nb_pleines': arr_full_bins[arr_name]
+                'nb_pleines': arr_full_bins[arr_name],
+                'nb_vides': arr_empty_bins[arr_name]
             })
     except Exception as e:
         print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
