@@ -67,16 +67,22 @@
         </div>
     </div>
 
+<<<<<<< HEAD
     <div class="row mb-4 justify-content-center">
         <div class="col-12 text-center">
             <h5>{{ _('Distribution des tailles de fichiers :') }}</h5>
             <canvas id="distribution" style="max-width: 100%; height: 260px;"></canvas>
+=======
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5>{{ _('Répartition des poubelles pleines par arrondissement :') }}</h5>
+            <canvas id="arrondissementChart" style="max-width: 400px; height: 300px; margin: auto; display: block;"></canvas>
+>>>>>>> e76f9fd7dcd6e3d6fabe8d7004572ab72f54b5fb
         </div>
     </div>
 
-
     <img src="{{ image_base64 }}" alt="Graphique" class="img-fluid mb-2">
-    <img src="{{ img_base64_distribution }}" alt="Graphique de distribution des tailles de fichiers" class="img-fluid mb-2">
     <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-4">
 
     <!-- Tableau des moyennes std_h, std_s, std_v -->
@@ -238,13 +244,16 @@
         var aucuneDonnee = "{{ _('Aucune donnée disponible') }}";
         var total_annot = {{ total_annotations | tojson }};
         var total_possible = 720;
-        {% if size_files and occ_size_files %}
-        var sizeFiles = {{ size_files|tojson }};
-        var occSizeFiles = {{ occ_size_files|tojson }};
-        {% else %}
-        var sizeFiles = [];
-        var occSizeFiles = [];
-        {% endif %}
+        var arrLabels = [
+            {% for stat in arr_stats %}
+                "{{ stat.arr }}"{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
+        var arrPleines = [
+            {% for stat in arr_stats %}
+                {{ stat.nb_pleines }}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        ];
     </script>
 
     <!-- JS principal -->
@@ -325,16 +334,24 @@
         }
     });
 
-    // Graphique barres : distribution des tailles de fichiers
-    if(sizeFiles.length && occSizeFiles.length) {
-        new Chart(document.getElementById("distribution"), {
-            type: "bar",
+
+     // <-- AJOUTE CETTE ACCOLADE FERMANTE
+
+    // Graphique barres : répartition des poubelles pleines par arrondissement
+    if(arrLabels.length && arrPleines.length) {
+        new Chart(document.getElementById("arrondissementChart"), {
+            type: "pie",
             data: {
-                labels: sizeFiles,
+                labels: arrLabels,
                 datasets: [{
-                    label: nbFichiersLabel,
-                    backgroundColor: "#4CAF50",
-                    data: occSizeFiles
+                    label: "{{ _('Poubelles pleines') }}",
+                    backgroundColor: [
+                        "#388e3c", "#43a047", "#66bb6a", "#81c784", "#a5d6a7",
+                        "#c8e6c9", "#e8f5e9", "#b2dfdb", "#80cbc4", "#4dd0e1",
+                        "#26c6da", "#00bcd4", "#039be5", "#0288d1", "#0277bd",
+                        "#01579b", "#b3e5fc", "#81d4fa", "#4fc3f7", "#29b6f6"
+                    ],
+                    data: arrPleines
                 }]
             },
             options: {
@@ -342,13 +359,9 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: "{{ _('Distribution des tailles de fichiers') }}"
+                        text: "{{ _('Répartition des poubelles pleines par arrondissement') }}"
                     },
-                    legend: { display: false }
-                },
-                scales: {
-                    x: { title: { display: true, text: tailleOctetsLabel } },
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                    legend: { position: 'bottom' }
                 }
             }
         });
