@@ -456,6 +456,7 @@ def index():
         return int(match.group(1)) if match else 0
 
     arr_stats = sorted(arr_stats, key=arrondissement_key)
+
     return render_template('about.html', arr_stats=arr_stats)
 
 
