@@ -143,7 +143,10 @@
                                 </tr>
                                 {% endfor %}
                             </tbody>
+
                         </table>
+                        <!-- Pagination Controls -->
+                        {# Pagination supprimée, affichage direct de tout le tableau #}
                     </div>
                 </div>
             </div>
@@ -261,21 +264,15 @@
                 emptyTable: aucuneDonnee
             }
         });
-        // Pagination sur le tableau des arrondissements (7 par page)
+        // Tableau arrondissements : pas de pagination JS, tout s'affiche
         $('#arr-table').DataTable({
-            paging: true,
-            pageLength: 7,
-            lengthChange: false,
+            paging: false,
             searching: false,
             info: false,
             ordering: false,
             responsive: true,
             language: {
-                emptyTable: aucuneDonnee,
-                paginate: {
-                    previous: "<",
-                    next: ">"
-                }
+                emptyTable: aucuneDonnee
             }
         });
     });

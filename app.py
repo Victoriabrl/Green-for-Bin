@@ -991,10 +991,13 @@ def plot_histogram(data, title=''):
     return base64.b64encode(buf.read()).decode('utf-8')
 
 
+
 @app.route('/visualisations')
 @login_required
 def stats():
     """Visualisations et statistiques"""
+    # Suppression de la pagination : on affiche tous les arrondissements
+
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -1010,55 +1013,62 @@ def stats():
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelled_annotations = c.fetchone()[0]
 
-    # --- Ajout : stats par arrondissement basées sur les données de la carte ---
+    # --- Ajout : stats par arrondissement basées sur la base de données ---
     arr_stats = []
     try:
-        # Charger les arrondissements
-        with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-            arr_geo = json.load(f)
-        # Charger les poubelles
-        with open(os.path.join('static', 'data', 'poubelles.json'), encoding='utf-8') as f:
-            poubelles = json.load(f)
-        # Préparer les polygones
-        arr_polys = []
-        for feature in arr_geo['features']:
-            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-            arr_poly = shape(feature['geometry'])
-            arr_polys.append((arr_name, arr_poly))
-        # Compter les poubelles pleines et vides par arrondissement
-        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
-        arr_empty_bins = {arr_name: 0 for arr_name, _ in arr_polys}
-        for pb in poubelles:
-            pt = Point(pb['lon'], pb['lat'])
-            for arr_name, arr_poly in arr_polys:
-                if arr_poly.contains(pt):
-                    if pb.get('remplissage', '').startswith('pleine'):
-                        arr_full_bins[arr_name] += 1
-                    elif pb.get('remplissage', '').startswith('vide'):
-                        arr_empty_bins[arr_name] += 1
-                    break
-        # Construire arr_stats et notifier si besoin
-        for arr_name, _ in arr_polys:
-            nb_pleines = arr_full_bins[arr_name]
-            nb_vides = arr_empty_bins[arr_name]
-            # Notification logic
-            if nb_pleines > 10:
-                notify_admin(
-                    subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
-                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
-                    urgent=True
-                )
-            elif nb_pleines >= 7:
-                notify_admin(
-                    subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
-                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
-                    urgent=False
-                )
-            arr_stats.append({
-                'arr': arr_name,
-                'nb_pleines': nb_pleines,
-                'nb_vides': nb_vides
-            })
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute("SELECT localisation, annotation FROM images WHERE annotation IS NOT NULL AND localisation IS NOT NULL AND localisation != ''")
+            arr_full_bins = {}
+            arr_empty_bins = {}
+            for row in c.fetchall():
+                loc, annotation = row
+                # On suppose que la localisation est sous forme "lat,lon"
+                try:
+                    lat, lon = map(float, loc.split(","))
+                except Exception:
+                    continue
+                # Trouver l'arrondissement correspondant
+                arr_name = None
+                with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+                    arr_geo = json.load(f)
+                    for feature in arr_geo['features']:
+                        poly_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                        arr_poly = shape(feature['geometry'])
+                        if arr_poly.contains(Point(lon, lat)):
+                            arr_name = poly_name
+                            break
+                if not arr_name:
+                    continue
+                if annotation.startswith('pleine'):
+                    arr_full_bins[arr_name] = arr_full_bins.get(arr_name, 0) + 1
+                elif annotation.startswith('vide'):
+                    arr_empty_bins[arr_name] = arr_empty_bins.get(arr_name, 0) + 1
+            # Charger tous les arrondissements pour garantir l'affichage
+            with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
+                arr_geo = json.load(f)
+                for feature in arr_geo['features']:
+                    arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                    nb_pleines = arr_full_bins.get(arr_name, 0)
+                    nb_vides = arr_empty_bins.get(arr_name, 0)
+                    # Notification logic
+                    if nb_pleines > 10:
+                        notify_admin(
+                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                            urgent=True
+                        )
+                    elif nb_pleines >= 7:
+                        notify_admin(
+                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                            urgent=False
+                        )
+                    arr_stats.append({
+                        'arr': arr_name,
+                        'nb_pleines': nb_pleines,
+                        'nb_vides': nb_vides
+                    })
     except Exception as e:
         print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
         # Fallback: ancienne méthode
@@ -1066,6 +1076,9 @@ def stats():
             {'arr': f"{i}e", 'nb_pleines': 0}
             for i in range(1, 21)
         ]
+
+    # On affiche tous les arrondissements, pas de pagination
+    arr_stats_page = arr_stats  # Pour compatibilité temporaire, mais on va nettoyer plus bas
 
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
@@ -1081,8 +1094,6 @@ def stats():
     plt.close(fig)
     buf.seek(0)
     img_base64_nombre = "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
-
-
 
     # Affichage du graphique en camembert pour la répartition des annotations
     data = [full_annotations, empty_annotations]
