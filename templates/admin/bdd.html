@@ -3,12 +3,22 @@
 {% block content %}
 <div class="container mt-4">
     <h2>{{ _('Base de données des images') }}</h2>
+    <form method="get" class="mb-3 d-flex align-items-center">
+        <label for="date_filter" class="mr-2 mb-0">Filtrer par date :</label>
+        <input type="date" id="date_filter" name="date_filter" class="form-control mr-2" value="{{ request.args.get('date_filter', '') }}">
+        <button type="submit" class="btn btn-outline-success">Filtrer</button>
+        {% if request.args.get('date_filter') %}
+            <a href="{{ url_for('afficher_bdd') }}" class="btn btn-link ml-2">Réinitialiser</a>
+        {% endif %}
+    </form>
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-green-text">
             <thead>
                 <tr>
                     {% for col in colonnes %}
-                        <th>{{ col }}</th>
+                        <th>
+                            {% if col == 'upload_date' or col == 'date' %}Date{% else %}{{ col }}{% endif %}
+                        </th>
                     {% endfor %}
                 </tr>
             </thead>

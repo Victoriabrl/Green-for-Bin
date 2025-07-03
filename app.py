@@ -458,8 +458,14 @@ def upload():
             flash('Aucun fichier sélectionné.', 'error')
             return redirect(request.url)
 
-        # Pour admin : récupération du choix d'arrondissement
-        selected_arr = request.form.get('arrondissement') if session.get('role') == 'admin' else None
+        # Pour admin : récupération du choix d'arrondissement et de la date/heure
+        selected_arr = request.form.get('arrondissement')
+        selected_date = request.form.get('date_upload')
+        # Formatage de la date/heure si fournie (pour tous)
+        if selected_date:
+            selected_date = selected_date.replace('T', ' ')
+            if len(selected_date) == 16:
+                selected_date += ':00'
 
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -474,14 +480,13 @@ def upload():
                 try:
                     # Traitement synchrone pour admin
                     width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
-                    upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    upload_date = selected_date if selected_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     if selected_arr and selected_arr.strip():
                         localisation = random_localisation_in_arrondissement(selected_arr)
                     else:
                         localisation = random_localisation_paris()
                     # Utilisation correcte de la classification automatique
                     auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
-                    localisation = random_localisation_paris()
                     auto_label_result = auto_label.classify_bin(filepath)
                     if isinstance(auto_label_result, dict):
                         std_h = auto_label_result.get('std_h')
@@ -529,8 +534,11 @@ def upload():
             else:
                 # Traitement asynchrone pour les autres
                 width, height, file_size, avg_color, contrast, contour_count, hist_rgb, hist_lum = extract_metadata(filepath)
-                upload_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                localisation = random_localisation_france()
+                upload_date = selected_date if selected_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                if selected_arr and selected_arr.strip():
+                    localisation = random_localisation_in_arrondissement(selected_arr)
+                else:
+                    localisation = random_localisation_france()
                 auto_label_result = auto_label.classify_bin(filepath)
                 if isinstance(auto_label_result, dict):
                     std_h = auto_label_result.get('std_h')
@@ -841,18 +849,18 @@ def demote_user(user_id):
     return redirect(url_for('admin_users'))
 
 
+
 @app.route('/admin/bdd')
 @admin_required
 def afficher_bdd():
-    """Affichage de la base de données (admin seulement) avec pagination"""
+    """Affichage de la base de données (admin seulement) avec pagination et filtre date"""
     page = int(request.args.get('page', 1))
     per_page = 5
     offset = (page - 1) * per_page
+    date_filter = request.args.get('date_filter')
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        c.execute("SELECT COUNT(*) FROM images")
-        total_rows = c.fetchone()[0]
         # Ajout explicite des colonnes std_h, std_s, std_v si elles existent
         try:
             c.execute("SELECT * FROM images LIMIT 1")
@@ -866,12 +874,26 @@ def afficher_bdd():
         select_cols = '*'
         if has_std_h and has_std_s and has_std_v:
             select_cols = '*, std_h, std_s, std_v'
-        c.execute(f"SELECT * FROM images ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
+        # Renommer la colonne upload_date en date dans l'affichage
+        c.execute("PRAGMA table_info(images)")
+        colonnes = [col[1] for col in c.fetchall()]
+        colonnes = ["date" if col == "upload_date" else col for col in colonnes]
+        # Construction de la requête SQL avec filtre date
+        base_query = "SELECT * FROM images"
+        params = []
+        if date_filter:
+            base_query += " WHERE date(upload_date) = ?"
+            params.append(date_filter)
+        base_query += " ORDER BY id DESC LIMIT ? OFFSET ?"
+        params.extend([per_page, offset])
+        c.execute(base_query, params)
         rows = c.fetchall()
-        colonnes = [description[0] for description in c.description]
     processed_rows = []
     for row in rows:
         row_dict = dict(row)
+        # Renommer la clé upload_date en date pour l'affichage
+        if 'upload_date' in row_dict:
+            row_dict['date'] = row_dict.pop('upload_date')
         for col_name, title in [('hist_rgb', 'Histogramme RGB'), ('hist_lum', 'Histogramme Luminance')]:
             if col_name in row_dict and row_dict[col_name]:
                 try:
@@ -889,6 +911,15 @@ def afficher_bdd():
                 except Exception:
                     pass
         processed_rows.append(row_dict)
+    # Nombre total de lignes pour la pagination (avec ou sans filtre)
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        if date_filter:
+            c.execute("SELECT COUNT(*) FROM images WHERE date(upload_date) = ?", (date_filter,))
+            total_rows = c.fetchone()[0]
+        else:
+            c.execute("SELECT COUNT(*) FROM images")
+            total_rows = c.fetchone()[0]
     total_pages = max(ceil(total_rows / per_page), 1)
     return render_template('admin/bdd.html', rows=processed_rows, colonnes=colonnes, page=page, total_pages=total_pages)
 
