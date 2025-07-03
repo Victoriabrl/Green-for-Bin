@@ -6,7 +6,7 @@
 
     <div class="hero-content">
        
-        <p class="hero-subtitle">{{ _("Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique") }}</p>
+        <p class="hero-subtitle text-center">{{ _("Révolutionnez la gestion de vos déchets avec notre solution intelligente et écologique") }}</p>
         <div class="d-flex justify-content-center mt-4 mb-5">
             <a href="#features" class="btn btn-primary btn-lg hero-cta">{{ _("Découvrir notre solution") }}</a>
         </div>
@@ -88,10 +88,12 @@
         <div class="mb-3">
             <input type="text" name="subject" class="form-control" placeholder="{{ _('Sujet') }}" required>
         </div>
-        <div class="mb-3">
-            <textarea name="message" class="form-control" rows="4" placeholder="{{ _('Votre message') }}" required></textarea>
+        <div class="mb-3 position-relative">
+            <textarea name="message" class="form-control" rows="4" placeholder="{{ _('Votre message') }}" required style="padding-bottom: 3.2rem;"></textarea>
+            <div style="position: absolute; bottom: 0.5rem; right: 0.7rem;">
+                <button type="submit" name="send_message" class="btn btn-success">{{ _("Envoyer") }}</button>
+            </div>
         </div>
-        <button type="submit" name="send_message" class="btn btn-success">{{ _("Envoyer") }}</button>
     </form>
     {% if message_sent %}
         <div class="alert alert-success mt-3">{{ _("Votre message a bien été envoyé à l'administrateur.") }}</div>

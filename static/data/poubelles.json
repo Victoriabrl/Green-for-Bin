@@ -14,7 +14,7 @@
     {
         "lat": 48.824193,
         "lon": 2.414246,
-        "remplissage": "vide_auto",
+        "remplissage": "pleine",
         "date": "2025-06-30 16:39:49"
     },
     {
@@ -38,7 +38,7 @@
     {
         "lat": 48.882215,
         "lon": 2.36908,
-        "remplissage": "vide_auto",
+        "remplissage": "pleine",
         "date": "2025-06-30 16:42:35"
     },
     {
@@ -136,14 +136,41 @@
         "lon": 2.363692,
         "remplissage": "vide",
         "date": "2025-07-02 12:22:01"
-<<<<<<< HEAD
-=======
     },
     {
         "lat": 48.884432,
         "lon": 2.316504,
         "remplissage": "vide",
         "date": "2025-07-03 09:14:32"
->>>>>>> 15d401e7213e683948db1ed554e60b441939b61a
+    },
+    {
+        "lat": 48.882522,
+        "lon": 2.338017,
+        "remplissage": "pleine",
+        "date": "2025-07-03 09:21:30"
+    },
+    {
+        "lat": 48.881806,
+        "lon": 2.333722,
+        "remplissage": "vide",
+        "date": "2025-07-03 09:22:23"
+    },
+    {
+        "lat": 48.878164,
+        "lon": 2.317431,
+        "remplissage": "pleine",
+        "date": "2025-07-03 09:23:03"
+    },
+    {
+        "lat": 48.886945,
+        "lon": 2.333307,
+        "remplissage": "vide",
+        "date": "2025-07-03 09:23:26"
+    },
+    {
+        "lat": 48.846837,
+        "lon": 2.31093,
+        "remplissage": "vide",
+        "date": "2025-07-03 09:24:17"
     }
 ]

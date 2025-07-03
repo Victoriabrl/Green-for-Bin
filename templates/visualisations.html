@@ -3,11 +3,11 @@
 {% block title %}Visualisations{% endblock %}
 
 {% block content %}
-    <h1>{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
+    <h1 class="text-center">{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
 
-    <h2>{{ _('Statistiques') }}</h2>
-    <div class="table-responsive">
-        <table id="stats-table" class="table table-striped table-hover align-middle">
+    <h2 class="text-center">{{ _('Statistiques') }}</h2>
+    <div class="table-responsive d-flex justify-content-center">
+        <table id="stats-table" class="table table-striped table-hover align-middle custom-table-center" style="max-width: 600px;">
             <thead>
                 <tr>
                     <th>{{ _('Type') }}</th>
@@ -57,18 +57,18 @@
         </table>
     </div>
 
-    <h2 class="mt-4">{{ _('Visualisations') }}</h2>
-    <div class="row mb-4">
-        <div class="col-md-6">
+    <h2 class="mt-4 text-center">{{ _('Visualisations') }}</h2>
+    <div class="row mb-4 justify-content-center">
+        <div class="col-md-6 d-flex justify-content-center">
             <canvas id="progressChart" style="max-width: 100%; height: 260px;"></canvas>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 d-flex justify-content-center">
             <canvas id="repartition" style="max-width: 100%; height: 260px;"></canvas>
         </div>
     </div>
 
-    <div class="row mb-4">
-        <div class="col-12">
+    <div class="row mb-4 justify-content-center">
+        <div class="col-12 text-center">
             <h5>{{ _('Distribution des tailles de fichiers :') }}</h5>
             <canvas id="distribution" style="max-width: 100%; height: 260px;"></canvas>
         </div>
@@ -80,10 +80,10 @@
     <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-4">
 
     <!-- Tableau des moyennes std_h, std_s, std_v -->
-    <div class="row mb-4">
-        <div class="col-12">
+    <div class="row mb-4 justify-content-center">
+        <div class="col-12 text-center">
             <h5>{{ _('Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)') }}</h5>
-            <table class="table table-bordered table-striped w-auto" style="max-width:400px">
+            <table class="table table-bordered table-striped w-auto custom-table-center" style="max-width:400px">
                 <thead>
                     <tr>
                         <th>Couleur</th>
@@ -105,11 +105,11 @@
     <!-- NOUVEAU : Tableau par arrondissement -->
     <section class="section" id="arrondissements-stats" style="background: #fff;">
         <div class="container">
-            <h2 class="section-title">{{ _('Tableau de Bord par Arrondissement') }}</h2>
-            <div class="row">
+            <h2 class="section-title text-center">{{ _('Tableau de Bord par Arrondissement') }}</h2>
+            <div class="row justify-content-center">
                 <div class="col-12">
                     <div class="modern-table">
-                        <table class="table table-hover mb-0">
+                        <table id="arr-table" class="table table-hover mb-0 custom-table-center" style="max-width:900px; margin:auto;">
                             <thead>
                                 <tr>
                                     <th>{{ _('Arrondissement') }}</th>
@@ -154,6 +154,75 @@
 
     <!-- CSS + JS externes -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"/>
+    <style>
+    /* Coins arrondis uniquement sur les coins extérieurs du tableau */
+    .custom-table-center {
+        margin-left: auto;
+        margin-right: auto;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    .custom-table-center thead th:first-child {
+        border-top-left-radius: 16px;
+    }
+    .custom-table-center thead th:last-child {
+        border-top-right-radius: 16px;
+    }
+    .custom-table-center tbody tr:last-child td:first-child {
+        border-bottom-left-radius: 16px;
+    }
+    .custom-table-center tbody tr:last-child td:last-child {
+        border-bottom-right-radius: 16px;
+    }
+
+    /* Pagination DataTables : 7 carrés verts, chiffres blancs, sans coins arrondis */
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 1.2rem;
+        gap: 0.3rem;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        background: var(--light-green, #7fb069) !important;
+        color: var(--cream, #fefefe) !important;
+        border: none !important;
+        border-radius: 0 !important;
+        width: 2.3em;
+        height: 2.3em;
+        min-width: 2.3em;
+        min-height: 2.3em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1em;
+        font-family: 'Inter', Arial, sans-serif;
+        transition: background 0.18s, color 0.18s;
+        box-shadow: none !important;
+        cursor: pointer;
+        outline: none;
+        margin: 0 0.08em;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:focus {
+        background: var(--light-green, #7fb069) !important;
+        color: var(--cream, #fefefe) !important;
+        border: none !important;
+        box-shadow: 0 0 0 2px var(--primary-green, #4a7c59);
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+        background: var(--sage-green, #8fbc8f) !important;
+        color: var(--cream, #fefefe) !important;
+    }
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        background: var(--soft-gray, #e9ecef) !important;
+        color: var(--text-secondary, #636e72) !important;
+        border: none !important;
+    }
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
@@ -189,6 +258,23 @@
             responsive: true,
             language: {
                 emptyTable: aucuneDonnee
+            }
+        });
+        // Pagination sur le tableau des arrondissements (7 par page)
+        $('#arr-table').DataTable({
+            paging: true,
+            pageLength: 7,
+            lengthChange: false,
+            searching: false,
+            info: false,
+            ordering: false,
+            responsive: true,
+            language: {
+                emptyTable: aucuneDonnee,
+                paginate: {
+                    previous: "<",
+                    next: ">"
+                }
             }
         });
     });
