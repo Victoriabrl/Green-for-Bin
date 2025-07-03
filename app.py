@@ -1123,27 +1123,33 @@ def stats():
                            std_v_mean=std_v_mean)
 
 
+
 @app.route('/gallery')
 @login_required
 def gallery():
-    """Galerie d'images avec pagination"""
+    """Galerie d'images avec pagination et carrousel, métadonnées au clic"""
     page = int(request.args.get('page', 1))
     per_page = 5
     offset = (page - 1) * per_page
     with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
         c = conn.cursor()
+        # Images vides
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        vides = [dict(row) for row in c.fetchall()]
+        # Images pleines
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        pleines = [dict(row) for row in c.fetchall()]
+        # Images non annotées
+        c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        non_labelisees = [dict(row) for row in c.fetchall()]
+        # Nombre total pour la pagination
         c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%vide%'")
         total_vides = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation LIKE '%vide%' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        vides = c.fetchall()
         c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%pleine%'")
         total_pleines = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation LIKE '%pleine%' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        pleines = c.fetchall()
         c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
         total_non_label = c.fetchone()[0]
-        c.execute("SELECT filename, upload_date FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY upload_date DESC LIMIT ? OFFSET ?", (per_page, offset))
-        non_labelisees = c.fetchall()
     total_pages = max(ceil(max(total_vides, total_pleines, total_non_label) / per_page), 1)
     return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees, page=page, total_pages=total_pages)
 
