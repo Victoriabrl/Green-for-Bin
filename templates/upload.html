@@ -18,7 +18,6 @@
             <input id="file-upload" type="file" name="image" accept=".jpg, .jpeg, .png" style="display:none" required>
             <span id="file-name" class="mb-3">{{ _('Aucun fichier choisi') }}</span>
         </div>
-        {% if session.role == 'admin' %}
         <div class="form-group mt-3 w-100">
             <label for="arrondissement">Choisir un arrondissement (optionnel) :</label>
             <select class="form-control" id="arrondissement" name="arrondissement">
@@ -28,7 +27,10 @@
                 {% endfor %}
             </select>
         </div>
-        {% endif %}
+        <div class="form-group mt-3 w-100">
+            <label for="date_upload">Date et heure (optionnel) :</label>
+            <input type="datetime-local" class="form-control" id="date_upload" name="date_upload">
+        </div>
         <button type="submit" class="btn btn-outline-success mt-3 w-100">Uploader</button>
     </form>
     {% if session.role != 'admin' %}
