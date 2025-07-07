@@ -184,6 +184,7 @@
                         {% endif %}
                     </ul>
                     <ul class="navbar-nav ml-auto" style="margin-left:auto;">
+                    <div class="d-flex align-items-center ml-auto" style="margin-left:auto;">
                         {% if session.get('user_id') %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-weight:bold; color: var(--cream) !important;">
@@ -208,9 +209,34 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url_for('login') }}">{{ _('Connexion') }}</a>
                             </li>
+                            <div class="nav-item dropdown d-flex align-items-center mr-2">
+                                {% if session.get('role') == 'admin' %}
+                                    <img src="{{ url_for('static', filename='images/icon-admin.svg') }}" alt="admin" title="Admin" style="width:22px;height:22px;margin-right:7px;vertical-align:middle;">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/icon-user.svg') }}" alt="user" title="Utilisateur" style="width:22px;height:22px;margin-right:7px;vertical-align:middle;">
+                                {% endif %}
+                                <a class="nav-link dropdown-toggle p-0" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background:none;">
+                                    {{ session.get('username') }}
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                    <a class="dropdown-item" href="{{ url_for('logout') }}">{{ _('Déconnexion') }}</a>
+                                </div>
+                            </div>
                         {% endif %}
                     </ul>
                     </ul>
+                        <form class="form-inline" method="get" action="#" id="langDropdownForm" style="margin:0; padding:0;">
+                            <div class="dropdown lang-switch" style="font-size:0.95rem;">
+                                <button class="btn btn-outline-light dropdown-toggle p-1" type="button" id="langDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:0.95rem; min-width:90px; height:32px; line-height:1.1; padding:2px 10px;">
+                                    {% if get_locale() == 'fr' %}🇫🇷 Français{% elif get_locale() == 'en' %}🇬🇧 English{% else %}🌐 Langue{% endif %}
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="langDropdown">
+                                    <a class="dropdown-item" href="{{ url_for('set_language', lang='fr') }}">🇫🇷 Français</a>
+                                    <a class="dropdown-item" href="{{ url_for('set_language', lang='en') }}">🇬🇧 English</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </nav>

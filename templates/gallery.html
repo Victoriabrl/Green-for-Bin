@@ -1,223 +1,334 @@
 {# Suppression du premier block scripts pour éviter le doublon #}
 {% extends "base.html" %}
 
-
 {% block title %}{{ _('Galerie') }}{% endblock %}
 
 {% block content %}
-    <h2>{{ _('Galerie des images uploadées') }}</h2>
+<h2>{{ _('Galerie des images uploadées') }}</h2>
 
-<<<<<<< HEAD
-    <label for="imageFilter"><b>{{ _('Filtrer par type d\'image') }} :</b></label>
-    <select id="imageFilter" style="margin-bottom: 20px;">
-        <option value="all">{{ _('Toutes') }}</option>
-        <option value="vides">{{ _('Images Vides') }}</option>
-        <option value="pleines">{{ _('Images Pleines') }}</option>
-        <option value="non_labelisees">{{ _('Images Non Annotées') }}</option>
-    </select>
+<label for="imageFilter"><b>{{ _('Filtrer par type d\'image') }} :</b></label>
+<select id="imageFilter" style="margin-bottom: 20px;">
+    <option value="all">{{ _('Toutes') }}</option>
+    <option value="vides">{{ _('Images Vides') }}</option>
+    <option value="pleines">{{ _('Images Pleines') }}</option>
+    <option value="non_labelisees">{{ _('Images Non Annotées') }}</option>
+</select>
 
-    <style>
-        .image-container {
-            position: relative;
-            margin: 10px;
-            display: inline-block;
-        }
-        .meta-hover {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: rgba(255,255,255,0.95);
-            color: #222;
-            border: 1px solid #8fbc8f;
-            border-radius: 8px;
-            padding: 10px;
-            z-index: 10;
-            min-width: 180px;
-            max-width: 250px;
-            font-size: 0.95em;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .image-container:hover .meta-hover {
-            display: block;
-        }
-    </style>
-
-    <div id="videsSection">
-        <h3>{{ _('Images Vides') }}</h3>
-        <div style="display: flex; flex-wrap: wrap;">
-            {% for image in vides %}
-                <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
-                    <div class="meta-hover">
+<div id="allSection" class="gallery-section">
+    <h3>{{ _('Toutes les catégories') }}</h3>
+    <div class="carousels-group">
+        <div class="carousel-block">
+            <h3 class="carousel-title">{{ _('Images Vides') }}</h3>
+            <div class="carousel" id="carousel-vides-all">
+                {% for image in vides %}
+                <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+                    <div class="meta-hover" style="display:none;">
                         <b>Métadonnées :</b><br>
                         Nom : {{ image['filename'] }}<br>
                         Date : {{ image['date'] if image['date'] is defined else '' }}<br>
                         {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
                         {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
-                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
-                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
+                        {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
                     </div>
                 </div>
-            {% endfor %}
+                {% endfor %}
+                <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+                <button class="carousel-next" aria-label="Suivant">&#8594;</button>
+            </div>
         </div>
-    </div>
-
-    <div id="pleinesSection">
-        <h3>{{ _('Images Pleines') }}</h3>
-        <div style="display: flex; flex-wrap: wrap;">
-            {% for image in pleines %}
-                <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
-                    <div class="meta-hover">
+        <div class="carousel-block">
+            <h3 class="carousel-title">{{ _('Images Pleines') }}</h3>
+            <div class="carousel" id="carousel-pleines-all">
+                {% for image in pleines %}
+                <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+                    <div class="meta-hover" style="display:none;">
                         <b>Métadonnées :</b><br>
                         Nom : {{ image['filename'] }}<br>
                         Date : {{ image['date'] if image['date'] is defined else '' }}<br>
                         {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
                         {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
-                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
-                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
+                        {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
                     </div>
                 </div>
-            {% endfor %}
+                {% endfor %}
+                <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+                <button class="carousel-next" aria-label="Suivant">&#8594;</button>
+            </div>
         </div>
-    </div>
-
-    <div id="nonLabeliseesSection">
-        <h3>{{ _('Images Non Annotées') }}</h3>
-        <div style="display: flex; flex-wrap: wrap;">
-            {% for image in non_labelisees %}
-                <div class="image-container">
-                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="200" loading="lazy"><br>
-                    <small>{{ _('Aperçu de l\'image') }} : {{ image['date'] if image['date'] is defined else '' }}</small>
-                    <div class="meta-hover">
+        <div class="carousel-block">
+            <h3 class="carousel-title">{{ _('Images Non Annotées') }}</h3>
+            <div class="carousel" id="carousel-non_labelisees-all">
+                {% for image in non_labelisees %}
+                <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                    <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+                    <div class="meta-hover" style="display:none;">
                         <b>Métadonnées :</b><br>
                         Nom : {{ image['filename'] }}<br>
                         Date : {{ image['date'] if image['date'] is defined else '' }}<br>
                         {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
                         {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
-                        {% if image['file_size'] is defined %}Taille : {{ (image['file_size']/1024)|round(1) }} Ko<br>{% endif %}
-                        {% if image['contrast'] is defined %}Contraste : {{ image['contrast'] }}<br>{% endif %}
-                        {% if image['luminosity'] is defined %}Luminosité : {{ image['luminosity'] }}<br>{% endif %}
+                        {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
                     </div>
                 </div>
-            {% endfor %}
-        </div>
-=======
-
-    <div class="row">
-      <div class="col-md-12 mb-5">
-        <h3>{{ _('Images Vides') }}</h3>
-        {% if vides|length == 0 %}
-          <div class="alert alert-info text-center">{{ _('Aucune image vide à afficher.') }}</div>
-        {% else %}
-        <div id="carouselVides" class="carousel slide" data-ride="carousel">
-          <ol class="carousel-indicators">
-            {% for image in vides %}
-              <li data-target="#carouselVides" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
-            {% endfor %}
-          </ol>
-          <div class="carousel-inner">
-            {% for image in vides %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-              <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" class="d-block mx-auto" style="max-width:350px;cursor:pointer" data-toggle="modal" data-target="#metaModal" data-meta='{{ image|tojson }}'>
+                {% endfor %}
+                <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+                <button class="carousel-next" aria-label="Suivant">&#8594;</button>
             </div>
-            {% endfor %}
-          </div>
-          <a class="carousel-control-prev" href="#carouselVides" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Précédent</span>
-          </a>
-          <a class="carousel-control-next" href="#carouselVides" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Suivant</span>
-          </a>
         </div>
-        {% endif %}
-      </div>
-      <div class="col-md-12 mb-5">
-        <h3>{{ _('Images Pleines') }}</h3>
-        {% if pleines|length == 0 %}
-          <div class="alert alert-info text-center">{{ _('Aucune image pleine à afficher.') }}</div>
-        {% else %}
-        <div id="carouselPleines" class="carousel slide" data-ride="carousel">
-          <ol class="carousel-indicators">
-            {% for image in pleines %}
-              <li data-target="#carouselPleines" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
-            {% endfor %}
-          </ol>
-          <div class="carousel-inner">
-            {% for image in pleines %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-              <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" class="d-block mx-auto" style="max-width:350px;cursor:pointer" data-toggle="modal" data-target="#metaModal" data-meta='{{ image|tojson }}'>
-            </div>
-            {% endfor %}
-          </div>
-          <a class="carousel-control-prev" href="#carouselPleines" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Précédent</span>
-          </a>
-          <a class="carousel-control-next" href="#carouselPleines" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Suivant</span>
-          </a>
-        </div>
-        {% endif %}
-      </div>
-      <div class="col-md-12 mb-5">
-        <h3>{{ _('Images Non Annotées') }}</h3>
-        {% if non_labelisees|length == 0 %}
-          <div class="alert alert-info text-center">{{ _('Aucune image non annotée à afficher.') }}</div>
-        {% else %}
-        <div id="carouselNonLabel" class="carousel slide" data-ride="carousel">
-          <ol class="carousel-indicators">
-            {% for image in non_labelisees %}
-              <li data-target="#carouselNonLabel" data-slide-to="{{ loop.index0 }}" class="{% if loop.first %}active{% endif %}"></li>
-            {% endfor %}
-          </ol>
-          <div class="carousel-inner">
-            {% for image in non_labelisees %}
-            <div class="carousel-item {% if loop.first %}active{% endif %}">
-              <img src="{{ url_for('static', filename='uploads/' + image.filename) }}" class="d-block mx-auto" style="max-width:350px;cursor:pointer" data-toggle="modal" data-target="#metaModal" data-meta='{{ image|tojson }}'>
-            </div>
-            {% endfor %}
-          </div>
-          <a class="carousel-control-prev" href="#carouselNonLabel" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Précédent</span>
-          </a>
-          <a class="carousel-control-next" href="#carouselNonLabel" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Suivant</span>
-          </a>
-        </div>
-        {% endif %}
-      </div>
     </div>
-
-    <!-- Modal pour métadonnées -->
-    <div class="modal fade" id="metaModal" tabindex="-1" role="dialog" aria-labelledby="metaModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="metaModalLabel">Métadonnées de l'image</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body" id="metaModalBody">
-          </div>
+</div>
+<div id="videsSection" class="gallery-section" style="display:none;">
+    <h3 class="carousel-title">{{ _('Images Vides') }}</h3>
+    <div class="carousel" id="carousel-vides">
+        {% for image in vides %}
+        <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+            <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+            <div class="meta-hover" style="display:none;">
+                <b>Métadonnées :</b><br>
+                Nom : {{ image['filename'] }}<br>
+                Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
+            </div>
         </div>
-      </div>
->>>>>>> f73d34552a999af44e92c2ceabfbf59c51d9344d
+        {% endfor %}
+        <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+        <button class="carousel-next" aria-label="Suivant">&#8594;</button>
     </div>
+</div>
+<div id="pleinesSection" class="gallery-section" style="display:none;">
+    <h3 class="carousel-title">{{ _('Images Pleines') }}</h3>
+    <div class="carousel" id="carousel-pleines">
+        {% for image in pleines %}
+        <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+            <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+            <div class="meta-hover" style="display:none;">
+                <b>Métadonnées :</b><br>
+                Nom : {{ image['filename'] }}<br>
+                Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+        <button class="carousel-next" aria-label="Suivant">&#8594;</button>
+    </div>
+</div>
+<div id="nonLabeliseesSection" class="gallery-section" style="display:none;">
+    <h3 class="carousel-title">{{ _('Images Non Annotées') }}</h3>
+    <div class="carousel" id="carousel-non_labelisees">
+        {% for image in non_labelisees %}
+        <div class="carousel-item" {% if loop.index0 == 0 %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+            <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" width="300" loading="lazy" alt="image" class="carousel-img">
+            <div class="meta-hover" style="display:none;">
+                <b>Métadonnées :</b><br>
+                Nom : {{ image['filename'] }}<br>
+                Date : {{ image['date'] if image['date'] is defined else '' }}<br>
+                {% if image['width'] is defined %}Largeur : {{ image['width'] }} px<br>{% endif %}
+                {% if image['height'] is defined %}Hauteur : {{ image['height'] }} px<br>{% endif %}
+                {% if image['size'] is defined %}Taille : {{ image['size'] }}<br>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        <button class="carousel-prev" aria-label="Précédent">&#8592;</button>
+        <button class="carousel-next" aria-label="Suivant">&#8594;</button>
+    </div>
+</div>
 
-    {% include "pagination.html" %}
+<style>
+.gallery-section {
+    margin-bottom: 40px;
+}
+.carousels-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+}
+.carousel-block {
+    flex: 1 1 320px;
+    min-width: 320px;
+    max-width: 400px;
+    margin: 0 10px 30px 10px;
+    background: transparent;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #0001;
+    padding: 10px 0 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.carousel-title {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--primary-green, #4a7c59);
+    letter-spacing: 1px;
+}
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+    min-height: 350px;
+    background: transparent;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px #0001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+.carousel-item {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 10px 10px 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+.carousel-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 1px 6px #0002;
+    margin-bottom: 0;
+    transition: box-shadow 0.2s;
+}
+.carousel-img:hover {
+    box-shadow: 0 4px 16px #4a7c5922;
+}
+.carousel-prev, .carousel-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.5em;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0.8;
+    box-shadow: 0 1px 4px #0001;
+}
+.carousel-prev { left: 10px; }
+.carousel-next { right: 10px; }
+.meta-hover {
+    margin-top: 18px;
+    font-size: 0.98em;
+    background: #f0f0f0;
+    border-radius: 6px;
+    padding: 10px 14px;
+    box-shadow: 0 1px 4px #0001;
+    display: none;
+    width: 100%;
+    max-width: 320px;
+    word-break: break-word;
+    text-align: left;
+}
+@media (max-width: 900px) {
+    .carousels-group {
+        flex-direction: column;
+        gap: 24px;
+        align-items: center;
+    }
+    .carousel-block {
+        max-width: 98vw;
+        min-width: 0;
+    }
+    .carousel {
+        max-width: 98vw;
+    }
+}
+@media (max-width: 600px) {
+    .carousel-block {
+        padding: 4px 0 10px 0;
+    }
+    .carousel-title {
+        font-size: 1.1rem;
+    }
+    .carousel {
+        min-height: 220px;
+        max-width: 99vw;
+    }
+    .meta-hover {
+        font-size: 0.93em;
+        padding: 7px 7px;
+        max-width: 99vw;
+    }
+}
+</style>
+
+<script>
+// Filtre : afficher la bonne section
+const filter = document.getElementById('imageFilter');
+const sections = {
+    all: document.getElementById('allSection'),
+    vides: document.getElementById('videsSection'),
+    pleines: document.getElementById('pleinesSection'),
+    non_labelisees: document.getElementById('nonLabeliseesSection')
+};
+filter.addEventListener('change', function() {
+    for (const key in sections) sections[key].style.display = 'none';
+    const val = filter.value;
+    if (val === 'all') {
+        sections.all.style.display = '';
+    } else if (sections[val]) {
+        sections[val].style.display = '';
+    }
+});
+
+// Carrousel : navigation
+function setupCarousel(carouselId) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel) return;
+    const items = carousel.querySelectorAll('.carousel-item');
+    let current = 0;
+    function show(idx) {
+        items.forEach((el, i) => el.style.display = (i === idx ? 'block' : 'none'));
+    }
+    carousel.querySelector('.carousel-prev').onclick = function() {
+        current = (current - 1 + items.length) % items.length;
+        show(current);
+    };
+    carousel.querySelector('.carousel-next').onclick = function() {
+        current = (current + 1) % items.length;
+        show(current);
+    };
+    // Affichage des métadonnées au clic sur l'image
+    items.forEach(item => {
+        const img = item.querySelector('.carousel-img');
+        const meta = item.querySelector('.meta-hover');
+        if (img && meta) {
+            img.style.cursor = 'pointer';
+            img.onclick = function() {
+                // Ferme toutes les autres meta-hover de ce carrousel
+                items.forEach(it => {
+                    const m = it.querySelector('.meta-hover');
+                    if (m && m !== meta) m.style.display = 'none';
+                });
+                // Toggle celle-ci
+                meta.style.display = (meta.style.display === 'block') ? 'none' : 'block';
+            };
+        }
+    });
+}
+setupCarousel('carousel-vides-all');
+setupCarousel('carousel-pleines-all');
+setupCarousel('carousel-non_labelisees-all');
+setupCarousel('carousel-vides');
+setupCarousel('carousel-pleines');
+setupCarousel('carousel-non_labelisees');
+</script>
 {% endblock %}
-
-{# Un seul block scripts doit être présent dans le template. Fusionnez les scripts si besoin. #}
 
