@@ -82,12 +82,46 @@ def classify_bin(image_path, debug=False):
     # 12. Nouveau critère luminance/contraste sur l'image entière
     condition_lum_contrast_full = (mean_lum_full < seuil_lum) or (contrast_full > seuil_contrast)
 
-    # 13. Décision finale : OR entre conditions
+        # 13. Décision finale : OR entre conditions
     if condition_std or condition_lum_contrast or condition_lum_contrast_full:
         if debug:
             print(f"Poubelle pleine (dépôts autour détectés)")
-        return "pleine"
+        return {
+            'label': 'pleine',
+            'std_h': float(std_h),
+            'std_s': float(std_s),
+            'std_v': float(std_v)
+        }
     else:
         if debug:
             print("Poubelle vide (pas de dépôt autour)")
+        return {
+            'label': 'vide',
+            'std_h': float(std_h),
+            'std_s': float(std_s),
+            'std_v': float(std_v)
+        }
+
+def classify_bin_custom(image_path, use_std_h=True, use_std_s=True, use_std_v=True,
+                        seuil_h=55, seuil_s=37, seuil_v=54, debug=False):
+    result = classify_bin(image_path, debug=debug)
+    if result == "erreur":
+        return "erreur"
+
+    label = result['label']
+    std_h = result['std_h']
+    std_s = result['std_s']
+    std_v = result['std_v']
+
+    conditions = []
+    if use_std_h:
+        conditions.append(std_h > seuil_h)
+    if use_std_s:
+        conditions.append(std_s > seuil_s)
+    if use_std_v:
+        conditions.append(std_v > seuil_v)
+
+    if any(conditions):
+        return "pleine"
+    else:
         return "vide"
