@@ -24,10 +24,20 @@
     </div>
     <h2>{{ _('Image uploadée') }}</h2>
     <form method="POST" class="d-flex gap-3 mb-4">
-        <button type="submit" name="annotation" value="pleine" class="btn btn-success btn-lg">{{ _('Pleine') }}</button>
-        <button type="submit" name="annotation" value="vide" class="btn btn-outline-success btn-lg">{{ _('Vide') }}</button>
+        <button type="submit" name="annotation" value="pleine" class="btn btn-success btn-lg" style="margin-right:2.5rem;">{{ _('Pleine') }}</button>
+        <button type="submit" name="annotation" value="vide" class="btn btn-outline-success btn-lg" style="margin-left:2.5rem;">{{ _('Vide') }}</button>
     </form>
 
+    {% if auto_label %}
+        <div class="alert alert-warning mt-4 p-4 text-center shadow-lg" style="font-size:2.1rem; border: 3px solid #8fbc8f; background: #fffbe6; color: #2d4739; font-weight: bold; letter-spacing: 0.03em;">
+            <span style="font-size:1.2rem; color:#8fbc8f; text-transform:uppercase; letter-spacing:0.08em;">{{ _('Pronostic automatique') }}</span><br>
+            {% if auto_label.startswith('vide') %}
+                <span style="font-size:2.5rem; color:#007bff;">{{ _('VIDE') }}</span>
+            {% else %}
+                <span style="font-size:2.5rem; color:#e67e22;">{{ _('PLEINE') }}</span>
+            {% endif %}
+        </div>
+    {% endif %}
     <div class="card mb-3">
         <div class="card-body">
             <h5 class="card-title">{{ _('Auto-label personnalisé') }}</h5>
@@ -66,11 +76,5 @@
         </div>
     </div>
 
-    {% if auto_label %}
-        <div class="alert alert-info mt-3">
-            <b>{{ _('Pronostic automatique :') }}</b>
-            {{ _('Vide') if auto_label.startswith('vide') else _('Pleine') }}
-        </div>
-    {% endif %}
 </div>
 {% endblock %}

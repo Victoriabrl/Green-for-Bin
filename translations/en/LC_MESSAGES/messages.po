@@ -1,3 +1,30 @@
+# Ajouts pour la traduction anglaise
+msgid "Filtrer par date"
+msgstr "Filter by date"
+
+msgid "Filtrer"
+msgstr "Filter"
+
+msgid "Réinitialiser"
+msgstr "Reset"
+
+msgid "Créer un compte administrateur"
+msgstr "Create an admin account"
+
+msgid "Supprimer"
+msgstr "Delete"
+
+msgid "Messages reçus"
+msgstr "Received messages"
+
+msgid "Messages reçus des utilisateurs"
+msgstr "Messages received from users"
+
+msgid "Expéditeur"
+msgstr "Sender"
+
+msgid "Aucun message reçu pour le moment."
+msgstr "No message received yet."
 # English translations for PROJECT.
 # Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
@@ -396,3 +423,31 @@ msgstr "Previous"
 
 msgid "Suivant"
 msgstr "Next"
+
+# Ajouts pour la traduction anglaise
+msgid "Filtrer par date"
+msgstr "Filter by date"
+
+msgid "Filtrer"
+msgstr "Filter"
+
+msgid "Réinitialiser"
+msgstr "Reset"
+
+msgid "Créer un compte administrateur"
+msgstr "Create an admin account"
+
+msgid "Supprimer"
+msgstr "Delete"
+
+msgid "Messages reçus"
+msgstr "Received messages"
+
+msgid "Messages reçus des utilisateurs"
+msgstr "Messages received from users"
+
+msgid "Expéditeur"
+msgstr "Sender"
+
+msgid "Aucun message reçu pour le moment."
+msgstr "No message received yet."

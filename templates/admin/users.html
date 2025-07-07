@@ -18,10 +18,10 @@
             <form method="post" action="{{ url_for('create_admin') }}">
                 <div class="row g-2 align-items-center">
                     <div class="col-md-4">
-                        <input type="text" name="username" class="form-control" placeholder="Nom d'utilisateur" required>
+                        <input type="text" name="username" class="form-control" placeholder="{{ _('Nom d\'utilisateur') }}" required>
                     </div>
                     <div class="col-md-4">
-                        <input type="password" name="password" class="form-control" placeholder="Mot de passe" required>
+                        <input type="password" name="password" class="form-control" placeholder="{{ _('Mot de passe') }}" required>
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary">{{ _('Créer admin') }}</button>
@@ -50,12 +50,12 @@
                     <td>{{ user[4] or _('Jamais') }}</td>
                     <td class="d-flex gap-2">
                         {% if user[2] == 'user' %}
-                            <a href="{{ url_for('promote_user', user_id=user[0]) }}" class="btn btn-success btn-sm">{{ _('Promouvoir admin') }}</a>
+                            <a href="{{ url_for('promote_user', user_id=user[0]) }}" class="btn btn-success btn-sm" style="margin-right:2.5rem;">{{ _('Promouvoir admin') }}</a>
                         {% else %}
-                            <a href="{{ url_for('demote_user', user_id=user[0]) }}" class="btn btn-warning btn-sm">{{ _('Rétrograder utilisateur') }}</a>
+                            <a href="{{ url_for('demote_user', user_id=user[0]) }}" class="btn btn-warning btn-sm" style="margin-right:2.5rem;">{{ _('Rétrograder utilisateur') }}</a>
                         {% endif %}
                         {% if session['user_id'] != user[0] and (user[2] != 'admin' or admin_count > 1) %}
-                            <a href="{{ url_for('delete_user', user_id=user[0]) }}" class="btn btn-danger btn-sm" onclick="return confirm('Supprimer cet utilisateur ?');">{{ _('Supprimer') }}</a>
+                            <a href="{{ url_for('delete_user', user_id=user[0]) }}" class="btn btn-danger btn-sm" style="margin-left:2.5rem;">{{ _('Supprimer') }}</a>
                         {% endif %}
                     </td>
                 </tr>
