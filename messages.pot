@@ -1,14 +1,17 @@
-
+# Translations template for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2025-07-07 15:57+0200\n"
-"PO-Revision-Date: 2025-06-25 17:29+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: en\n"
-"Language-Team: en <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,18 +28,16 @@ msgid ""
 msgstr ""
 
 #: app.py:248
-#, fuzzy
 msgid "Témoin de Bac"
-msgstr "Less than one bag"
+msgstr ""
 
 #: app.py:248
 msgid "Tu prends les poubelles en flagrant délit. Tu commences à documenter !"
 msgstr ""
 
 #: app.py:249
-#, fuzzy
 msgid "Photographe de Poubelles"
-msgstr "Total bins"
+msgstr ""
 
 #: app.py:249
 msgid "L’art du cliché… version plastique. Tu sais trouver LE bon angle."
@@ -88,367 +89,346 @@ msgid ""
 "autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une "
 "initiative locale."
 msgstr ""
-"Bravo! Your habits have a positive impact. Keep inspiring others around "
-"you. Try zero waste challenges or join a local initiative."
 
 #: app.py:529 app.py:997 templates/analyses_avancees.html:153
 msgid "Éco-expert 🌱"
-msgstr "Eco-expert 🌱"
+msgstr ""
 
 #: app.py:532 app.py:999 templates/analyses_avancees.html:155
 msgid ""
 "Vous avez de très bons réflexes. Pour progresser : essayez le compostage "
 "ou limitez les emballages."
-msgstr "You have very good habits. To improve: try composting or reduce packaging."
+msgstr ""
 
 #: app.py:533 app.py:1000 templates/analyses_avancees.html:155
 msgid "Bon élève ♻️"
-msgstr "Good student ♻️"
+msgstr ""
 
 #: app.py:536 app.py:1002 templates/analyses_avancees.html:157
 msgid ""
 "Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous"
 " sur les points de collecte."
 msgstr ""
-"You are aware of the issue. Sort systematically, find out about "
-"collection points."
 
 #: app.py:537 app.py:1003 templates/analyses_avancees.html:157
 msgid "Éco-curieux 🧐"
-msgstr "Eco-curious 🧐"
+msgstr ""
 
 #: app.py:540 app.py:1005 templates/analyses_avancees.html:159
 msgid ""
 "Pas de panique ! Commencez par des gestes simples comme trier ou acheter "
 "en vrac. Chaque geste compte !"
 msgstr ""
-"Don't panic! Start with simple actions like sorting or buying in bulk. "
-"Every action counts!"
 
 #: app.py:541 app.py:1006 templates/analyses_avancees.html:159
 msgid "Débutant·e 🐣"
-msgstr "Beginner 🐣"
+msgstr ""
 
-# Ajouts pour _arr_table.html
 #: templates/_arr_table.html:6 templates/about.html:71
 msgid "Arrondissement"
-msgstr "District"
+msgstr ""
 
 #: templates/_arr_table.html:7 templates/about.html:72
 #: templates/dashboard.html:13 templates/visualisations.html:32
 #: templates/visualisations.html:379
 msgid "Poubelles pleines"
-msgstr "Full bins"
+msgstr ""
 
 #: templates/_arr_table.html:8 templates/dashboard.html:14
 #: templates/visualisations.html:40
 msgid "Poubelles vides"
-msgstr "Empty bins"
+msgstr ""
 
 #: templates/_arr_table.html:9
 #, python-format
 msgid "%% Pleines"
-msgstr "%% Full"
+msgstr ""
 
 #: templates/_arr_table.html:10
 #, python-format
 msgid "%% Vides"
-msgstr "%% Empty"
+msgstr ""
 
 #: templates/_arr_table.html:11
 msgid "Statut"
-msgstr "Status"
+msgstr ""
 
 #: templates/_arr_table.html:29
 msgid "Optimal"
-msgstr "Optimal"
+msgstr ""
 
 #: templates/_arr_table.html:31
 msgid "Attention"
-msgstr "Warning"
+msgstr ""
 
 #: templates/_arr_table.html:33
 msgid "Zone à risque"
-msgstr "Risk zone"
+msgstr ""
 
 #: templates/_arr_table.html:43 templates/pagination.html:7
 #: templates/pagination.html:11
 msgid "Précédent"
-msgstr "Previous"
+msgstr ""
 
 #: templates/_arr_table.html:49 templates/pagination.html:21
 #: templates/pagination.html:25
 msgid "Suivant"
-msgstr "Next"
+msgstr ""
 
 #: templates/about.html:2
-#, fuzzy
 msgid "Green For Bin - Suivi des poubelles"
-msgstr "Bin tracking"
+msgstr ""
 
 #: templates/about.html:9
-#, fuzzy
 msgid "Votre dernier score :"
-msgstr "Your score"
+msgstr ""
 
 #: templates/about.html:11
 msgid "Date du questionnaire :"
 msgstr ""
 
-# Added from about.html
 #: templates/about.html:18
 msgid ""
 "Révolutionnez la gestion de vos déchets avec notre solution intelligente "
 "et écologique"
 msgstr ""
-"Revolutionize your waste management with our smart and eco-friendly "
-"solution"
 
 #: templates/about.html:20
 msgid "Découvrir notre solution"
-msgstr "Discover our solution"
+msgstr ""
 
 #: templates/about.html:28
 msgid "Nos Fonctionnalités"
-msgstr "Our Features"
+msgstr ""
 
 #: templates/about.html:35
 msgid "Cartographie Intelligente"
-msgstr "Smart Mapping"
+msgstr ""
 
 #: templates/about.html:36
 msgid ""
 "Visualisez en temps réel l'emplacement et l'état de toutes vos poubelles "
 "sur une carte interactive moderne."
 msgstr ""
-"See in real time the location and status of all your bins on a modern "
-"interactive map."
 
 #: templates/about.html:44 templates/analyses_avancees.html:2
 #: templates/analyses_avancees.html:6
 msgid "Analyses Avancées"
-msgstr "Advanced Analytics"
+msgstr ""
 
 #: templates/about.html:45 templates/analyses_avancees.html:7
 msgid ""
 "Obtenez des insights détaillés sur vos habitudes de consommation et votre"
 " impact environnemental."
 msgstr ""
-"Get detailed insights into your consumption habits and environmental "
-"impact."
 
 #: templates/about.html:53
 msgid "Notifications Smart"
-msgstr "Smart Notifications"
+msgstr ""
 
 #: templates/about.html:54
 msgid ""
 "Recevez des alertes personnalisées pour optimiser vos tournées de "
 "collecte et réduire les coûts."
 msgstr ""
-"Receive personalized alerts to optimize your collection rounds and reduce"
-" costs."
 
 #: templates/about.html:64
 msgid "Tableau de Bord"
-msgstr "Dashboard"
+msgstr ""
 
 #: templates/about.html:88
 msgid "Voir tous les rapports"
-msgstr "See all reports"
+msgstr ""
 
 #: templates/about.html:95
 msgid "Envoyer un message à l'administrateur"
-msgstr "Send a message to the administrator"
+msgstr ""
 
 #: templates/about.html:98 templates/admin/messages.html:12
 msgid "Sujet"
-msgstr "Subject"
+msgstr ""
 
 #: templates/about.html:101
 msgid "Votre message"
-msgstr "Your message"
+msgstr ""
 
 #: templates/about.html:103
 msgid "Envoyer"
-msgstr "Send"
+msgstr ""
 
 #: templates/about.html:108
 msgid "Votre message a bien été envoyé à l'administrateur."
-msgstr "Your message has been sent to the administrator."
+msgstr ""
 
 #: templates/analyses_avancees.html:10
 msgid "À quelle fréquence triez-vous vos déchets ?"
-msgstr "How often do you sort your waste?"
+msgstr ""
 
 #: templates/analyses_avancees.html:13
 msgid "Toujours"
-msgstr "Always"
+msgstr ""
 
 #: templates/analyses_avancees.html:17
 msgid "Souvent"
-msgstr "Often"
+msgstr ""
 
 #: templates/analyses_avancees.html:21 templates/analyses_avancees.html:74
 #: templates/analyses_avancees.html:93
 msgid "Parfois"
-msgstr "Sometimes"
+msgstr ""
 
 #: templates/admin/users.html:52 templates/analyses_avancees.html:25
 #: templates/analyses_avancees.html:82 templates/analyses_avancees.html:101
 msgid "Jamais"
-msgstr "Never"
+msgstr ""
 
 #: templates/analyses_avancees.html:29
 msgid "Utilisez-vous un composteur ?"
-msgstr "Do you use a composter?"
+msgstr ""
 
 #: templates/analyses_avancees.html:32
 msgid "Oui régulièrement"
-msgstr "Yes, regularly"
+msgstr ""
 
 #: templates/analyses_avancees.html:36
 msgid "De temps en temps"
-msgstr "From time to time"
+msgstr ""
 
 #: templates/analyses_avancees.html:40
 msgid "Non mais j’aimerais"
-msgstr "No, but I would like to"
+msgstr ""
 
 #: templates/analyses_avancees.html:44
 msgid "Non ce n’est pas prévu"
-msgstr "No, not planned"
+msgstr ""
 
 #: templates/analyses_avancees.html:48
 msgid "Quelle quantité de déchets jetez-vous par semaine ?"
-msgstr "How much waste do you throw away per week?"
+msgstr ""
 
 #: templates/analyses_avancees.html:51
 msgid "Moins d’un sac"
-msgstr "Less than one bag"
+msgstr ""
 
 #: templates/analyses_avancees.html:55
 msgid "1 à 2 sacs"
-msgstr "1 to 2 bags"
+msgstr ""
 
 #: templates/analyses_avancees.html:59
 msgid "3 à 4 sacs"
-msgstr "3 to 4 bags"
+msgstr ""
 
 #: templates/analyses_avancees.html:63
 msgid "Plus de 4 sacs"
-msgstr "More than 4 bags"
+msgstr ""
 
 #: templates/analyses_avancees.html:67
 msgid "Achetez-vous des produits avec peu ou pas d’emballage ?"
-msgstr "Do you buy products with little or no packaging?"
+msgstr ""
 
 #: templates/analyses_avancees.html:70
 msgid "Le plus possible"
-msgstr "As much as possible"
+msgstr ""
 
 #: templates/analyses_avancees.html:78 templates/analyses_avancees.html:97
 msgid "Rarement"
-msgstr "Rarely"
+msgstr ""
 
 #: templates/analyses_avancees.html:86
 msgid "Réparez-vous, donnez-vous ou revendez-vous vos objets usagés ?"
-msgstr "Do you repair, donate or resell your used items?"
+msgstr ""
 
 #: templates/analyses_avancees.html:89
 msgid "Oui systématiquement"
-msgstr "Yes, always"
+msgstr ""
 
 #: templates/analyses_avancees.html:105
 msgid "Avez-vous déjà participé à une initiative écologique ?"
-msgstr "Have you ever participated in an ecological initiative?"
+msgstr ""
 
 #: templates/analyses_avancees.html:108
 msgid "Oui"
-msgstr "Yes"
+msgstr ""
 
 #: templates/analyses_avancees.html:112
 msgid "Non mais je suis intéressé·e"
-msgstr "No, but I am interested"
+msgstr ""
 
 #: templates/analyses_avancees.html:116
 msgid "Non ce n’est pas mon truc"
-msgstr "No, it's not my thing"
+msgstr ""
 
 #: templates/analyses_avancees.html:120
 msgid "Connaissez-vous votre impact environnemental ou empreinte carbone ?"
-msgstr "Do you know your environmental impact or carbon footprint?"
+msgstr ""
 
 #: templates/analyses_avancees.html:123
 msgid "Oui je l’ai déjà calculé"
-msgstr "Yes, I have already calculated it"
+msgstr ""
 
 #: templates/analyses_avancees.html:127
 msgid "J’en ai une vague idée"
-msgstr "I have a vague idea"
+msgstr ""
 
 #: templates/analyses_avancees.html:131
 msgid "Non jamais"
-msgstr "No, never"
+msgstr ""
 
 #: templates/analyses_avancees.html:134
 msgid "Soumettre"
-msgstr "Submit"
+msgstr ""
 
 #: templates/analyses_avancees.html:161
 msgid "Votre score"
-msgstr "Your score"
+msgstr ""
 
 #: templates/annotate.html:4
 msgid "Annotation"
-msgstr "Annotation"
+msgstr ""
 
 #: templates/annotate.html:10
 msgid "Image à annoter"
-msgstr "Image to annotate"
+msgstr ""
 
 #: templates/annotate.html:15
 msgid "Métadonnées de l'image"
-msgstr "Image metadata"
+msgstr ""
 
 #: templates/annotate.html:17
 msgid "Taille"
-msgstr "Size"
+msgstr ""
 
 #: templates/annotate.html:18
 msgid "Luminosité moyenne"
-msgstr "Average brightness"
+msgstr ""
 
 #: templates/annotate.html:19
 msgid "Contraste"
-msgstr "Contrast"
+msgstr ""
 
 #: templates/annotate.html:25
 msgid "Image uploadée"
-msgstr "Uploaded image"
+msgstr ""
 
 #: templates/annotate.html:27 templates/annotate.html:73
 msgid "Pleine"
-msgstr "Full"
+msgstr ""
 
 #: templates/annotate.html:28 templates/annotate.html:73
 msgid "Vide"
-msgstr "Empty"
+msgstr ""
 
 #: templates/annotate.html:33
-#, fuzzy
 msgid "Pronostic automatique"
-msgstr "Automatic prediction:"
+msgstr ""
 
 #: templates/annotate.html:35
-#, fuzzy
 msgid "VIDE"
-msgstr "Empty"
+msgstr ""
 
 #: templates/annotate.html:37
-#, fuzzy
 msgid "PLEINE"
-msgstr "Full"
+msgstr ""
 
 #: templates/annotate.html:43
 msgid "Auto-label personnalisé"
@@ -464,55 +444,51 @@ msgstr ""
 
 #: templates/base.html:6
 msgid "Suivi des poubelles"
-msgstr "Bin tracking"
+msgstr ""
 
 #: templates/base.html:150
-#, fuzzy
 msgid "Green For Bin"
-msgstr "Green for Bin"
+msgstr ""
 
 #: templates/base.html:153
 msgid "Accueil"
-msgstr "Home"
+msgstr ""
 
 #: templates/base.html:160
-#, fuzzy
 msgid "Upload"
-msgstr "Upload"
+msgstr ""
 
 #: templates/base.html:163
 msgid "Carte"
-msgstr "Map"
+msgstr ""
 
 #: templates/base.html:166
 msgid "Visualisations"
-msgstr "Visualizations"
+msgstr ""
 
 #: templates/base.html:169 templates/gallery.html:5
 msgid "Galerie"
-msgstr "Gallery"
+msgstr ""
 
-# Added for analyses_avancees.html
 #: templates/base.html:172
 msgid "Analyses avancées"
-msgstr "Advanced analytics"
+msgstr ""
 
 #: templates/base.html:176
 msgid "Base de données"
-msgstr "Database"
+msgstr ""
 
 #: templates/base.html:179
 msgid "Gestion utilisateurs"
-msgstr "User management"
+msgstr ""
 
 #: templates/base.html:182
-#, fuzzy
 msgid "Messages"
-msgstr "Received messages"
+msgstr ""
 
 #: templates/base.html:202
 msgid "Déconnexion"
-msgstr "Logout"
+msgstr ""
 
 #: templates/base.html:203
 msgid "Français"
@@ -524,70 +500,67 @@ msgstr ""
 
 #: templates/base.html:209 templates/login.html:9
 msgid "Connexion"
-msgstr "Login"
+msgstr ""
 
 #: templates/dashboard.html:5
 msgid "Tableau de bord"
-msgstr "Dashboard"
+msgstr ""
 
 #: templates/dashboard.html:9
 msgid "Statistiques générales"
-msgstr "General statistics"
+msgstr ""
 
 #: templates/dashboard.html:12
 msgid "Total d'images"
-msgstr "Total images"
+msgstr ""
 
 #: templates/dashboard.html:22
 msgid "Statistiques administrateur"
-msgstr "Admin statistics"
+msgstr ""
 
 #: templates/dashboard.html:25
 msgid "Total d'utilisateurs"
-msgstr "Total users"
+msgstr ""
 
 #: templates/dashboard.html:26
 msgid "Administrateurs"
-msgstr "Administrators"
+msgstr ""
 
 #: templates/dashboard.html:27
 msgid "Utilisateurs classiques"
-msgstr "Regular users"
+msgstr ""
 
 #: templates/gallery.html:8
 msgid "Galerie des images uploadées"
-msgstr "Gallery of uploaded images"
+msgstr ""
 
-# Ajouts pour la traduction anglaise
 #: templates/gallery.html:11
-#, fuzzy
 msgid "Filtrer par type d'image"
-msgstr "Filter by date"
+msgstr ""
 
 #: templates/gallery.html:13 templates/map.html:18
 msgid "Toutes"
-msgstr "All"
+msgstr ""
 
 #: templates/gallery.html:14 templates/gallery.html:47
 #: templates/gallery.html:114
 msgid "Images Vides"
-msgstr "Empty Images"
+msgstr ""
 
 #: templates/gallery.html:15 templates/gallery.html:69
 #: templates/gallery.html:143
 msgid "Images Pleines"
-msgstr "Full Images"
+msgstr ""
 
 #: templates/gallery.html:16 templates/gallery.html:91
 #: templates/gallery.html:172
 msgid "Images Non Annotées"
-msgstr "Unannotated Images"
+msgstr ""
 
 #: templates/gallery.html:52 templates/gallery.html:74
 #: templates/gallery.html:96
-#, fuzzy
 msgid "Aperçu de l'image"
-msgstr "Annotate the image"
+msgstr ""
 
 #: templates/gallery.html:116
 msgid "Aucune image vide à afficher."
@@ -598,269 +571,262 @@ msgid "Aucune image pleine à afficher."
 msgstr ""
 
 #: templates/gallery.html:174
-#, fuzzy
 msgid "Aucune image non annotée à afficher."
-msgstr "Unannotated Images"
+msgstr ""
 
 #: templates/admin/users.html:21 templates/admin/users.html:37
 #: templates/login.html:22 templates/register.html:22
 msgid "Nom d'utilisateur"
-msgstr "Username"
+msgstr ""
 
 #: templates/admin/users.html:24 templates/login.html:26
 #: templates/register.html:26
 msgid "Mot de passe"
-msgstr "Password"
+msgstr ""
 
 #: templates/login.html:30 templates/register.html:38
 msgid "Se connecter"
-msgstr "Log in"
+msgstr ""
 
 #: templates/login.html:34
 msgid "Pas encore de compte?"
-msgstr "No account yet?"
+msgstr ""
 
 #: templates/login.html:34 templates/register.html:34
 msgid "S'inscrire"
-msgstr "Sign up"
+msgstr ""
 
 #: templates/map.html:5
 msgid "Carte interactive des poubelles"
-msgstr "Interactive trash bin map"
+msgstr ""
 
 #: templates/map.html:13
 msgid "Poubelles dans un marché"
-msgstr "Bins in a market"
+msgstr ""
 
 #: templates/map.html:16
 msgid "Zone"
-msgstr "Zone"
+msgstr ""
 
 #: templates/map.html:25
 msgid "Afficher les zones de marché"
-msgstr "Show market areas"
+msgstr ""
 
 #: templates/register.html:9
 msgid "Inscription"
-msgstr "Registration"
+msgstr ""
 
 #: templates/register.html:30
 msgid "Confirmer le mot de passe"
-msgstr "Confirm password"
+msgstr ""
 
 #: templates/register.html:38
 msgid "Déjà un compte?"
-msgstr "Already have an account?"
+msgstr ""
 
 #: templates/result.html:3
 msgid "Résultat"
-msgstr "Result"
+msgstr ""
 
 #: templates/result.html:7
 msgid "Annotation enregistrée :"
-msgstr "Annotation saved:"
+msgstr ""
 
 #: templates/result.html:10
-#, fuzzy
 msgid "Modifier l'annotation"
-msgstr "Annotation"
+msgstr ""
 
 #: templates/upload.html:5
 msgid "Uploader une image"
-msgstr "Upload an image"
+msgstr ""
 
 #: templates/upload.html:16
 msgid "Choisir un fichier"
-msgstr "Choose a file"
+msgstr ""
 
 #: templates/upload.html:19 templates/upload.html:52
 msgid "Aucun fichier choisi"
-msgstr "No file chosen"
+msgstr ""
 
 #: templates/upload.html:20
 msgid "Prendre une photo avec la caméra"
-msgstr "Take a photo with the camera"
+msgstr ""
 
 #: templates/upload.html:23
 msgid "Capturer la photo"
-msgstr "Capture photo"
+msgstr ""
 
-# Ajouts pour upload.html
 #: templates/upload.html:26
 msgid "Choisir un arrondissement (optionnel) :"
-msgstr "Choose a district (optional):"
+msgstr ""
 
 #: templates/upload.html:28
 msgid "-- Aucun (aléatoire dans Paris) --"
-msgstr "-- None (random in Paris) --"
+msgstr ""
 
 #: templates/upload.html:35
 msgid "Date et heure (optionnel) :"
-msgstr "Date and time (optional):"
+msgstr ""
 
 #: templates/upload.html:38
 msgid "Uploader"
-msgstr "Upload"
+msgstr ""
 
 #: templates/upload.html:42
 msgid "0%"
-msgstr "0%%"
+msgstr ""
 
 #: templates/upload.html:74
 msgid "Impossible d'accéder à la caméra."
-msgstr "Unable to access the camera."
+msgstr ""
 
 #: templates/upload.html:77
 msgid "La capture par caméra n'est pas supportée sur cet appareil."
-msgstr "Camera capture is not supported on this device."
+msgstr ""
 
-# Ajouts pour visualisations.html
 #: templates/visualisations.html:7
 msgid "Dashboard des Poubelles"
-msgstr "Trash Bin Dashboard"
+msgstr ""
 
 #: templates/visualisations.html:17
 msgid "Statistiques"
-msgstr "Statistics"
+msgstr ""
 
 #: templates/visualisations.html:22
 msgid "Type"
-msgstr "Type"
+msgstr ""
 
 #: templates/visualisations.html:23
 msgid "Valeur"
-msgstr "Value"
+msgstr ""
 
 #: templates/visualisations.html:28
 msgid "Total de poubelles"
-msgstr "Total bins"
+msgstr ""
 
 #: templates/visualisations.html:36
 msgid "Pourcentage pleines"
-msgstr "Percentage full"
+msgstr ""
 
 #: templates/visualisations.html:44
 msgid "Pourcentage vides"
-msgstr "Percentage empty"
+msgstr ""
 
 #: templates/visualisations.html:48
 msgid "Non labelisées"
-msgstr "Unlabeled"
+msgstr ""
 
 #: templates/visualisations.html:59
 msgid "Progression des annotations"
-msgstr "Annotation progress"
+msgstr ""
 
 #: templates/visualisations.html:68
 msgid "Répartition Pleines/Vides"
-msgstr "Full/Empty Distribution"
+msgstr ""
 
 #: templates/visualisations.html:79
 msgid "Répartition par Arrondissement"
-msgstr "Distribution by District"
+msgstr ""
 
 #: templates/visualisations.html:91
 msgid "Graphiques supplémentaires"
-msgstr "Additional charts"
+msgstr ""
 
 #: templates/visualisations.html:100
 msgid "Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)"
-msgstr "Average HSV standard deviations (Hue, Saturation, Value)"
+msgstr ""
 
 #: templates/visualisations.html:127
 msgid "Tableau de Bord par Arrondissement"
-msgstr "District Dashboard Table"
+msgstr ""
 
 #: templates/visualisations.html:228
 msgid "pleines"
-msgstr "full"
+msgstr ""
 
 #: templates/visualisations.html:228
 msgid "vides"
-msgstr "empty"
+msgstr ""
 
 #: templates/visualisations.html:231
 msgid "Nombre de fichiers"
-msgstr "Number of files"
+msgstr ""
 
 #: templates/visualisations.html:232
 msgid "Taille (octets)"
-msgstr "Size (bytes)"
+msgstr ""
 
 #: templates/visualisations.html:233
 msgid "Aucune donnée disponible"
-msgstr "No data available"
+msgstr ""
 
 #: templates/visualisations.html:327
 msgid "Annotations actuelles"
-msgstr "Current annotations"
+msgstr ""
 
 #: templates/visualisations.html:327
 msgid "Annotations possibles"
-msgstr "Possible annotations"
+msgstr ""
 
 #: templates/visualisations.html:341
 msgid "Nombre d'images uploadées"
-msgstr "Number of uploaded images"
+msgstr ""
 
 #: templates/visualisations.html:363
 msgid "Répartition des annotations (pleines vs vides)"
-msgstr "Distribution of annotations (full vs empty)"
+msgstr ""
 
 #: templates/visualisations.html:394
 msgid "Répartition des poubelles pleines par arrondissement"
-msgstr "Distribution of full bins by district"
+msgstr ""
 
 #: templates/admin/bdd.html:5
 msgid "Base de données des images"
-msgstr "Image database"
+msgstr ""
 
-# Ajouts pour la traduction anglaise
 #: templates/admin/bdd.html:7
 msgid "Filtrer par date"
-msgstr "Filter by date"
+msgstr ""
 
 #: templates/admin/bdd.html:9
 msgid "Filtrer"
-msgstr "Filter"
+msgstr ""
 
 #: templates/admin/bdd.html:11
 msgid "Réinitialiser"
-msgstr "Reset"
+msgstr ""
 
 #: templates/admin/messages.html:2
 msgid "Messages reçus"
-msgstr "Received messages"
+msgstr ""
 
 #: templates/admin/messages.html:5
 msgid "Messages reçus des utilisateurs"
-msgstr "Messages received from users"
+msgstr ""
 
 #: templates/admin/messages.html:11
 msgid "Expéditeur"
-msgstr "Sender"
+msgstr ""
 
 #: templates/admin/messages.html:13
-#, fuzzy
 msgid "Message"
-msgstr "Your message"
+msgstr ""
 
 #: templates/admin/messages.html:14
-#, fuzzy
 msgid "Date"
-msgstr "Map"
+msgstr ""
 
 #: templates/admin/messages.html:30
 msgid "Aucun message reçu pour le moment."
-msgstr "No message received yet."
+msgstr ""
 
 #: templates/admin/users.html:5
 msgid "Gestion des utilisateurs"
-msgstr "User management"
+msgstr ""
 
 #: templates/admin/users.html:17
 msgid "Créer un compte administrateur"
-msgstr "Create an admin account"
+msgstr ""
 
 #: templates/admin/users.html:27
 msgid "Créer admin"
@@ -868,113 +834,37 @@ msgstr ""
 
 #: templates/admin/users.html:38
 msgid "Rôle"
-msgstr "Role"
+msgstr ""
 
 #: templates/admin/users.html:39
 msgid "Date de création"
-msgstr "Creation date"
+msgstr ""
 
 #: templates/admin/users.html:40
 msgid "Dernière connexion"
-msgstr "Last login"
+msgstr ""
 
 #: templates/admin/users.html:41
 msgid "Score éco"
 msgstr ""
 
 #: templates/admin/users.html:42
-#, fuzzy
 msgid "Conseil"
-msgstr "Contrast"
+msgstr ""
 
 #: templates/admin/users.html:43
 msgid "Actions"
-msgstr "Actions"
+msgstr ""
 
 #: templates/admin/users.html:69
 msgid "Promouvoir admin"
-msgstr "Promote to admin"
+msgstr ""
 
 #: templates/admin/users.html:71
 msgid "Rétrograder utilisateur"
-msgstr "Demote to user"
+msgstr ""
 
 #: templates/admin/users.html:74
 msgid "Supprimer"
-msgstr "Delete"
-
-#~ msgid "N/A"
-#~ msgstr "N/A"
-
-#~ msgid "Uploader une image de poubelle"
-#~ msgstr "Upload a trash bin image"
-
-#~ msgid "Image uploadée :"
-#~ msgstr "Uploaded image:"
-
-#~ msgid "Bienvenue sur le dashboard !"
-#~ msgstr "Welcome to the dashboard!"
-
-#~ msgid "Vous pouvez visualiser les données de vos poubelles ici."
-#~ msgstr "You can visualize your trash bin data here."
-
-#~ msgid "Nombre total d'annotations :"
-#~ msgstr "Total number of annotations:"
-
-#~ msgid "Nombre d'annotations poubelles pleines :"
-#~ msgstr "Number of full bin annotations:"
-
-#~ msgid "Nombre d'annotations poubelles vides :"
-#~ msgstr "Number of empty bin annotations:"
-
-#~ msgid "Nombre d'annotations non labelisées :"
-#~ msgstr "Number of unlabelled annotations:"
-
-#~ msgid "Choisir une image"
-#~ msgstr "Choose an image"
-
-#~ msgid "Banque de données"
-#~ msgstr "Database"
-
-#~ msgid "Bienvenue sur le Dashboard !"
-#~ msgstr "Welcome to the Dashboard!"
-
-#~ msgid "Banque de données : Images Uploadées"
-#~ msgstr "Database: Uploaded Images"
-
-#~ msgid "Carte interactive"
-#~ msgstr "Interactive map"
-
-#~ msgid "Aucune donnée trouvée dans la base."
-#~ msgstr "No data found in the database."
-
-#~ msgid "Poubelles"
-#~ msgstr "Bins"
-
-#~ msgid "Dernière collecte"
-#~ msgstr "Last collection"
-
-#~ msgid "Zone A"
-#~ msgstr "Zone A"
-
-#~ msgid "Il y a 2 jours"
-#~ msgstr "2 days ago"
-
-#~ msgid "Voir détails"
-#~ msgstr "See details"
-
-#~ msgid "Zone B"
-#~ msgstr "Zone B"
-
-#~ msgid "Il y a 4 jours"
-#~ msgstr "4 days ago"
-
-#~ msgid "Zone C"
-#~ msgstr "Zone C"
-
-#~ msgid "Urgent"
-#~ msgstr "Urgent"
-
-#~ msgid "Il y a 6 jours"
-#~ msgstr "6 days ago"
+msgstr ""
 

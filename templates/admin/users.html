@@ -38,6 +38,8 @@
                 <th>{{ _('Rôle') }}</th>
                 <th>{{ _('Date de création') }}</th>
                 <th>{{ _('Dernière connexion') }}</th>
+                <th>{{ _('Score éco') }}</th>
+                <th>{{ _('Conseil') }}</th>
                 <th>{{ _('Actions') }}</th>
             </tr>
         </thead>
@@ -48,6 +50,20 @@
                     <td>{{ user[2] }}</td>
                     <td>{{ user[3] }}</td>
                     <td>{{ user[4] or _('Jamais') }}</td>
+                    <td>
+                        {% if user_eco[user[0]] %}
+                            <b>{{ user_eco[user[0]].score }}/28</b> <br><span style="font-size:0.85em; color:#888;">{{ user_eco[user[0]].date }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user_eco[user[0]] %}
+                            <b>{{ _(user_eco[user[0]].titre) }}</b><br><span style="font-size:0.9em;">{{ _(user_eco[user[0]].conseil) }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
                     <td class="d-flex gap-2">
                         {% if user[2] == 'user' %}
                             <a href="{{ url_for('promote_user', user_id=user[0]) }}" class="btn btn-success btn-sm" style="margin-right:2.5rem;">{{ _('Promouvoir admin') }}</a>

@@ -3,6 +3,15 @@
 {% block content %}
 <!-- Hero Section -->
 <header class="hero-header" id="home">
+    {% if last_eco %}
+    <div class="container my-4">
+        <div class="alert alert-{{ last_eco.alert }} text-center" style="max-width:600px; margin:0 auto;">
+            <b>{{ _(last_eco.titre) }}</b> – {{ _('Votre dernier score :') }} <b>{{ last_eco.score }}/28</b><br>
+            <span>{{ _(last_eco.conseil) }}</span>
+            <div style="font-size:0.9em; color:#888;">{{ _('Date :') }} {{ last_eco.date }}</div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="hero-content">
        

@@ -1,0 +1,17 @@
+/* Désactive tout effet hover, active et focus sur tous les éléments du questionnaire analyses avancées */
+#ecoForm *:hover,
+#ecoForm *:active {
+    background: none !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    filter: none !important;
+    outline: none !important;
+    cursor: pointer;
+    transition: none !important;
+}
+#ecoForm .form-check-input:focus,
+#ecoForm .form-check-label:focus,
+#ecoForm .form-check:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
