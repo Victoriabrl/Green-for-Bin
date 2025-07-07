@@ -8,7 +8,7 @@
         <input type="date" id="date_filter" name="date_filter" class="form-control" style="max-width: 180px; min-width: 120px;" value="{{ request.args.get('date_filter', '') }}">
         <button type="submit" class="btn btn-outline-success">Filtrer</button>
         {% if request.args.get('date_filter') %}
-            <a href="{{ url_for('afficher_bdd') }}" class="btn btn-link ml-2">Réinitialiser</a>
+            <a href="{{ url_for('afficher_bdd') }}" class="btn btn-link" style="margin-left:2.5rem;">Réinitialiser</a>
         {% endif %}
     </form>
     <div class="table-responsive">

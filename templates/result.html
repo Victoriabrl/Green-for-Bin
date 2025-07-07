@@ -7,8 +7,8 @@
     <h2 class="text-center" style="margin-bottom: 2.5rem;">{{ _("Annotation enregistrée :") }} {{ annotation }}</h2>
     <img src="{{ url_for('static', filename='uploads/' + filename) }}" width="400" loading="lazy" class="mb-4">
     <div class="mt-4 d-flex gap-3 justify-content-center">
-        <a href="{{ url_for('annotate', filename=filename) }}" class="btn btn-warning btn-lg">{{ _('Modifier l\'annotation') }}</a>
-        <a href="{{ url_for('gallery') }}" class="btn btn-success btn-lg">OK</a>
+        <a href="{{ url_for('annotate', filename=filename) }}" class="btn btn-warning btn-lg" style="margin-right:2.5rem;">{{ _('Modifier l\'annotation') }}</a>
+        <a href="{{ url_for('gallery') }}" class="btn btn-success btn-lg" style="margin-left:2.5rem;">OK</a>
     </div>
 </div>
 {% endblock %}
