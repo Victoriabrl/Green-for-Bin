@@ -1,6 +1,9 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import auto_label
+from auto_label import classify_bin_custom
+
 def notify_admin(subject, message, urgent=False):
     # Notification logic: flash for now, email if urgent
     # 1. Flash notification (if in request context)
@@ -93,7 +96,8 @@ import json
 from threading import Thread
 from math import ceil
 from shapely.geometry import shape, Point
-import auto_label
+from auto_label import classify_bin_custom
+
 
 # ==================== CONFIGURATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -522,6 +526,7 @@ def upload():
                     # Utilisation correcte de la classification automatique
                     auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
                     auto_label_result = auto_label.classify_bin(filepath)
+                    print("DEBUG classify_bin:", auto_label_result)
                     if isinstance(auto_label_result, dict):
                         std_h = auto_label_result.get('std_h')
                         std_s = auto_label_result.get('std_s')
@@ -559,6 +564,54 @@ def upload():
                         placeholders = ','.join(['?'] * len(insert_cols))
                         c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                         conn.commit()
+
+                        # --- Notification immédiate si seuil franchi dans l'arrondissement ---
+                        # On ne notifie que si la nouvelle image est une poubelle pleine
+                        if auto_label_str.startswith('pleine') and selected_arr and selected_arr.strip():
+                            arr_name = selected_arr
+                            # Charger le geojson pour trouver le polygone de l'arrondissement
+                            arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+                            try:
+                                with open(arr_file, encoding='utf-8') as f:
+                                    arr_geo = json.load(f)
+                                arr_poly = None
+                                for feature in arr_geo['features']:
+                                    feature_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                                    if feature_name == arr_name:
+                                        arr_poly = shape(feature['geometry'])
+                                        break
+                                if arr_poly:
+                                    # Compter le nombre de pleines dans ce polygone
+                                    c.execute("SELECT localisation FROM images WHERE annotation LIKE 'pleine%' AND localisation IS NOT NULL AND localisation != ''")
+                                    pleines_locs = c.fetchall()
+                                    nb_pleines = 0
+                                    for (loc_str,) in pleines_locs:
+                                        try:
+                                            lat, lon = map(float, loc_str.split(","))
+                                            pt = Point(lon, lat)
+                                            if arr_poly.contains(pt):
+                                                nb_pleines += 1
+                                        except Exception:
+                                            continue
+                                    # Seuils
+                                    seuil_urgent = 11
+                                    seuil_attention = 7
+                                    # Notification à chaque ajout si la zone est à risque, mais une seule (urgence prioritaire)
+                                    if nb_pleines >= seuil_urgent:
+                                        notify_admin(
+                                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                                            urgent=True
+                                        )
+                                    elif nb_pleines >= seuil_attention:
+                                        notify_admin(
+                                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                                            urgent=False
+                                        )
+                            except Exception as e:
+                                print(f"[UPLOAD NOTIF] Erreur notification seuil: {e}")
+
                     flash('Image uploadée avec succès! Veuillez annoter.', 'success')
                     return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label_str}')
                 except Exception as e:
@@ -574,6 +627,8 @@ def upload():
                 else:
                     localisation = random_localisation_france()
                 auto_label_result = auto_label.classify_bin(filepath)
+                print("DEBUG classify_bin:", auto_label_result)
+
                 if isinstance(auto_label_result, dict):
                     std_h = auto_label_result.get('std_h')
                     std_s = auto_label_result.get('std_s')
@@ -682,7 +737,7 @@ def annotate(filename):
                 seuil_v = 49
 
             # Appel à la fonction d'auto-label personnalisée
-            from auto_label import classify_bin_custom
+
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             custom_auto_label_result = classify_bin_custom(
                 image_path,
@@ -993,12 +1048,15 @@ def plot_histogram(data, title=''):
 
 
 
+
 @app.route('/visualisations')
 @login_required
 def stats():
     """Visualisations et statistiques"""
-    # Suppression de la pagination : on affiche tous les arrondissements
-
+    # Pagination pour les arrondissements : 5 par page
+    page = int(request.args.get('page', 1))
+    # print(f"[VISU] page demandée (visualisations): {page} (AJAX: {request.headers.get('X-Requested-With')})")
+    per_page = 5
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
 
@@ -1017,69 +1075,103 @@ def stats():
     # --- Ajout : stats par arrondissement basées sur la base de données ---
     arr_stats = []
     try:
+        # Charger le GeoJSON une seule fois et préparer les polygones
+        arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        arr_polys = []  # Liste de tuples (nom, polygone)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arr_poly = shape(feature['geometry'])
+            arr_polys.append((arr_name, arr_poly))
+
+        # Initialiser les compteurs
+        arr_full_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+        arr_empty_bins = {arr_name: 0 for arr_name, _ in arr_polys}
+
+        # Récupérer toutes les localisations et annotations
         with sqlite3.connect(DB_PATH) as conn:
             c = conn.cursor()
             c.execute("SELECT localisation, annotation FROM images WHERE annotation IS NOT NULL AND localisation IS NOT NULL AND localisation != ''")
-            arr_full_bins = {}
-            arr_empty_bins = {}
-            for row in c.fetchall():
-                loc, annotation = row
-                # On suppose que la localisation est sous forme "lat,lon"
+            for loc, annotation in c.fetchall():
                 try:
                     lat, lon = map(float, loc.split(","))
                 except Exception:
                     continue
-                # Trouver l'arrondissement correspondant
-                arr_name = None
-                with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-                    arr_geo = json.load(f)
-                    for feature in arr_geo['features']:
-                        poly_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-                        arr_poly = shape(feature['geometry'])
-                        if arr_poly.contains(Point(lon, lat)):
-                            arr_name = poly_name
-                            break
-                if not arr_name:
+                pt = Point(lon, lat)
+                arr_name_found = None
+                for arr_name, arr_poly in arr_polys:
+                    if arr_poly.contains(pt):
+                        arr_name_found = arr_name
+                        break
+                if not arr_name_found:
                     continue
                 if annotation.startswith('pleine'):
-                    arr_full_bins[arr_name] = arr_full_bins.get(arr_name, 0) + 1
+                    arr_full_bins[arr_name_found] += 1
                 elif annotation.startswith('vide'):
-                    arr_empty_bins[arr_name] = arr_empty_bins.get(arr_name, 0) + 1
-            # Charger tous les arrondissements pour garantir l'affichage
-            with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
-                arr_geo = json.load(f)
-                for feature in arr_geo['features']:
-                    arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
-                    nb_pleines = arr_full_bins.get(arr_name, 0)
-                    nb_vides = arr_empty_bins.get(arr_name, 0)
-                    # Notification logic
-                    if nb_pleines > 10:
-                        notify_admin(
-                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
-                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
-                            urgent=True
-                        )
-                    elif nb_pleines >= 7:
-                        notify_admin(
-                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
-                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
-                            urgent=False
-                        )
-                    arr_stats.append({
-                        'arr': arr_name,
-                        'nb_pleines': nb_pleines,
-                        'nb_vides': nb_vides
-                    })
+                    arr_empty_bins[arr_name_found] += 1
+
+        # --- Notification uniquement si une nouvelle poubelle pleine est ajoutée dans une zone à risque ---
+        # On stocke en session les arrondissements déjà notifiés (pour la session utilisateur)
+        notified_urgent = session.get('notified_urgent', set())
+        notified_attention = session.get('notified_attention', set())
+        # Si la session ne peut pas stocker un set, on utilise une liste
+        if isinstance(notified_urgent, list):
+            notified_urgent = set(notified_urgent)
+        if isinstance(notified_attention, list):
+            notified_attention = set(notified_attention)
+        for arr_name, _ in arr_polys:
+            nb_pleines = arr_full_bins.get(arr_name, 0)
+            nb_vides = arr_empty_bins.get(arr_name, 0)
+            # Notification logic (uniquement si le nombre de pleines vient de franchir le seuil)
+            if nb_pleines > 10:
+                if arr_name not in notified_urgent:
+                    notify_admin(
+                        subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                        message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                        urgent=True
+                    )
+                    notified_urgent.add(arr_name)
+            elif nb_pleines >= 7:
+                if arr_name not in notified_attention:
+                    notify_admin(
+                        subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                        message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                        urgent=False
+                    )
+                    notified_attention.add(arr_name)
+            arr_stats.append({
+                'arr': arr_name,
+                'nb_pleines': nb_pleines,
+                'nb_vides': nb_vides
+            })
+        # Mise à jour de la session pour ne pas renvoyer plusieurs fois
+        session['notified_urgent'] = list(notified_urgent)
+        session['notified_attention'] = list(notified_attention)
     except Exception as e:
-        print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
+        # print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
         # Fallback: ancienne méthode
         arr_stats = [
-            {'arr': f"{i}e", 'nb_pleines': 0}
+            {'arr': f"{i}e", 'nb_pleines': 0, 'nb_vides': 0}
             for i in range(1, 21)
         ]
 
-    # On affiche tous les arrondissements, pas de pagination
-    arr_stats_page = arr_stats  # Pour compatibilité temporaire, mais on va nettoyer plus bas
+    # Tri par numéro d'arrondissement (si possible)
+    def arrondissement_key(stat):
+        import re
+        match = re.match(r"(\d+)", stat['arr'])
+        return int(match.group(1)) if match else 0
+
+    arr_stats = sorted(arr_stats, key=arrondissement_key)
+    arr_stats_all = arr_stats.copy()  # Pour les graphiques (tous les arrondissements)
+
+    # Pagination sur arr_stats (pour le tableau)
+    total_arr = len(arr_stats)
+    total_pages = max(1, (total_arr + per_page - 1) // per_page)
+    start = (page - 1) * per_page
+    end = start + per_page
+    arr_stats_page = arr_stats[start:end]
+    # Suppression du print de debug, affichage normal des pages
 
     # Affichage du graphique donut pour le nombre d'annotations
     donut_values = [total_annotations, 720 - total_annotations]  # 720 est le nombre total d'images attendues
@@ -1167,6 +1259,9 @@ def stats():
                 std_h_mean, std_s_mean, std_v_mean = res
         except Exception:
             pass
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Si AJAX, ne renvoyer que le tableau paginé (HTML partiel)
+        return render_template('_arr_table.html', arr_stats=arr_stats_page, page=page, total_pages=total_pages)
     return render_template('visualisations.html',
                            total_annotations=total_annotations,
                            full_annotations=full_annotations,
@@ -1177,10 +1272,13 @@ def stats():
                            occ_size_files=occ_size_files,
                            img_base64_distribution=img_base64_distribution,
                            img_base64_nombre=img_base64_nombre,
-                           arr_stats=arr_stats,
+                           arr_stats=arr_stats_page,  # Pour le tableau (paginé)
+                           arr_stats_all=arr_stats_all,  # Pour les graphiques (complet)
                            std_h_mean=std_h_mean,
                            std_s_mean=std_s_mean,
-                           std_v_mean=std_v_mean)
+                           std_v_mean=std_v_mean,
+                           page=page,
+                           total_pages=total_pages)
 
 
 

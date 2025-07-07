@@ -3,160 +3,148 @@
 {% block title %}Visualisations{% endblock %}
 
 {% block content %}
-    <h1 class="text-center">{{ _('Vous pouvez visualiser les données de vos poubelles ici.') }}</h1>
+<div class="container-fluid py-4">
+    <h1 class="text-center mb-4 fw-bold" style="letter-spacing:1px;">{{ _('Dashboard des Poubelles') }}</h1>
 
-    <h2 class="text-center">{{ _('Statistiques') }}</h2>
-    <div class="table-responsive d-flex justify-content-center">
-        <table id="stats-table" class="table table-striped table-hover align-middle custom-table-center" style="max-width: 600px;">
-            <thead>
-                <tr>
-                    <th>{{ _('Type') }}</th>
-                    <th>{{ _('Valeur') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ _('Nombre total d\'annotations') }}</td>
-                    <td>{{ total_annotations }}</td>
-                </tr>
-                <tr>
-                    <td>{{ _('Nombre d\'annotations poubelles pleines') }}</td>
-                    <td>{{ full_annotations }}</td>
-                </tr>
-                <tr>
-                    <td>{{ _('Pourcentage pleines') }}</td>
-                    <td>
-                        {% if total_annotations > 0 %}
-                            {{ ((full_annotations / total_annotations) * 100) | round(1) }}%
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>{{ _('Nombre d\'annotations poubelles vides') }}</td>
-                    <td>{{ empty_annotations }}</td>
-                </tr>
-                <tr>
-                    <td>{{ _('Pourcentage vides') }}</td>
-                    <td>
-                        {% if total_annotations > 0 %}
-                            {{ ((empty_annotations / total_annotations) * 100) | round(1) }}%
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </td>
-                </tr>
-                <tr>
-                    <td>{{ _('Nombre d\'annotations non labelisées') }}</td>
-                    <td>{{ non_labelled_annotations }}</td>
-                </tr>
-                
-                
-            </tbody>
-        </table>
-    </div>
-
-    <h2 class="mt-4 text-center">{{ _('Visualisations') }}</h2>
-    <div class="row mb-4 justify-content-center">
-        <div class="col-md-6 d-flex justify-content-center">
-            <canvas id="progressChart" style="max-width: 100%; height: 260px;"></canvas>
+    <!-- Première ligne : Statistiques | Progression des annotations | Répartition Pleines/Vides côte à côte -->
+    <div class="row g-0 mb-3 dashboard-gap">
+        <!-- Statistiques -->
+        <div class="col-12 col-xl-4 col-lg-4 d-flex align-items-stretch">
+            <div class="card shadow-sm w-100 h-100">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Statistiques') }}</div>
+                <div class="card-body p-0">
+                    <table id="stats-table" class="table table-striped table-hover align-middle custom-table-center mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ _('Type') }}</th>
+                                <th>{{ _('Valeur') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ _('Total de poubelles') }}</td>
+                                <td>{{ total_annotations }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ _('Poubelles pleines') }}</td>
+                                <td>{{ full_annotations }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ _('Pourcentage pleines') }}</td>
+                                <td>{% if total_annotations > 0 %}{{ ((full_annotations / total_annotations) * 100) | round(1) }}%{% else %}N/A{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ _('Poubelles vides') }}</td>
+                                <td>{{ empty_annotations }}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ _('Pourcentage vides') }}</td>
+                                <td>{% if total_annotations > 0 %}{{ ((empty_annotations / total_annotations) * 100) | round(1) }}%{% else %}N/A{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td>{{ _('Non labelisées') }}</td>
+                                <td>{{ non_labelled_annotations }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6 d-flex justify-content-center">
-            <canvas id="repartition" style="max-width: 100%; height: 260px;"></canvas>
+        <!-- Progression des annotations -->
+        <div class="col-12 col-xl-4 col-lg-4 d-flex align-items-stretch">
+            <div class="card shadow-sm w-100 h-100">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Progression des annotations') }}</div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="height: 520px;">
+                    <canvas id="progressChart" style="max-width: 100%; height: 440px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Répartition Pleines/Vides -->
+        <div class="col-12 col-xl-4 col-lg-4 d-flex align-items-stretch">
+            <div class="card shadow-sm w-100 h-100">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Répartition Pleines/Vides') }}</div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="height: 520px;">
+                    <canvas id="repartition" style="max-width: 100%; height: 440px;"></canvas>
+                </div>
+            </div>
         </div>
     </div>
-
-
-
-    <div class="row mb-4">
+    <!-- Deuxième ligne : Répartition par Arrondissement -->
+    <div class="row g-3 mb-3 dashboard-gap">
         <div class="col-12">
-            <canvas id="arrondissementChart" style="max-width: 400px; height: 300px; margin: auto; display: block;"></canvas>
+            <div class="card shadow-sm w-100 h-100" style="min-height: 100%; min-width: 100%;">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Répartition par Arrondissement') }}</div>
+                <div class="card-body d-flex justify-content-center align-items-center" style="height: 520px;">
+                    <canvas id="arrondissementChart" style="max-width: 100%; height: 440px;"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 
-    <img src="{{ image_base64 }}" alt="Graphique" class="img-fluid mb-2">
-    <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-4">
-
-    <!-- Tableau des moyennes std_h, std_s, std_v -->
-    <div class="row mb-4 justify-content-center">
-        <div class="col-12 text-center">
-            <h5>{{ _('Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)') }}</h5>
-            <table class="table table-bordered table-striped w-auto custom-table-center" style="max-width:400px">
-                <thead>
-                    <tr>
-                        <th>Couleur</th>
-                        <th>Saturation</th>
-                        <th>Luminosité</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>{{ std_h_mean|default('N/A')|round(2) if std_h_mean is not none else 'N/A' }}</td>
-                        <td>{{ std_s_mean|default('N/A')|round(2) if std_s_mean is not none else 'N/A' }}</td>
-                        <td>{{ std_v_mean|default('N/A')|round(2) if std_v_mean is not none else 'N/A' }}</td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Deuxième ligne : Graphiques supplémentaires + Moyennes HSV -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Graphiques supplémentaires') }}</div>
+                <div class="card-body text-center">
+                    <img src="{{ image_base64 }}" alt="Graphique" class="img-fluid mb-2">
+                    <img src="{{ img_base64_nombre }}" alt="Graphique de nombre d'images" class="img-fluid mb-2">
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Moyennes des écarts-types HSV (Couleur, Saturation, Luminosité)') }}</div>
+                <div class="card-body p-0 d-flex align-items-center justify-content-center" style="height:100%;">
+                    <table class="table table-bordered table-striped w-auto custom-table-center mb-0" style="max-width:400px">
+                        <thead>
+                            <tr>
+                                <th>Couleur</th>
+                                <th>Saturation</th>
+                                <th>Luminosité</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ std_h_mean|default('N/A')|round(2) if std_h_mean is not none else 'N/A' }}</td>
+                                <td>{{ std_s_mean|default('N/A')|round(2) if std_s_mean is not none else 'N/A' }}</td>
+                                <td>{{ std_v_mean|default('N/A')|round(2) if std_v_mean is not none else 'N/A' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- NOUVEAU : Tableau par arrondissement -->
-    <section class="section" id="arrondissements-stats" style="background: #fff;">
-        <div class="container">
-            <h2 class="section-title text-center">{{ _('Tableau de Bord par Arrondissement') }}</h2>
-            <div class="row justify-content-center">
-                <div class="col-12">
-                    <div class="modern-table">
-                        <table id="arr-table" class="table table-hover mb-0 custom-table-center" style="max-width:900px; margin:auto;">
-                            <thead>
-                                <tr>
-                                    <th>{{ _('Arrondissement') }}</th>
-                                    <th>{{ _('Poubelles pleines') }}</th>
-                                    <th>{{ _('Poubelles vides') }}</th>
-                                    <th>{{ _('%% Pleines') }}</th>
-                                    <th>{{ _('%% Vides') }}</th>
-                                    <th>{{ _('Statut') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for stat in arr_stats %}
-                                <tr>
-                                    <td>{{ stat.arr }}</td>
-                                    <td>{{ stat.nb_pleines }}</td>
-                                    <td>{{ stat.nb_vides if stat.nb_vides is defined else 'N/A' }}</td>
-                                    <td>
-                                        {% set total = (stat.nb_pleines + (stat.nb_vides if stat.nb_vides is defined else 0)) %}
-                                        {% if total > 0 %}{{ ((stat.nb_pleines / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if total > 0 %}{{ ((stat.nb_vides / total) * 100) | round(1) }}%{% else %}N/A{% endif %}
-                                    </td>
-                                    <td>
-                                        {% if stat.nb_pleines < 7 %}
-                                            <span class="badge bg-success">{{ _('Optimal') }}</span>
-                                        {% elif stat.nb_pleines <= 10 %}
-                                            <span class="badge bg-warning">{{ _('Attention') }}</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">{{ _('Zone à risque') }}</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-
-                        </table>
-                        <!-- Pagination Controls -->
-                        {# Pagination supprimée, affichage direct de tout le tableau #}
+    <!-- Troisième ligne : Tableau par arrondissement -->
+    <div class="row g-3 mb-3 justify-content-center">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light-green text-center fw-bold">{{ _('Tableau de Bord par Arrondissement') }}</div>
+                <div class="card-body p-0">
+                    <div id="arr-table-container">
+                        {% include '_arr_table.html' %}
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</div>
 
     <!-- CSS + JS externes -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css"/>
     <style>
+    /* Espacement plus large entre les cards du dashboard */
+    .dashboard-gap {
+        gap: 0 !important;
+    }
+    .dashboard-gap .card {
+        margin-bottom: 0 !important;
+    }
+    .card {
+        margin-bottom: 0 !important;
+    }
     /* Coins arrondis uniquement sur les coins extérieurs du tableau */
     .custom-table-center {
         margin-left: auto;
@@ -232,28 +220,79 @@
 
     <!-- Variables injectées par Jinja -->
     <script>
-        var xValues = ["{{ _('pleines') }}", "{{ _('vides') }}"];
-        var yValues = [{{ full_annotations|tojson }}, {{ empty_annotations|tojson }}];
-        var barColors = ["#8fbc8f", "#fefefe"];
-        var nbFichiersLabel = "{{ _('Nombre de fichiers') }}";
-        var tailleOctetsLabel = "{{ _('Taille (octets)') }}";
-        var aucuneDonnee = "{{ _('Aucune donnée disponible') }}";
-        var total_annot = {{ total_annotations | tojson }};
-        var total_possible = 720;
-        var arrLabels = [
-            {% for stat in arr_stats %}
-                "{{ stat.arr }}"{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        ];
-        var arrPleines = [
-            {% for stat in arr_stats %}
-                {{ stat.nb_pleines }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        ];
+var arrLabels = {{ arr_stats_all | map(attribute='arr') | list | tojson | safe }};
+var arrPleines = {{ arr_stats_all | map(attribute='nb_pleines') | list | tojson | safe }};
+var xValues = ["{{ _('pleines') }}", "{{ _('vides') }}"];
+var yValues = [{{ full_annotations|tojson }}, {{ empty_annotations|tojson }}];
+var barColors = ["#8fbc8f", "#fefefe"];
+var nbFichiersLabel = "{{ _('Nombre de fichiers') }}";
+var tailleOctetsLabel = "{{ _('Taille (octets)') }}";
+var aucuneDonnee = "{{ _('Aucune donnée disponible') }}";
+var total_annot = {{ total_annotations | tojson }};
+var total_possible = 720;
     </script>
 
     <!-- JS principal -->
     <script>
+    // Pagination AJAX pour le tableau d'arrondissement
+    function handleArrPaginationClick(e) {
+        // Si lien désactivé, ne rien faire
+        if (this.parentElement.classList.contains('disabled') || this.parentElement.classList.contains('active')) {
+            e.preventDefault();
+            return;
+        }
+        e.preventDefault();
+        var url = this.getAttribute('href');
+        // Détruire DataTables avant de remplacer le HTML (sinon bug d'affichage)
+        if ($.fn.DataTable && $('#arr-table').length && $('#arr-table').hasClass('dataTable')) {
+            $('#arr-table').DataTable().destroy();
+        }
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(function(response) { return response.text(); })
+            .then(function(html) {
+                // Extraire le nouveau tableau + pagination du HTML reçu
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var newTable = doc.querySelector('#arr-table-container');
+                if (newTable) {
+                    document.getElementById('arr-table-container').innerHTML = newTable.innerHTML;
+                }
+                // Ré-initialiser DataTables sur le nouveau tableau
+                if ($.fn.DataTable && $('#arr-table').length) {
+                    $('#arr-table').DataTable({
+                        paging: false,
+                        searching: false,
+                        info: false,
+                        ordering: false,
+                        responsive: true,
+                        language: {
+                            emptyTable: aucuneDonnee
+                        }
+                    });
+                }
+                // Re-bind les events sur les nouveaux liens
+                document.querySelectorAll('#arr-pagination-nav a.page-link').forEach(function(link) {
+                    link.addEventListener('click', handleArrPaginationClick);
+                });
+                // Scroll vers le tableau
+                var el = document.getElementById('arr-table');
+                if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'});
+            });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('#arr-pagination-nav a.page-link').forEach(function(link) {
+            link.addEventListener('click', handleArrPaginationClick);
+        });
+    });
+    // Scroll automatique vers le tableau d'arrondissement si l'URL contient #arr-table
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.location.hash === '#arr-table') {
+            var el = document.getElementById('arr-table');
+            if (el) {
+                el.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
+        }
+    });
     $(document).ready(function() {
         $('#stats-table').DataTable({
             paging: false,
