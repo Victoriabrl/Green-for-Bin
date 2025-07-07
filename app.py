@@ -559,6 +559,54 @@ def upload():
                         placeholders = ','.join(['?'] * len(insert_cols))
                         c.execute(f"INSERT INTO images ({','.join(insert_cols)}) VALUES ({placeholders})", values)
                         conn.commit()
+
+                        # --- Notification immédiate si seuil franchi dans l'arrondissement ---
+                        # On ne notifie que si la nouvelle image est une poubelle pleine
+                        if auto_label_str.startswith('pleine') and selected_arr and selected_arr.strip():
+                            arr_name = selected_arr
+                            # Charger le geojson pour trouver le polygone de l'arrondissement
+                            arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+                            try:
+                                with open(arr_file, encoding='utf-8') as f:
+                                    arr_geo = json.load(f)
+                                arr_poly = None
+                                for feature in arr_geo['features']:
+                                    feature_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+                                    if feature_name == arr_name:
+                                        arr_poly = shape(feature['geometry'])
+                                        break
+                                if arr_poly:
+                                    # Compter le nombre de pleines dans ce polygone
+                                    c.execute("SELECT localisation FROM images WHERE annotation LIKE 'pleine%' AND localisation IS NOT NULL AND localisation != ''")
+                                    pleines_locs = c.fetchall()
+                                    nb_pleines = 0
+                                    for (loc_str,) in pleines_locs:
+                                        try:
+                                            lat, lon = map(float, loc_str.split(","))
+                                            pt = Point(lon, lat)
+                                            if arr_poly.contains(pt):
+                                                nb_pleines += 1
+                                        except Exception:
+                                            continue
+                                    # Seuils
+                                    seuil_urgent = 11
+                                    seuil_attention = 7
+                                    # Notification à chaque ajout si la zone est à risque, mais une seule (urgence prioritaire)
+                                    if nb_pleines >= seuil_urgent:
+                                        notify_admin(
+                                            subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                                            urgent=True
+                                        )
+                                    elif nb_pleines >= seuil_attention:
+                                        notify_admin(
+                                            subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                                            message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                                            urgent=False
+                                        )
+                            except Exception as e:
+                                print(f"[UPLOAD NOTIF] Erreur notification seuil: {e}")
+
                     flash('Image uploadée avec succès! Veuillez annoter.', 'success')
                     return redirect(url_for('annotate', filename=filename) + f'?auto_label={auto_label_str}')
                 except Exception as e:
@@ -1056,28 +1104,43 @@ def stats():
                 elif annotation.startswith('vide'):
                     arr_empty_bins[arr_name_found] += 1
 
-        # Construire la liste finale pour l'affichage
+        # --- Notification uniquement si une nouvelle poubelle pleine est ajoutée dans une zone à risque ---
+        # On stocke en session les arrondissements déjà notifiés (pour la session utilisateur)
+        notified_urgent = session.get('notified_urgent', set())
+        notified_attention = session.get('notified_attention', set())
+        # Si la session ne peut pas stocker un set, on utilise une liste
+        if isinstance(notified_urgent, list):
+            notified_urgent = set(notified_urgent)
+        if isinstance(notified_attention, list):
+            notified_attention = set(notified_attention)
         for arr_name, _ in arr_polys:
             nb_pleines = arr_full_bins.get(arr_name, 0)
             nb_vides = arr_empty_bins.get(arr_name, 0)
-            # Notification logic
+            # Notification logic (uniquement si le nombre de pleines vient de franchir le seuil)
             if nb_pleines > 10:
-                notify_admin(
-                    subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
-                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
-                    urgent=True
-                )
+                if arr_name not in notified_urgent:
+                    notify_admin(
+                        subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
+                        message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est critique ({nb_pleines}). Veuillez intervenir rapidement !",
+                        urgent=True
+                    )
+                    notified_urgent.add(arr_name)
             elif nb_pleines >= 7:
-                notify_admin(
-                    subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
-                    message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
-                    urgent=False
-                )
+                if arr_name not in notified_attention:
+                    notify_admin(
+                        subject=f"[GreenForBin] Attention : Zone à surveiller ({arr_name})",
+                        message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
+                        urgent=False
+                    )
+                    notified_attention.add(arr_name)
             arr_stats.append({
                 'arr': arr_name,
                 'nb_pleines': nb_pleines,
                 'nb_vides': nb_vides
             })
+        # Mise à jour de la session pour ne pas renvoyer plusieurs fois
+        session['notified_urgent'] = list(notified_urgent)
+        session['notified_attention'] = list(notified_attention)
     except Exception as e:
         # print(f"[VISU] Erreur lors du calcul des stats par arrondissement: {e}")
         # Fallback: ancienne méthode
