@@ -41,6 +41,18 @@ header h1 {
     transition: background 0.2s;
 }
 
+
+/* Désactive tout effet hover sur le questionnaire analyses avancées */
+#ecoForm *:hover,
+#ecoForm *:active,
+#ecoForm *:focus {
+    background: none !important;
+    color: inherit !important;
+    box-shadow: none !important;
+    filter: none !important;
+    outline: none !important;
+    transition: none !important;
+}
 .card {
     border-radius: 16px;
     box-shadow: 0 4px 24px 0 rgba(79, 124, 89, 0.10);

@@ -124,6 +124,22 @@ def get_locale():
 def inject_locale():
     return dict(get_locale=get_locale)
 
+@app.context_processor
+def inject_user_level():
+    def user_level():
+        if 'user_id' in session:
+            try:
+                with sqlite3.connect(DB_PATH) as conn:
+                    c = conn.cursor()
+                    c.execute("SELECT xp FROM users WHERE id = ?", (session['user_id'],))
+                    row = c.fetchone()
+                    xp = row[0] if row and row[0] is not None else 0
+                return get_user_level(xp)
+            except Exception as e:
+                print(f"[USER LEVEL] {e}")
+        return get_user_level(0)
+    return dict(user_level=user_level)
+
 
 babel = Babel(app, locale_selector=get_locale)
 
@@ -154,6 +170,18 @@ def init_db():
     """Initialise la base de données avec les tables nécessaires"""
     with sqlite3.connect(DB_PATH) as conn:
         c = conn.cursor()
+
+        # Table pour stocker les résultats des questionnaires analyses avancées
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS user_eco_analysis (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                date_filled TEXT NOT NULL,
+                score INTEGER NOT NULL,
+                details TEXT,
+                FOREIGN KEY(user_id) REFERENCES users(id)
+            )
+        ''')
 
         # Table pour les images (ajout std_h, std_s, std_v si non présents)
         c.execute('''
@@ -191,9 +219,15 @@ def init_db():
                 password_hash TEXT NOT NULL,
                 role TEXT NOT NULL DEFAULT 'user',
                 created_at TEXT NOT NULL,
-                last_login TEXT
+                last_login TEXT,
+                xp INTEGER DEFAULT 0
             )
         ''')
+        # Migration : ajout colonne xp si manquante
+        try:
+            c.execute("ALTER TABLE users ADD COLUMN xp INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
 
         conn.commit()
 
@@ -202,11 +236,47 @@ def init_db():
         if c.fetchone()[0] == 0:
             admin_hash = generate_password_hash('admin123')
             c.execute('''
-                INSERT INTO users (username, password_hash, role, created_at)
-                VALUES (?, ?, 'admin', ?)
+                INSERT INTO users (username, password_hash, role, created_at, xp)
+                VALUES (?, ?, 'admin', ?, 0)
             ''', ('admin', admin_hash, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             conn.commit()
             print("Admin par défaut créé - Login: admin, Mot de passe: admin123")
+def get_user_level(xp):
+    # Niveaux tous les 50 XP
+    levels = [
+        (0, u"Petit Ramasseur", u"Tu viens de découvrir l’univers du tri. Tu fais tes premiers pas vers le propre."),
+        (50, u"Témoin de Bac", u"Tu prends les poubelles en flagrant délit. Tu commences à documenter !"),
+        (100, u"Photographe de Poubelles", u"L’art du cliché… version plastique. Tu sais trouver LE bon angle."),
+        (150, u"Trashémon Dresseur", u"Tu les repères, tu les captures. Mais pas pour les garder !"),
+        (200, u"Détective du Déchet", u"Rien ne t’échappe : canettes, cartons, sacs éventrés… Tu mènes l’enquête."),
+        (250, u"Ninja du Nettoyage", u"Tu agis vite, tu shoots net. Invisible mais indispensable."),
+        (300, u"Captain Clean", u""),
+        (350, u"Lumière Verte", u"Ton aura écologique éclaire les autres."),
+        (400, u"Seigneur·e Zéro Déchet", u"")
+    ]
+    current = levels[0]
+    next_level = None
+    for lvl in levels:
+        if xp >= lvl[0]:
+            current = lvl
+        elif xp < lvl[0]:
+            next_level = lvl
+            break
+    # Progression vers le prochain niveau
+    if next_level:
+        progress = int(100 * (xp - current[0]) / (next_level[0] - current[0]))
+        next_xp = next_level[0]
+    else:
+        progress = 100
+        next_xp = current[0]
+    return {
+        "level": levels.index(current) + 1,
+        "title": current[1],
+        "desc": current[2],
+        "progress": progress,
+        "xp": xp,
+        "next_xp": next_xp
+    }
 
 
 # ==================== AUTHENTIFICATION ====================
@@ -412,12 +482,67 @@ def classify_bin_automatically(avg_color, file_size, contrast, contour_count, im
 
 # ==================== ROUTES PRINCIPALES ====================
 
+
+# Route pour la page Analyses Avancées (GET + POST)
+@app.route('/analyses_avancees', methods=['GET', 'POST'])
+def analyses_avancees():
+    """Page d'analyses avancées avec questionnaire interactif et sauvegarde"""
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        try:
+            score = 0
+            details = {}
+            for i in range(1, 8):
+                val = int(request.form.get(f'q{i}', 0))
+                score += val
+                details[f'q{i}'] = val
+            details_str = json.dumps(details, ensure_ascii=False)
+            with sqlite3.connect(DB_PATH) as conn:
+                c = conn.cursor()
+                c.execute('''INSERT INTO user_eco_analysis (user_id, date_filled, score, details) VALUES (?, ?, ?, ?)''',
+                          (session['user_id'], datetime.now().strftime("%Y-%m-%d %H:%M:%S"), score, details_str))
+                conn.commit()
+            return jsonify(success=True, score=score)
+        except Exception as e:
+            return jsonify(success=False, error=str(e))
+    return render_template('analyses_avancees.html')
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     # Ajout : stats arrondissements (3 premières lignes) pour la page d'accueil
     arr_stats = []
+    # Récupérer le dernier questionnaire éco de l'utilisateur
+    last_eco = None
+    if 'user_id' in session:
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                c = conn.cursor()
+                c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC LIMIT 1", (session['user_id'],))
+                row = c.fetchone()
+                if row:
+                    score, date_filled = row
+                    if score >= 24:
+                        conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                        titre = 'Éco-expert 🌱'
+                        alert = 'success'
+                    elif score >= 18:
+                        conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                        titre = 'Bon élève ♻️'
+                        alert = 'info'
+                    elif score >= 12:
+                        conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                        titre = 'Éco-curieux 🧐'
+                        alert = 'warning'
+                    else:
+                        conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                        titre = 'Débutant·e 🐣'
+                        alert = 'danger'
+                    last_eco = dict(score=score, date=date_filled, conseil=conseil, titre=titre, alert=alert)
+        except Exception as e:
+            print(f"[INDEX] Erreur récupération eco_analysis: {e}")
     try:
         with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
             arr_geo = json.load(f)
@@ -457,7 +582,7 @@ def index():
 
     arr_stats = sorted(arr_stats, key=arrondissement_key)
 
-    return render_template('about.html', arr_stats=arr_stats)
+    return render_template('about.html', arr_stats=arr_stats, last_eco=last_eco)
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -509,6 +634,16 @@ def upload():
             # Compression de l'image
             compress_image(temp_path, filepath)
             os.remove(temp_path)
+
+            # Ajout XP à l'utilisateur (hors admin)
+            if session.get('role') != 'admin':
+                try:
+                    with sqlite3.connect(DB_PATH) as conn:
+                        c = conn.cursor()
+                        c.execute("UPDATE users SET xp = COALESCE(xp,0) + 10 WHERE id = ?", (session['user_id'],))
+                        conn.commit()
+                except Exception as e:
+                    print(f"[XP] Erreur ajout XP : {e}")
 
             if session.get('role') == 'admin':
                 try:
@@ -850,9 +985,31 @@ def admin_users():
             ORDER BY created_at DESC
         """)
         users = c.fetchall()
+        # Récupérer le dernier score et conseil pour chaque utilisateur
+        user_eco = {}
+        for user in users:
+            c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC LIMIT 1", (user[0],))
+            row = c.fetchone()
+            if row:
+                score, date_filled = row
+                if score >= 24:
+                    conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                    titre = 'Éco-expert 🌱'
+                elif score >= 18:
+                    conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                    titre = 'Bon élève ♻️'
+                elif score >= 12:
+                    conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                    titre = 'Éco-curieux 🧐'
+                else:
+                    conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                    titre = 'Débutant·e 🐣'
+                user_eco[user[0]] = dict(score=score, date=date_filled, conseil=conseil, titre=titre)
+            else:
+                user_eco[user[0]] = None
         c.execute("SELECT COUNT(*) FROM users WHERE role = 'admin'")
         admin_count = c.fetchone()[0]
-    return render_template('admin/users.html', users=users, admin_count=admin_count)
+    return render_template('admin/users.html', users=users, admin_count=admin_count, user_eco=user_eco)
 
 @app.route('/admin/create_admin', methods=['POST'])
 @admin_required

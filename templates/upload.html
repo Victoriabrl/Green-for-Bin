@@ -17,25 +17,29 @@
             </label>
             <input id="file-upload" type="file" name="image" accept=".jpg, .jpeg, .png" style="display:none" required>
             <span id="file-name" class="mb-3">{{ _('Aucun fichier choisi') }}</span>
+            <button type="button" id="camera-btn" class="btn btn-outline-primary mb-2 w-100">{{ _('Prendre une photo avec la caméra') }}</button>
+            <video id="camera-stream" width="100%" height="240" autoplay playsinline style="display:none;"></video>
+            <canvas id="capture-canvas" width="640" height="480" style="display:none;"></canvas>
+            <button type="button" id="capture-btn" class="btn btn-primary mb-2 w-100" style="display:none;">{{ _('Capturer la photo') }}</button>
         </div>
         <div class="form-group mt-3 w-100">
-            <label for="arrondissement">Choisir un arrondissement (optionnel) :</label>
+            <label for="arrondissement">{{ _('Choisir un arrondissement (optionnel) :') }}</label>
             <select class="form-control" id="arrondissement" name="arrondissement">
-                <option value="">-- Aucun (aléatoire dans Paris) --</option>
+                <option value="">{{ _('-- Aucun (aléatoire dans Paris) --') }}</option>
                 {% for arr in arrondissements %}
                     <option value="{{ arr }}">{{ arr }}</option>
                 {% endfor %}
             </select>
         </div>
         <div class="form-group mt-3 w-100">
-            <label for="date_upload">Date et heure (optionnel) :</label>
+            <label for="date_upload">{{ _('Date et heure (optionnel) :') }}</label>
             <input type="datetime-local" class="form-control" id="date_upload" name="date_upload">
         </div>
-        <button type="submit" class="btn btn-outline-success mt-3 w-100">Uploader</button>
+        <button type="submit" class="btn btn-outline-success mt-3 w-100">{{ _('Uploader') }}</button>
     </form>
     {% if session.role != 'admin' %}
     <div id="progress-container" class="progress mt-3 w-100" style="height: 30px; display: none; max-width:500px;">
-        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; height: 100%;">0%</div>
+        <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; height: 100%;">{{ _('0%') }}</div>
     </div>
     <div id="prediction-result" class="mt-3 text-center"></div>
     {% endif %}
@@ -47,6 +51,61 @@
 document.getElementById('file-upload').addEventListener('change', function() {
     var fileName = this.files.length > 0 ? this.files[0].name : "{{ _('Aucun fichier choisi') }}";
     document.getElementById('file-name').textContent = fileName;
+});
+
+const cameraBtn = document.getElementById('camera-btn');
+const cameraStream = document.getElementById('camera-stream');
+const captureBtn = document.getElementById('capture-btn');
+const captureCanvas = document.getElementById('capture-canvas');
+const fileInput = document.getElementById('file-upload');
+const fileNameSpan = document.getElementById('file-name');
+
+let stream = null;
+
+cameraBtn.addEventListener('click', async function() {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            cameraStream.srcObject = stream;
+            cameraStream.style.display = 'block';
+            captureBtn.style.display = 'block';
+            captureCanvas.style.display = 'none';
+        } catch (err) {
+            alert("{{ _('Impossible d\'accéder à la caméra.') }}");
+        }
+    } else {
+        alert("{{ _('La capture par caméra n\'est pas supportée sur cet appareil.') }}");
+    }
+});
+
+captureBtn.addEventListener('click', function() {
+    const context = captureCanvas.getContext('2d');
+    captureCanvas.width = cameraStream.videoWidth;
+    captureCanvas.height = cameraStream.videoHeight;
+    context.drawImage(cameraStream, 0, 0, cameraStream.videoWidth, cameraStream.videoHeight);
+    captureCanvas.style.display = 'block';
+    // Arrêter le flux vidéo
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+    cameraStream.style.display = 'none';
+    captureBtn.style.display = 'none';
+    // Convertir l'image capturée en blob et la placer dans le champ file-upload
+    captureCanvas.toBlob(function(blob) {
+        const dt = new DataTransfer();
+        const now = new Date();
+        const defaultName = `photo_${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}.png`;
+        const file = new File([blob], defaultName, { type: 'image/png', lastModified: now.getTime() });
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileNameSpan.textContent = file.name;
+        // Remplir automatiquement la date de prise
+        const dateInput = document.getElementById('date_upload');
+        if (dateInput) {
+            const local = now.toISOString().slice(0,16);
+            dateInput.value = local;
+        }
+    }, 'image/png');
 });
 </script>
 {% if session.role != 'admin' %}
