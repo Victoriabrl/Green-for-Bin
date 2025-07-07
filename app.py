@@ -1187,31 +1187,29 @@ def stats():
 @app.route('/gallery')
 @login_required
 def gallery():
-    """Galerie d'images avec pagination et carrousel, métadonnées au clic"""
-    page = int(request.args.get('page', 1))
-    per_page = 5
-    offset = (page - 1) * per_page
+    """Galerie d'images sans pagination, affichage en grille, déduplication côté backend"""
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        # Images vides
-        c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        # Récupérer toutes les images par catégorie
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%'")
         vides = [dict(row) for row in c.fetchall()]
-        # Images pleines
-        c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%'")
         pleines = [dict(row) for row in c.fetchall()]
-        # Images non annotées
-        c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+        c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = ''")
         non_labelisees = [dict(row) for row in c.fetchall()]
-        # Nombre total pour la pagination
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%vide%'")
-        total_vides = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%pleine%'")
-        total_pleines = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
-        total_non_label = c.fetchone()[0]
-    total_pages = max(ceil(max(total_vides, total_pleines, total_non_label) / per_page), 1)
-    return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees, page=page, total_pages=total_pages)
+
+        # Déduplication pour "Toutes les images" (par filename)
+        all_images = vides + pleines + non_labelisees
+        seen = set()
+        toutes_les_images = []
+        for img in all_images:
+            fname = img.get('filename')
+            if fname and fname not in seen:
+                toutes_les_images.append(img)
+                seen.add(fname)
+
+    return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees, toutes_les_images=toutes_les_images)
 
 
 # ==================== CARTE ====================
@@ -1360,3 +1358,25 @@ if __name__ == '__main__':
     print("Base de données initialisée.")
     print("Admin par défaut - Login: admin, Mot de passe: admin123")
     app.run(debug=True)
+@app.route('/delete_last_upload', methods=['POST'])
+@login_required
+def delete_last_upload():
+    """Supprime la dernière image uploadée par l'utilisateur (toutes catégories confondues)"""
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        # Récupère la dernière image uploadée (par date la plus récente)
+        c.execute("SELECT filename FROM images ORDER BY upload_date DESC LIMIT 1")
+        row = c.fetchone()
+        if row:
+            filename = row[0]
+            # Supprime le fichier du dossier uploads
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            # Supprime l'entrée de la base de données
+            c.execute("DELETE FROM images WHERE filename = ?", (filename,))
+            conn.commit()
+            flash(f"Dernière image uploadée supprimée : {filename}", 'success')
+        else:
+            flash("Aucune image à supprimer.", 'warning')
+    return redirect(url_for('gallery'))
