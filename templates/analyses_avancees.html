@@ -149,16 +149,13 @@ document.getElementById('ecoForm').addEventListener('submit', function(e) {
         if (data.success) {
             let score = data.score;
             let message = '';
-            if (score >= 24) {
-                message = '<div class="alert alert-success"><b>{{ _("Éco-expert 🌱") }}</b> : {{ _("Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.") }}</div>';
-            } else if (score >= 18) {
-                message = '<div class="alert alert-info"><b>{{ _("Bon élève ♻️") }}</b> : {{ _("Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.") }}</div>';
-            } else if (score >= 12) {
-                message = '<div class="alert alert-warning"><b>{{ _("Éco-curieux 🧐") }}</b> : {{ _("Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.") }}</div>';
-            } else {
-                message = '<div class="alert alert-danger"><b>{{ _("Débutant·e 🐣") }}</b> : {{ _("Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !") }}</div>';
-            }
-            document.getElementById('result').innerHTML = '<h4>{{ _("Votre score") }}: ' + score + ' / 28</h4>' + message;
+            // Traduction dynamique côté JS
+            let titre = typeof gettext === 'function' ? gettext(data.titre) : data.titre;
+            let conseil = typeof gettext === 'function' ? gettext(data.conseil) : data.conseil;
+            let alert = data.alert || 'success';
+            message = `<div class="alert alert-${alert}"><b>${titre}</b> : ${conseil}</div>`;
+            let scoreLabel = typeof gettext === 'function' ? gettext('Votre score') : 'Votre score';
+            document.getElementById('result').innerHTML = `<h4>${scoreLabel}: ${score} / 28</h4>` + message;
             document.getElementById('result').style.display = 'block';
             window.scrollTo({top: document.getElementById('result').offsetTop - 60, behavior: 'smooth'});
         } else {

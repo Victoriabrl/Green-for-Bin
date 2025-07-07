@@ -507,7 +507,24 @@ def analyses_avancees():
                 c.execute('''INSERT INTO user_eco_analysis (user_id, date_filled, score, details) VALUES (?, ?, ?, ?)''',
                           (session['user_id'], datetime.now().strftime("%Y-%m-%d %H:%M:%S"), score, details_str))
                 conn.commit()
-            return jsonify(success=True, score=score)
+            # Déterminer la clé du titre et du conseil (non traduit)
+            if score >= 24:
+                titre = 'Éco-expert 🌱'
+                conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                alert = 'success'
+            elif score >= 18:
+                titre = 'Bon élève ♻️'
+                conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                alert = 'info'
+            elif score >= 12:
+                titre = 'Éco-curieux 🧐'
+                conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                alert = 'warning'
+            else:
+                titre = 'Débutant·e 🐣'
+                conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                alert = 'danger'
+            return jsonify(success=True, score=score, titre=titre, conseil=conseil, alert=alert)
         except Exception as e:
             return jsonify(success=False, error=str(e))
     return render_template('analyses_avancees.html')
@@ -946,6 +963,35 @@ def about():
             message_sent = True
     # Ajout : stats arrondissements (3 premières lignes)
     arr_stats = []
+    # Ajout : dernier score/conseil utilisateur (comme sur /)
+    last_eco = None
+    if 'user_id' in session:
+        try:
+            with sqlite3.connect(DB_PATH) as conn:
+                c = conn.cursor()
+                c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC LIMIT 1", (session['user_id'],))
+                row = c.fetchone()
+                if row:
+                    score, date_filled = row
+                    if score >= 24:
+                        conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                        titre = 'Éco-expert 🌱'
+                        alert = 'success'
+                    elif score >= 18:
+                        conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                        titre = 'Bon élève ♻️'
+                        alert = 'info'
+                    elif score >= 12:
+                        conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                        titre = 'Éco-curieux 🧐'
+                        alert = 'warning'
+                    else:
+                        conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                        titre = 'Débutant·e 🐣'
+                        alert = 'danger'
+                    last_eco = dict(score=score, date=date_filled, conseil=conseil, titre=titre, alert=alert)
+        except Exception as e:
+            print(f"[ABOUT] Erreur récupération eco_analysis: {e}")
     try:
         with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
             arr_geo = json.load(f)
@@ -975,7 +1021,7 @@ def about():
             {'arr': f"{i}e", 'nb_pleines': 0}
             for i in range(1, 21)
         ]
-    return render_template('about.html', message_sent=message_sent, arr_stats=arr_stats)
+    return render_template('about.html', message_sent=message_sent, arr_stats=arr_stats, last_eco=last_eco)
 
 
 # ==================== ROUTES ADMIN ====================
