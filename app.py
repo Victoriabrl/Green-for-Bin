@@ -1,6 +1,9 @@
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import auto_label
+from auto_label import classify_bin_custom
+
 def notify_admin(subject, message, urgent=False):
     # Notification logic: flash for now, email if urgent
     # 1. Flash notification (if in request context)
@@ -93,7 +96,8 @@ import json
 from threading import Thread
 from math import ceil
 from shapely.geometry import shape, Point
-import auto_label
+from auto_label import classify_bin_custom
+
 
 # ==================== CONFIGURATION ====================
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -522,6 +526,7 @@ def upload():
                     # Utilisation correcte de la classification automatique
                     auto_label_str = classify_bin_automatically(avg_color, file_size, contrast, contour_count, image_path=filepath)
                     auto_label_result = auto_label.classify_bin(filepath)
+                    print("DEBUG classify_bin:", auto_label_result)
                     if isinstance(auto_label_result, dict):
                         std_h = auto_label_result.get('std_h')
                         std_s = auto_label_result.get('std_s')
@@ -622,6 +627,8 @@ def upload():
                 else:
                     localisation = random_localisation_france()
                 auto_label_result = auto_label.classify_bin(filepath)
+                print("DEBUG classify_bin:", auto_label_result)
+
                 if isinstance(auto_label_result, dict):
                     std_h = auto_label_result.get('std_h')
                     std_s = auto_label_result.get('std_s')
@@ -730,7 +737,7 @@ def annotate(filename):
                 seuil_v = 49
 
             # Appel à la fonction d'auto-label personnalisée
-            from auto_label import classify_bin_custom
+
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             custom_auto_label_result = classify_bin_custom(
                 image_path,

@@ -27,7 +27,13 @@
                     <tr>
                         {% for col in colonnes %}
                             <td>
-                                {% if row[col] is string and row[col].startswith('<img') %}
+                                {% if col in ['std_h', 'std_s', 'std_v'] %}
+                                    {% if row[col] is not none %}
+                                        {{ "%.2f"|format(row[col]) }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                {% elif row[col] is string and row[col].startswith('<img') %}
                                     {{ row[col]|replace('<img ', '<img loading="lazy" ')|safe }}
                                 {% else %}
                                     {{ row[col] }}
