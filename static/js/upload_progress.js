@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const xhr = new XMLHttpRequest();
             progressContainer.style.display = 'block';
             predictionDiv.innerHTML = '';
+            // Afficher l'animation de chargement
+            var predictionLoading = document.getElementById('prediction-loading');
+            if (predictionLoading) predictionLoading.style.display = 'block';
             progressBar.style.width = '0%';
             progressBar.innerText = '0%';
             progressBar.classList.add('progress-bar-animated');
@@ -37,24 +40,29 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (fileInput) fileInput.value = '';
                     try {
                         const resp = JSON.parse(xhr.responseText);
+                        if (predictionLoading) predictionLoading.style.display = 'none';
                         if (resp.success) {
                             let meta = resp.metadata;
                             let metaHtml = '';
                             if (meta) {
                                 metaHtml = `
                                     <ul class="list-group mt-2 mb-2">
-                                        <li class="list-group-item">Taille : <b>${meta.width} x ${meta.height}</b> px</li>
-                                        <li class="list-group-item">Luminosité moyenne : <b>${meta.luminosity}</b></li>
-                                        <li class="list-group-item">Contraste : <b>${meta.contrast}</b></li>
+                                        <li class="list-group-item">${i18n_taille} <b>${meta.width} x ${meta.height}</b> px</li>
+                                        <li class="list-group-item">${i18n_lum} <b>${meta.luminosity}</b></li>
+                                        <li class="list-group-item">${i18n_contraste} <b>${meta.contrast}</b></li>
                                     </ul>
                                 `;
                             }
-                            predictionDiv.innerHTML = '<b>Prédiction automatique :</b> ' + resp.auto_label + metaHtml;
+                            predictionDiv.innerHTML = `<div class="alert alert-info shadow-lg p-3 mb-3 rounded" style="font-size:1.3em; font-weight:bold; border:2px solid #007bff; background: linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%); color:#0d47a1;">
+                                <span style="font-size:1.2em;">${i18n_pred_auto}</span> <span style="font-size:1.3em; color:#007bff;">${resp.auto_label}</span>
+                                ${metaHtml}
+                            </div>`;
                         } else {
-                            predictionDiv.innerHTML = '<span style="color:red">' + (resp.error || 'Erreur lors du traitement.') + '</span>';
+                        predictionDiv.innerHTML = '<span style="color:red">' + (resp.error || i18n_erreur_traitement) + '</span>';
                         }
                     } catch {
-                        predictionDiv.innerHTML = '<span style="color:red">Erreur lors du traitement.</span>';
+                    if (predictionLoading) predictionLoading.style.display = 'none';
+                    predictionDiv.innerHTML = '<span style="color:red">' + i18n_erreur_traitement + '</span>';
                     }
                 }
             };

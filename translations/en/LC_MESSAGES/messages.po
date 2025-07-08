@@ -1,4 +1,18 @@
 
+# Added for JS and custom PWA banner
+msgid "Merci !"
+msgstr "Thank you!"
+msgid "Prédiction automatique :"
+msgstr "Automatic prediction:"
+msgid "Taille :"
+msgstr "Size:"
+msgid "Luminosité moyenne :"
+msgstr "Average brightness:"
+msgid "Contraste :"
+msgstr "Contrast:"
+msgid "Erreur lors du traitement."
+msgstr "Error during processing."
+
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"

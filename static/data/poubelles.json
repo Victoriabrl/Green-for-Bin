@@ -446,7 +446,7 @@
     {
         "lat": 48.877583,
         "lon": 2.378467,
-        "remplissage": "pleine_auto",
+        "remplissage": "pleine",
         "date": "2025-07-07 15:09:40"
     },
     {
@@ -458,13 +458,13 @@
     {
         "lat": 48.839909,
         "lon": 2.250492,
-        "remplissage": "pleine_auto",
+        "remplissage": "pleine",
         "date": "2025-07-07 15:10:00"
     },
     {
         "lat": 48.88562,
         "lon": 2.327379,
-        "remplissage": "pleine_auto",
+        "remplissage": "pleine",
         "date": "2025-07-07 15:15:20"
     },
     {
@@ -490,5 +490,143 @@
         "lon": 2.318447,
         "remplissage": "pleine_auto",
         "date": "2025-07-07 19:42:36"
+    },
+    {
+        "lat": 48.88180046202435,
+        "lon": 2.3407005183415786,
+        "remplissage": "pleine",
+        "date": "2025-07-08 15:46:29"
+    },
+    {
+        "lat": 48.82519582942562,
+        "lon": 2.3464312819858546,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 16:38:02"
+    },
+    {
+        "lat": 48.851418,
+        "lon": 2.395497,
+        "remplissage": "vide",
+        "date": "2025-07-08 17:05:22"
+    },
+    {
+        "lat": 48.87238988983081,
+        "lon": 2.38068873027181,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 17:08:17"
+    },
+    {
+        "lat": 48.863426,
+        "lon": 2.355869,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:03:04"
+    },
+    {
+        "lat": 48.859997793824945,
+        "lon": 2.3127823580487408,
+        "remplissage": "pleine",
+        "date": "2025-07-08 18:07:08"
+    },
+    {
+        "lat": 48.851886,
+        "lon": 2.393553,
+        "remplissage": "vide",
+        "date": "2025-07-08 16:08:00"
+    },
+    {
+        "lat": 48.8637366110311,
+        "lon": 2.362646818693883,
+        "remplissage": "vide_auto",
+        "date": "2025-07-08 18:09:52"
+    },
+    {
+        "lat": 48.879583907317915,
+        "lon": 2.348644183557498,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:14:24"
+    },
+    {
+        "lat": 48.87547358137798,
+        "lon": 2.3427671716042795,
+        "remplissage": "vide_auto",
+        "date": "2025-07-08 18:15:22"
+    },
+    {
+        "lat": 48.880733405731725,
+        "lon": 2.33491804007988,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:18:46"
+    },
+    {
+        "lat": 48.886461,
+        "lon": 2.359729,
+        "remplissage": "vide_auto",
+        "date": "2025-07-08 18:19:05"
+    },
+    {
+        "lat": 48.822146,
+        "lon": 2.378929,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:19:17"
+    },
+    {
+        "lat": 48.835714,
+        "lon": 2.337043,
+        "remplissage": "vide_auto",
+        "date": "2025-07-08 18:19:39"
+    },
+    {
+        "lat": 48.848165,
+        "lon": 2.325646,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:20:12"
+    },
+    {
+        "lat": 48.897476,
+        "lon": 2.365483,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:21:57"
+    },
+    {
+        "lat": 48.856952,
+        "lon": 2.311479,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:22:13"
+    },
+    {
+        "lat": 48.865392,
+        "lon": 2.308976,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:22:33"
+    },
+    {
+        "lat": 48.822523,
+        "lon": 2.419135,
+        "remplissage": "pleine",
+        "date": "2025-07-08 18:22:46"
+    },
+    {
+        "lat": 48.862848,
+        "lon": 2.297677,
+        "remplissage": "pleine",
+        "date": "2025-07-08 18:26:33"
+    },
+    {
+        "lat": 48.87033712499109,
+        "lon": 2.329804448432656,
+        "remplissage": "pleine",
+        "date": "2025-07-08 18:27:31"
+    },
+    {
+        "lat": 48.88059085702341,
+        "lon": 2.3409071751660875,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:28:50"
+    },
+    {
+        "lat": 48.843655,
+        "lon": 2.295598,
+        "remplissage": "pleine_auto",
+        "date": "2025-07-08 18:33:10"
     }
 ]

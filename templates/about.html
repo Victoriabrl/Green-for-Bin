@@ -3,6 +3,61 @@
 {% block content %}
 <!-- Hero Section -->
 <header class="hero-header" id="home">
+    <!-- Bannière personnalisée d'installation PWA -->
+    <div id="pwa-install-banner" class="alert alert-success text-center" style="display:none; position:fixed; bottom:10px; left:0; right:0; z-index:9999;">
+        <b>💡 Astuce :</b> Installe cette application pour une expérience optimale&nbsp;!
+        <button id="pwa-install-btn" class="btn btn-primary ml-3" style="display:none;">Installer l'application</button>
+        <span id="pwa-manual-instructions" style="display:none;">
+            <span class="d-block mt-2">
+                <b>Sur iOS/Safari&nbsp;:</b> Appuie sur <b>Partager</b> (<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Share_icon_iOS.png/24px-Share_icon_iOS.png" style="height:18px;vertical-align:middle;">) puis <b>"Sur l'écran d'accueil"</b>.<br>
+                <b>Sur Android&nbsp;:</b> Appuie sur <b>⋮</b> (en haut à droite) puis <b>"Ajouter à l'écran d'accueil"</b> ou <b>"Installer l'application"</b>.
+            </span>
+        </span>
+        <button type="button" class="close" onclick="document.getElementById('pwa-install-banner').style.display='none';">&times;</button>
+    </div>
+    <script>
+    // Bannière PWA universelle (bouton + instructions)
+    let deferredPrompt = null;
+    function showBanner() {
+      document.getElementById('pwa-install-banner').style.display = 'block';
+    }
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwa-install-btn').style.display = 'inline-block';
+      document.getElementById('pwa-manual-instructions').style.display = 'none';
+      showBanner();
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      // Si le prompt n'est pas disponible, afficher instructions manuelles
+      setTimeout(function() {
+        if (!deferredPrompt) {
+          document.getElementById('pwa-install-btn').style.display = 'none';
+          document.getElementById('pwa-manual-instructions').style.display = 'inline';
+          showBanner();
+        }
+      }, 1200);
+      // Gestion du bouton d'installation
+      const btn = document.getElementById('pwa-install-btn');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                btn.innerText = '{{ _('Merci !') }}';
+                btn.disabled = true;
+                setTimeout(() => {
+                  document.getElementById('pwa-install-banner').style.display = 'none';
+                }, 2000);
+              }
+              deferredPrompt = null;
+            });
+          }
+        });
+      }
+    });
+    </script>
     {% if last_eco %}
     <div class="container my-4">
         <div class="alert alert-{{ last_eco.alert }} text-center" style="max-width:600px; margin:0 auto;">

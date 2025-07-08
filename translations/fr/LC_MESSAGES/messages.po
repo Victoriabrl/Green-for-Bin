@@ -1,3 +1,17 @@
+
+# Ajout chaînes JS et bannière PWA personnalisée
+msgid "Merci !"
+msgstr "Merci !"
+msgid "Prédiction automatique :"
+msgstr "Prédiction automatique :"
+msgid "Taille :"
+msgstr "Taille :"
+msgid "Luminosité moyenne :"
+msgstr "Luminosité moyenne :"
+msgid "Contraste :"
+msgstr "Contraste :"
+msgid "Erreur lors du traitement."
+msgstr "Erreur lors du traitement."
 # French translations for PROJECT.
 # Copyright (C) 2025 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.

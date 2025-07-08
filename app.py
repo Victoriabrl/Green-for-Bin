@@ -14,9 +14,9 @@ def notify_admin(subject, message, urgent=False):
     # 1. Flash notification (if in request context)
     try:
         if urgent:
-            flash('ALERTE URGENTE ADMIN : ' + message, 'danger')
+            flash(_('ALERTE URGENTE ADMIN : ') + message, 'danger')
         else:
-            flash('Notification admin : ' + message, 'warning')
+            flash(_('Notification admin : ') + message, 'warning')
     except Exception:
         pass
     # 2. Send email if urgent
@@ -299,7 +299,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Vous devez être connecté pour accéder à cette page.', 'error')
+            flash(_('Vous devez être connecté pour accéder à cette page.'), 'error')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
 
@@ -347,10 +347,10 @@ def profil():
         new_arrondissement = request.form.get('arrondissement', '').strip()
         errors = False
         if not new_email or '@' not in new_email:
-            flash('Veuillez fournir une adresse email valide.', 'error')
+            flash(_('Veuillez fournir une adresse email valide.'), 'error')
             errors = True
         if not new_arrondissement:
-            flash('Veuillez sélectionner un arrondissement.', 'error')
+            flash(_('Veuillez sélectionner un arrondissement.'), 'error')
             errors = True
         if not errors:
             try:
@@ -358,11 +358,11 @@ def profil():
                     c = conn.cursor()
                     c.execute("UPDATE users SET email = ?, arrondissement = ? WHERE id = ?", (new_email, new_arrondissement, user_id))
                     conn.commit()
-                flash('Profil mis à jour avec succès.', 'success')
+                flash(_('Profil mis à jour avec succès.'), 'success')
                 email = new_email
                 arrondissement = new_arrondissement
             except Exception as e:
-                flash("Erreur lors de la mise à jour du profil : " + str(e), 'error')
+                flash(_('Erreur lors de la mise à jour du profil : ') + str(e), 'error')
 
     level = get_user_level(xp)
     # Récupérer l'historique des questionnaires
@@ -394,7 +394,7 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            flash('Vous devez être connecté pour accéder à cette page.', 'error')
+            flash(_('Vous devez être connecté pour accéder à cette page.'), 'error')
             return redirect(url_for('login'))
 
         with sqlite3.connect(DB_PATH) as conn:
@@ -403,7 +403,7 @@ def admin_required(f):
             user = c.fetchone()
 
         if not user or user[0] != 'admin':
-            flash('Accès réservé aux administrateurs.', 'error')
+            flash(_('Accès réservé aux administrateurs.'), 'error')
             return redirect(url_for('index'))
         return f(*args, **kwargs)
 
@@ -434,10 +434,10 @@ def login():
                           (datetime.now().strftime("%Y-%m-%d %H:%M:%S"), user[0]))
                 conn.commit()
 
-            flash(f'Bienvenue {username}!', 'success')
+            flash(_('Bienvenue %(username)s!', username=username), 'success')
             return redirect(url_for('about'))
         else:
-            flash('Nom d\'utilisateur ou mot de passe incorrect.', 'error')
+            flash(_('Nom d\'utilisateur ou mot de passe incorrect.'), 'error')
 
     return render_template('login.html')
 
@@ -466,19 +466,19 @@ def register():
         arrondissement = request.form.get('arrondissement', '').strip()
 
         if password != confirm_password:
-            flash('Les mots de passe ne correspondent pas.', 'error')
+            flash(_('Les mots de passe ne correspondent pas.'), 'error')
             return render_template('register.html', arrondissements=arrondissements)
 
         if len(password) < 6:
-            flash('Le mot de passe doit contenir au moins 6 caractères.', 'error')
+            flash(_('Le mot de passe doit contenir au moins 6 caractères.'), 'error')
             return render_template('register.html', arrondissements=arrondissements)
 
         if not email or '@' not in email:
-            flash('Veuillez fournir une adresse email valide.', 'error')
+            flash(_('Veuillez fournir une adresse email valide.'), 'error')
             return render_template('register.html', arrondissements=arrondissements)
 
         if not arrondissement:
-            flash('Veuillez sélectionner un arrondissement.', 'error')
+            flash(_('Veuillez sélectionner un arrondissement.'), 'error')
             return render_template('register.html', arrondissements=arrondissements)
 
         password_hash = generate_password_hash(password)
@@ -492,11 +492,11 @@ def register():
                 ''', (username, password_hash, email, arrondissement, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                 conn.commit()
 
-            flash('Inscription réussie! Vous pouvez maintenant vous connecter.', 'success')
+            flash(_('Inscription réussie! Vous pouvez maintenant vous connecter.'), 'success')
             return redirect(url_for('login'))
 
         except sqlite3.IntegrityError:
-            flash('Ce nom d\'utilisateur existe déjà.', 'error')
+            flash(_('Ce nom d\'utilisateur existe déjà.'), 'error')
             return render_template('register.html', arrondissements=arrondissements)
 
     return render_template('register.html', arrondissements=arrondissements)
@@ -506,7 +506,7 @@ def register():
 def logout():
     """Déconnexion"""
     session.clear()
-    flash('Vous avez été déconnecté.', 'info')
+    flash(_('Vous avez été déconnecté.'), 'info')
     return redirect(url_for('index'))
 
 
@@ -724,14 +724,14 @@ def upload():
         if 'image' not in request.files:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify(success=False, error='Aucun fichier sélectionné.')
-            flash('Aucun fichier sélectionné.', 'error')
+            flash(_('Aucun fichier sélectionné.'), 'error')
             return redirect(request.url)
 
         file = request.files['image']
         if file.filename == '':
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify(success=False, error='Aucun fichier sélectionné.')
-            flash('Aucun fichier sélectionné.', 'error')
+            flash(_('Aucun fichier sélectionné.'), 'error')
             return redirect(request.url)
 
         # Pour admin : récupération du choix d'arrondissement et de la date/heure
@@ -1758,4 +1758,5 @@ if __name__ == '__main__':
     init_db()
     print("Base de données initialisée.")
     print("Admin par défaut - Login: admin, Mot de passe: admin123")
-    app.run(debug=True)
+
+    app.run(debug=True, host='0.0.0.0', port=5000)
