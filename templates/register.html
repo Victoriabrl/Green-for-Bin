@@ -23,6 +23,19 @@
                             <input type="text" class="form-control" id="username" name="username" required>
                         </div>
                         <div class="form-group">
+                            <label for="email">{{ _("Adresse email") }}</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="arrondissement">{{ _("Arrondissement") }}</label>
+                            <select class="form-control" id="arrondissement" name="arrondissement" required>
+                                <option value="">{{ _("Sélectionner un arrondissement") }}</option>
+                                {% for arr in arrondissements %}
+                                    <option value="{{ arr }}">{{ arr }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="password">{{ _("Mot de passe") }}</label>
                             <input type="password" class="form-control" id="password" name="password" required>
                         </div>

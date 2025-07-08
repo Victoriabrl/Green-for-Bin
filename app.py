@@ -1,3 +1,8 @@
+# ==================== PAGE PROFIL UTILISATEUR ====================
+# (La route /profil doit être placée APRÈS la création de l'objet app et la définition de login_required)
+# Elle doit donc être ajoutée après la section AUTHENTIFICATION, juste après la définition de login_required.
+## (Bloc profil supprimé ici, la route doit être placée APRÈS la création de l'objet app et des décorateurs)
+# (Ce bloc était du code orphelin, il est supprimé pour corriger l'IndentationError)
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -215,23 +220,26 @@ def init_db():
             except sqlite3.OperationalError:
                 pass  # colonne déjà existante
 
-        # Table pour les utilisateurs
+        # Table pour les utilisateurs (ajout email et arrondissement)
         c.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
+                email TEXT,
+                arrondissement TEXT,
                 role TEXT NOT NULL DEFAULT 'user',
                 created_at TEXT NOT NULL,
                 last_login TEXT,
                 xp INTEGER DEFAULT 0
             )
         ''')
-        # Migration : ajout colonne xp si manquante
-        try:
-            c.execute("ALTER TABLE users ADD COLUMN xp INTEGER DEFAULT 0")
-        except sqlite3.OperationalError:
-            pass
+        # Migration : ajout colonnes si manquantes
+        for col, coltype in [('xp', 'INTEGER DEFAULT 0'), ('email', 'TEXT'), ('arrondissement', 'TEXT')]:
+            try:
+                c.execute(f"ALTER TABLE users ADD COLUMN {col} {coltype}")
+            except sqlite3.OperationalError:
+                pass
 
         conn.commit()
 
@@ -298,6 +306,88 @@ def login_required(f):
     return decorated_function
 
 
+# ==================== PAGE PROFIL UTILISATEUR ====================
+
+# ==================== PAGE PROFIL UTILISATEUR (édition) ====================
+@app.route('/profil', methods=['GET', 'POST'])
+@login_required
+def profil():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash(_('Vous devez être connecté pour accéder à votre profil.'), 'error')
+        return redirect(url_for('login'))
+
+    # Charger la liste des arrondissements pour le formulaire d'édition
+    arrondissements = []
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arrondissements.append(arr_name)
+        arrondissements = sorted(arrondissements)
+    except Exception as e:
+        print(f"[PROFIL] Erreur chargement arrondissements: {e}")
+        arrondissements = []
+
+    # Récupérer XP, email, arrondissement
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("SELECT xp, email, arrondissement FROM users WHERE id = ?", (user_id,))
+        row = c.fetchone()
+        if row:
+            xp, email, arrondissement = row
+        else:
+            xp, email, arrondissement = 0, '', ''
+
+    # Si POST : édition du profil
+    if request.method == 'POST':
+        new_email = request.form.get('email', '').strip()
+        new_arrondissement = request.form.get('arrondissement', '').strip()
+        errors = False
+        if not new_email or '@' not in new_email:
+            flash('Veuillez fournir une adresse email valide.', 'error')
+            errors = True
+        if not new_arrondissement:
+            flash('Veuillez sélectionner un arrondissement.', 'error')
+            errors = True
+        if not errors:
+            try:
+                with sqlite3.connect(DB_PATH) as conn:
+                    c = conn.cursor()
+                    c.execute("UPDATE users SET email = ?, arrondissement = ? WHERE id = ?", (new_email, new_arrondissement, user_id))
+                    conn.commit()
+                flash('Profil mis à jour avec succès.', 'success')
+                email = new_email
+                arrondissement = new_arrondissement
+            except Exception as e:
+                flash("Erreur lors de la mise à jour du profil : " + str(e), 'error')
+
+    level = get_user_level(xp)
+    # Récupérer l'historique des questionnaires
+    history = []
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC", (user_id,))
+        rows = c.fetchall()
+        for score, date_filled in rows:
+            if score >= 24:
+                advice = _('Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.')
+            elif score >= 18:
+                advice = _('Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.')
+            elif score >= 12:
+                advice = _('Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.')
+            else:
+                advice = _("Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !")
+            history.append({
+                'date': date_filled,
+                'score': score,
+                'advice': advice
+            })
+    return render_template('profil.html', level=level, history=history, email=email, arrondissement=arrondissement, arrondissements=arrondissements)
+
+
 def admin_required(f):
     """Décorateur pour les pages réservées aux administrateurs"""
 
@@ -355,18 +445,41 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Page d'inscription"""
+    arrondissements = []
+    arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
+    try:
+        with open(arr_file, encoding='utf-8') as f:
+            arr_geo = json.load(f)
+        for feature in arr_geo['features']:
+            arr_name = feature['properties'].get('nom', feature['properties'].get('l_ar'))
+            arrondissements.append(arr_name)
+        arrondissements = sorted(arrondissements)
+    except Exception as e:
+        print(f"[REGISTER] Erreur chargement arrondissements: {e}")
+        arrondissements = []
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        email = request.form.get('email', '').strip()
+        arrondissement = request.form.get('arrondissement', '').strip()
 
         if password != confirm_password:
             flash('Les mots de passe ne correspondent pas.', 'error')
-            return render_template('register.html')
+            return render_template('register.html', arrondissements=arrondissements)
 
         if len(password) < 6:
             flash('Le mot de passe doit contenir au moins 6 caractères.', 'error')
-            return render_template('register.html')
+            return render_template('register.html', arrondissements=arrondissements)
+
+        if not email or '@' not in email:
+            flash('Veuillez fournir une adresse email valide.', 'error')
+            return render_template('register.html', arrondissements=arrondissements)
+
+        if not arrondissement:
+            flash('Veuillez sélectionner un arrondissement.', 'error')
+            return render_template('register.html', arrondissements=arrondissements)
 
         password_hash = generate_password_hash(password)
 
@@ -374,9 +487,9 @@ def register():
             with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
                 c.execute('''
-                    INSERT INTO users (username, password_hash, role, created_at)
-                    VALUES (?, ?, 'user', ?)
-                ''', (username, password_hash, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                    INSERT INTO users (username, password_hash, email, arrondissement, role, created_at)
+                    VALUES (?, ?, ?, ?, 'user', ?)
+                ''', (username, password_hash, email, arrondissement, datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                 conn.commit()
 
             flash('Inscription réussie! Vous pouvez maintenant vous connecter.', 'success')
@@ -384,9 +497,9 @@ def register():
 
         except sqlite3.IntegrityError:
             flash('Ce nom d\'utilisateur existe déjà.', 'error')
-            return render_template('register.html')
+            return render_template('register.html', arrondissements=arrondissements)
 
-    return render_template('register.html')
+    return render_template('register.html', arrondissements=arrondissements)
 
 
 @app.route('/logout')
@@ -701,10 +814,9 @@ def upload():
                         conn.commit()
 
                         # --- Notification immédiate si seuil franchi dans l'arrondissement ---
-                        # On ne notifie que si la nouvelle image est une poubelle pleine
+                        # On notifie admin ET les utilisateurs de l'arrondissement si seuil atteint
                         if auto_label_str.startswith('pleine') and selected_arr and selected_arr.strip():
                             arr_name = selected_arr
-                            # Charger le geojson pour trouver le polygone de l'arrondissement
                             arr_file = os.path.join('static', 'data', 'arrondissements.geojson')
                             try:
                                 with open(arr_file, encoding='utf-8') as f:
@@ -731,7 +843,7 @@ def upload():
                                     # Seuils
                                     seuil_urgent = 11
                                     seuil_attention = 7
-                                    # Notification à chaque ajout si la zone est à risque, mais une seule (urgence prioritaire)
+                                    # Notifier admin
                                     if nb_pleines >= seuil_urgent:
                                         notify_admin(
                                             subject=f"[GreenForBin] URGENCE : Zone à risque ({arr_name})",
@@ -744,6 +856,38 @@ def upload():
                                             message=f"Le nombre de poubelles pleines dans l'arrondissement {arr_name} est élevé ({nb_pleines}). Merci de surveiller cette zone.",
                                             urgent=False
                                         )
+                                    # Notifier les utilisateurs de l'arrondissement
+                                    if nb_pleines >= seuil_attention:
+                                        try:
+                                            c.execute("SELECT email FROM users WHERE arrondissement = ? AND email IS NOT NULL AND email != ''", (arr_name,))
+                                            user_emails = [row[0] for row in c.fetchall()]
+                                            if user_emails:
+                                                sender_email = "blablablablliblibli@gmail.com"
+                                                password = "mghs irrv kmgp kyox"
+                                                smtp_server = "smtp.gmail.com"
+                                                port = 587
+                                                subject = f"[GreenForBin] Alerte sur votre arrondissement : {arr_name}"
+                                                if nb_pleines >= seuil_urgent:
+                                                    message = f"Attention : Le nombre de poubelles pleines dans votre arrondissement ({arr_name}) est CRITIQUE ({nb_pleines}). Merci de prévenir la mairie ou d'agir si possible."
+                                                else:
+                                                    message = f"Alerte : Le nombre de poubelles pleines dans votre arrondissement ({arr_name}) est élevé ({nb_pleines}). Merci de rester vigilant et de signaler toute anomalie."
+                                                import smtplib
+                                                from email.mime.text import MIMEText
+                                                for email in user_emails:
+                                                    try:
+                                                        msg = MIMEText(message, 'plain')
+                                                        msg['From'] = sender_email
+                                                        msg['To'] = email
+                                                        msg['Subject'] = subject
+                                                        server = smtplib.SMTP(smtp_server, port)
+                                                        server.starttls()
+                                                        server.login(sender_email, password)
+                                                        server.sendmail(sender_email, email, msg.as_string())
+                                                        server.quit()
+                                                    except Exception as e:
+                                                        print(f"[USER EMAIL ERROR] {e}")
+                                        except Exception as e:
+                                            print(f"[USER NOTIFY ERROR] {e}")
                             except Exception as e:
                                 print(f"[UPLOAD NOTIF] Erreur notification seuil: {e}")
 

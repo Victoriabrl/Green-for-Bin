@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ _('Profil utilisateur') }}{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">{{ _('Profil de') }} {{ session.get('username') }}</h2>
+    <div class="card mb-4 p-3">
+        <h4>{{ _('Niveau actuel') }} : <span class="badge badge-success" style="font-size:1.2em;">{{ level.level }} - {{ _(level.title) }}</span></h4>
+        <div class="mb-2">{{ _('XP') }} : <strong>{{ level.xp }}</strong></div>
+        <div class="mb-2">{{ _('Email renseigné') }} : <strong>{{ email }}</strong></div>
+        <div class="mb-2">{{ _('Arrondissement') }} : <strong>{{ arrondissement }}</strong></div>
+        <div class="progress mb-2" style="height: 20px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ level.progress }}%;" aria-valuenow="{{ level.progress }}" aria-valuemin="0" aria-valuemax="100">{{ level.progress }}%</div>
+        </div>
+        <div class="mb-2">{{ _('Description du niveau') }} : <em>{{ _(level.desc) }}</em></div>
+    </div>
+    <div class="card p-3">
+        <h4>{{ _('Historique des questionnaires') }}</h4>
+        {% if history %}
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>{{ _('Date') }}</th>
+                    <th>{{ _('Score') }}</th>
+                    <th>{{ _('Conseil') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in history %}
+                <tr>
+                    <td>{{ entry.date }}</td>
+                    <td>{{ entry.score }}</td>
+                    <td>{{ entry.advice }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info mt-3">{{ _('Aucun questionnaire rempli pour le moment.') }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
