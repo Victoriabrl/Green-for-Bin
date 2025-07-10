@@ -40,9 +40,17 @@
                                 {% endif %}
                             </td>
                         {% endfor %}
+                        <td>
+                            <a href="{{ url_for('delete_image', filename=row['filename']) }}"
+                            class="btn btn-danger btn-sm"
+                            onclick="return confirm('Supprimer définitivement cette image ?');">
+                            {{ _('Supprimer') }}
+                            </a>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
+
         </table>
     </div>
     {% include "pagination.html" %}
