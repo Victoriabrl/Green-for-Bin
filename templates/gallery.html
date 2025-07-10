@@ -1,35 +1,113 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-  <h2 class="text-center mb-4">{{ _('Galerie d\'images') }}</h2>
+<style>
+  .modal-dialog {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+  }
+  .modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+</style>
 
-  {% for category, images in [('Images non annotées', non_labelisees), ('Images vides', vides), ('Images pleines', pleines)] %}
-  <div class="mb-5">
-    <h4 class="mb-3">{{ _(category) }}</h4>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-      {% for image in images %}
-      <div class="col">
-        <div class="card h-100 shadow-sm">
-          <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" class="card-img-top" alt="image">
-          <div class="card-body">
-            <h6 class="card-title text-truncate">{{ image['filename'] }}</h6>
-            <p class="card-text small">
-              {% if image['date'] is defined %}<strong>{{ _('Date') }}:</strong> {{ image['date'] }}<br>{% endif %}
-              {% if image['width'] is defined %}<strong>{{ _('Largeur') }}:</strong> {{ image['width'] }} px<br>{% endif %}
-              {% if image['height'] is defined %}<strong>{{ _('Hauteur') }}:</strong> {{ image['height'] }} px<br>{% endif %}
-              {% if image['size'] is defined %}<strong>{{ _('Taille') }}:</strong> {{ image['size'] }}<br>{% endif %}
-              {% if image['luminosity'] is defined %}<strong>{{ _('Luminosité') }}:</strong> {{ image['luminosity'] }}<br>{% endif %}
-              {% if image['std_h'] is defined %}<strong>stdH:</strong> {{ image['std_h'] }} {% endif %}
-              {% if image['std_s'] is defined %}<strong> stdS:</strong> {{ image['std_s'] }} {% endif %}
-              {% if image['std_v'] is defined %}<strong> stdV:</strong> {{ image['std_v'] }} {% endif %}
-            </p>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">{{ _(title) }}</h2>
+
+  <!-- Formulaire de filtres -->
+  <form method="get" class="mb-4 text-center d-flex justify-content-center align-items-center gap-3 flex-wrap">
+
+    <div>
+      <label for="category" class="form-label me-2">Afficher :</label>
+      <select name="category" id="category" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+        <option value="toutes" {% if category == 'toutes' %}selected{% endif %}>Toutes</option>
+        <option value="non_labelisees" {% if category == 'non_labelisees' %}selected{% endif %}>Images non annotées</option>
+        <option value="vides" {% if category == 'vides' %}selected{% endif %}>Images vides</option>
+        <option value="pleines" {% if category == 'pleines' %}selected{% endif %}>Images pleines</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="per_page" class="form-label me-2">Images par page :</label>
+      <select name="per_page" id="per_page" onchange="this.form.submit()" class="form-select d-inline-block w-auto">
+        <option value="4" {% if per_page == 4 %}selected{% endif %}>4</option>
+        <option value="8" {% if per_page == 8 %}selected{% endif %}>8</option>
+      </select>
+    </div>
+
+  </form>
+
+  <!-- Galerie d'images -->
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-4">
+    {% for image in images %}
+    <div class="col">
+      <div class="card h-100 shadow-sm">
+        <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" class="card-img-top" alt="image" style="cursor:pointer" data-bs-toggle="modal" data-bs-target="#modal-{{ loop.index }}">
+        <div class="card-body">
+          <h6 class="card-title text-truncate text-center">{{ image['filename'] }}</h6>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="modal-{{ loop.index }}" tabindex="-1" aria-labelledby="modalLabel-{{ loop.index }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalLabel-{{ loop.index }}">{{ image['filename'] }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center mb-3">
+              <img src="{{ url_for('static', filename='uploads/' + image['filename']) }}" class="img-fluid" alt="image">
+            </div>
+            <ul class="list-group">
+              {% if image['date'] %}<li class="list-group-item"><strong>Date :</strong> {{ image['date'] }}</li>{% endif %}
+              {% if image['width'] %}<li class="list-group-item"><strong>Largeur :</strong> {{ image['width'] }} px</li>{% endif %}
+              {% if image['height'] %}<li class="list-group-item"><strong>Hauteur :</strong> {{ image['height'] }} px</li>{% endif %}
+              {% if image['size'] %}<li class="list-group-item"><strong>Taille :</strong> {{ image['size'] }} octets</li>{% endif %}
+              {% if image['avg_color'] %}<li class="list-group-item"><strong>Couleur moyenne :</strong> {{ image['avg_color'] }}</li>{% endif %}
+              {% if image['contrast'] is defined %}<li class="list-group-item"><strong>Contraste :</strong> {{ image['contrast'] }}</li>{% endif %}
+              {% if image['contour_count'] is defined %}<li class="list-group-item"><strong>Contours détectés :</strong> {{ image['contour_count'] }}</li>{% endif %}
+              {% if image['luminosity'] is defined %}<li class="list-group-item"><strong>Luminosité :</strong> {{ image['luminosity'] }}</li>{% endif %}
+              {% if image['std_h'] is defined %}<li class="list-group-item"><strong>stdH :</strong> {{ image['std_h'] }}</li>{% endif %}
+              {% if image['std_s'] is defined %}<li class="list-group-item"><strong>stdS :</strong> {{ image['std_s'] }}</li>{% endif %}
+              {% if image['std_v'] is defined %}<li class="list-group-item"><strong>stdV :</strong> {{ image['std_v'] }}</li>{% endif %}
+            </ul>
           </div>
         </div>
       </div>
-      {% endfor %}
     </div>
+    {% endfor %}
   </div>
-  {% endfor %}
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-center mt-4">
+    <nav>
+      <ul class="pagination">
+        {% if page > 1 %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('gallery', page=page-1, category=category, per_page=per_page) }}">Précédent</a>
+        </li>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+          <a class="page-link" href="{{ url_for('gallery', page=p, category=category, per_page=per_page) }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+
+        {% if page < total_pages %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('gallery', page=page+1, category=category, per_page=per_page) }}">Suivant</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
 </div>
-{% endblock %}
+{% endblock %} 

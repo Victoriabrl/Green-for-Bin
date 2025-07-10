@@ -752,15 +752,15 @@ def upload():
             compress_image(temp_path, filepath)
             os.remove(temp_path)
 
-            # Ajout XP à l'utilisateur (hors admin)
-            if session.get('role') != 'admin':
-                try:
-                    with sqlite3.connect(DB_PATH) as conn:
-                        c = conn.cursor()
-                        c.execute("UPDATE users SET xp = COALESCE(xp,0) + 10 WHERE id = ?", (session['user_id'],))
-                        conn.commit()
-                except Exception as e:
-                    print(f"[XP] Erreur ajout XP : {e}")
+
+            # Ajout XP à l'utilisateur (y compris admin)
+            try:
+                with sqlite3.connect(DB_PATH) as conn:
+                    c = conn.cursor()
+                    c.execute("UPDATE users SET xp = COALESCE(xp,0) + 10 WHERE id = ?", (session['user_id'],))
+                    conn.commit()
+            except Exception as e:
+                print(f"[XP] Erreur ajout XP : {e}")
 
             if session.get('role') == 'admin':
                 try:
@@ -980,6 +980,20 @@ def annotate(filename):
     auto_label = request.args.get('auto_label')
     custom_auto_label_result = None
 
+    # Valeurs par défaut pour le formulaire personnalisé
+    form_values = {
+        'use_std_h': True,
+        'use_std_s': True,
+        'use_std_v': True,
+        'use_lum': True,
+        'use_contrast': True,
+        'seuil_h': 50,
+        'seuil_s': 34,
+        'seuil_v': 49,
+        'seuil_lum': 104,
+        'seuil_contrast': 60
+    }
+
     if request.method == 'POST':
         # Si annotation classique (pleine/vide)
         if 'annotation' in request.form:
@@ -998,35 +1012,51 @@ def annotate(filename):
             return render_template('result.html', filename=filename, annotation=annotation)
         # Si auto-label personnalisé
         elif 'custom_auto_label' in request.form:
-            # Récupérer les choix utilisateur
-            use_std_h = 'use_std_h' in request.form
-            use_std_s = 'use_std_s' in request.form
-            use_std_v = 'use_std_v' in request.form
+            # Récupérer les choix utilisateur pour les 5 critères
+            form_values['use_std_h'] = 'use_std_h' in request.form
+            form_values['use_std_s'] = 'use_std_s' in request.form
+            form_values['use_std_v'] = 'use_std_v' in request.form
+            form_values['use_lum'] = 'use_lum' in request.form
+            form_values['use_contrast'] = 'use_contrast' in request.form
             try:
-                seuil_h = float(request.form.get('seuil_h', 50))
+                form_values['seuil_h'] = float(request.form.get('seuil_h', 50))
             except Exception:
-                seuil_h = 50
+                form_values['seuil_h'] = 50
             try:
-                seuil_s = float(request.form.get('seuil_s', 34))
+                form_values['seuil_s'] = float(request.form.get('seuil_s', 34))
             except Exception:
-                seuil_s = 34
+                form_values['seuil_s'] = 34
             try:
-                seuil_v = float(request.form.get('seuil_v', 49))
+                form_values['seuil_v'] = float(request.form.get('seuil_v', 49))
             except Exception:
-                seuil_v = 49
+                form_values['seuil_v'] = 49
+            try:
+                form_values['seuil_lum'] = float(request.form.get('seuil_lum', 104))
+            except Exception:
+                form_values['seuil_lum'] = 104
+            try:
+                form_values['seuil_contrast'] = float(request.form.get('seuil_contrast', 60))
+            except Exception:
+                form_values['seuil_contrast'] = 60
 
-            # Appel à la fonction d'auto-label personnalisée
-
+            # Appel à la fonction d'auto-label personnalisée avec 5 critères
             image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             custom_auto_label_result = classify_bin_custom(
                 image_path,
-                use_std_h=use_std_h,
-                use_std_s=use_std_s,
-                use_std_v=use_std_v,
-                seuil_h=seuil_h,
-                seuil_s=seuil_s,
-                seuil_v=seuil_v
+                use_std_h=form_values['use_std_h'],
+                use_std_s=form_values['use_std_s'],
+                use_std_v=form_values['use_std_v'],
+                use_lum=form_values['use_lum'],
+                use_contrast=form_values['use_contrast'],
+                seuil_h=form_values['seuil_h'],
+                seuil_s=form_values['seuil_s'],
+                seuil_v=form_values['seuil_v'],
+                seuil_lum=form_values['seuil_lum'],
+                seuil_contrast=form_values['seuil_contrast']
             )
+
+    # Si GET, garder les valeurs par défaut
+    # Si POST, garder les valeurs saisies
 
     # --- Récupération des métadonnées depuis la BDD ---
 
@@ -1061,7 +1091,14 @@ def annotate(filename):
         'luminosity': luminosity
     }
 
-    return render_template('annotate.html', filename=filename, auto_label=auto_label, metadata=metadata, custom_auto_label_result=custom_auto_label_result)
+    return render_template(
+        'annotate.html',
+        filename=filename,
+        auto_label=auto_label,
+        metadata=metadata,
+        custom_auto_label_result=custom_auto_label_result,
+        form_values=form_values
+    )
 
 
 @app.route('/about', methods=['GET', 'POST'])
@@ -1582,35 +1619,55 @@ def stats():
                            total_pages=total_pages)
 
 
-
 @app.route('/gallery')
 @login_required
 def gallery():
-    """Galerie d'images avec pagination et carrousel, métadonnées au clic"""
     page = int(request.args.get('page', 1))
-    per_page = 5
+    per_page = int(request.args.get('per_page', 4))  # on récupère per_page aussi, défaut 4
     offset = (page - 1) * per_page
+    category = request.args.get('category', 'toutes')  # par défaut 'toutes'
+
     with sqlite3.connect(DB_PATH) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        # Images vides
-        c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
-        vides = [dict(row) for row in c.fetchall()]
-        # Images pleines
-        c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
-        pleines = [dict(row) for row in c.fetchall()]
-        # Images non annotées
-        c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
-        non_labelisees = [dict(row) for row in c.fetchall()]
-        # Nombre total pour la pagination
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%vide%'")
-        total_vides = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%pleine%'")
-        total_pleines = c.fetchone()[0]
-        c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
-        total_non_label = c.fetchone()[0]
-    total_pages = max(ceil(max(total_vides, total_pleines, total_non_label) / per_page), 1)
-    return render_template('gallery.html', vides=vides, pleines=pleines, non_labelisees=non_labelisees, page=page, total_pages=total_pages)
+
+        if category == 'vides':
+            c.execute("SELECT * FROM images WHERE annotation LIKE '%vide%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+            images = [dict(row) for row in c.fetchall()]
+            c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%vide%'")
+            total = c.fetchone()[0]
+            title = "Images vides"
+        elif category == 'pleines':
+            c.execute("SELECT * FROM images WHERE annotation LIKE '%pleine%' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+            images = [dict(row) for row in c.fetchall()]
+            c.execute("SELECT COUNT(*) FROM images WHERE annotation LIKE '%pleine%'")
+            total = c.fetchone()[0]
+            title = "Images pleines"
+        elif category == 'non_labelisees':
+            c.execute("SELECT * FROM images WHERE annotation IS NULL OR annotation = '' ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+            images = [dict(row) for row in c.fetchall()]
+            c.execute("SELECT COUNT(*) FROM images WHERE annotation IS NULL OR annotation = ''")
+            total = c.fetchone()[0]
+            title = "Images non annotées"
+        else:  # category == 'toutes' ou autre valeur
+            c.execute("SELECT * FROM images ORDER BY id DESC LIMIT ? OFFSET ?", (per_page, offset))
+            images = [dict(row) for row in c.fetchall()]
+            c.execute("SELECT COUNT(*) FROM images")
+            total = c.fetchone()[0]
+            title = "Toutes les images"
+
+    total_pages = max(ceil(total / per_page), 1)
+
+    return render_template(
+        'gallery.html',
+        images=images,
+        page=page,
+        total_pages=total_pages,
+        category=category,
+        per_page=per_page,
+        title=title
+    ) 
+
 
 
 # ==================== CARTE ====================

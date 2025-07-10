@@ -102,8 +102,12 @@ def classify_bin(image_path, debug=False):
             'std_v': float(std_v)
         }
 
-def classify_bin_custom(image_path, use_std_h=True, use_std_s=True, use_std_v=True,
-                        seuil_h=55, seuil_s=37, seuil_v=54, debug=False):
+def classify_bin_custom(
+    image_path,
+    use_std_h=True, use_std_s=True, use_std_v=True, use_lum=True, use_contrast=True,
+    seuil_h=55, seuil_s=37, seuil_v=54, seuil_lum=104, seuil_contrast=60,
+    debug=False
+):
     result = classify_bin(image_path, debug=debug)
     if result == "erreur":
         return "erreur"
@@ -113,6 +117,32 @@ def classify_bin_custom(image_path, use_std_h=True, use_std_s=True, use_std_v=Tr
     std_s = result['std_s']
     std_v = result['std_v']
 
+    # Pour récupérer les valeurs de luminance et contraste sur la zone entourante et l'image entière
+    import cv2
+    import numpy as np
+    image = cv2.imread(image_path)
+    hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    lower_green = np.array([60, 40, 40])
+    upper_green = np.array([120, 255, 255])
+    mask_green = cv2.inRange(hsv_image, lower_green, upper_green)
+    contours, _ = cv2.findContours(mask_green, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        return "erreur"
+    largest_contour = max(contours, key=cv2.contourArea)
+    mask_bin = np.zeros_like(mask_green)
+    cv2.drawContours(mask_bin, [largest_contour], -1, 255, cv2.FILLED)
+    kernel = np.ones((15, 15), np.uint8)
+    mask_dilated = cv2.dilate(mask_bin, kernel, iterations=1)
+    mask_surrounding = cv2.bitwise_xor(mask_dilated, mask_bin)
+    surrounding_pixels = cv2.bitwise_and(image, image, mask=mask_surrounding)
+    gray_surrounding = cv2.cvtColor(surrounding_pixels, cv2.COLOR_BGR2GRAY)
+    lum_surrounding = gray_surrounding[mask_surrounding == 255]
+    mean_lum = float(np.mean(lum_surrounding)) if lum_surrounding.size > 0 else 0
+    contrast = float(np.std(lum_surrounding)) if lum_surrounding.size > 0 else 0
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    mean_lum_full = float(np.mean(gray_image))
+    contrast_full = float(np.std(gray_image))
+
     conditions = []
     if use_std_h:
         conditions.append(std_h > seuil_h)
@@ -120,6 +150,10 @@ def classify_bin_custom(image_path, use_std_h=True, use_std_s=True, use_std_v=Tr
         conditions.append(std_s > seuil_s)
     if use_std_v:
         conditions.append(std_v > seuil_v)
+    if use_lum:
+        conditions.append(mean_lum < seuil_lum or mean_lum_full < seuil_lum)
+    if use_contrast:
+        conditions.append(contrast > seuil_contrast or contrast_full > seuil_contrast)
 
     if any(conditions):
         return "pleine"

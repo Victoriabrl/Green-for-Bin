@@ -240,6 +240,14 @@ input:focus, textarea:focus, select:focus {
     background: var(--green-light);
     border-radius: 1.5rem;
 }
+.modal-dialog {
+  margin: auto; /* centre horizontalement */
+}
+
+.modal.fade .modal-dialog {
+  transform: translate(0, 0); /* évite un décalage */
+}
+
 
 .footer {
     background: var(--primary-green);
