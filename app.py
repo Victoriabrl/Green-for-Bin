@@ -1263,6 +1263,18 @@ def delete_user(user_id):
         conn.commit()
     flash('Utilisateur supprimé avec succès.', 'success')
     return redirect(url_for('admin_users'))
+@app.route('/admin/delete_image/<filename>')
+@admin_required
+def delete_image(filename):
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute("DELETE FROM images WHERE filename = ?", (filename,))
+            conn.commit()
+        flash(f"L'image {filename} a été supprimée avec succès.", 'success')
+    except Exception as e:
+        flash(f"Erreur lors de la suppression de l'image : {e}", 'danger')
+    return redirect(url_for('afficher_bdd'))
 
 @app.route('/admin/promote_user/<int:user_id>')
 @admin_required
