@@ -615,51 +615,71 @@ def analyses_avancees():
                 score += val
                 details[f'q{i}'] = val
             details_str = json.dumps(details, ensure_ascii=False)
+
+            # Définir le conseil, titre et niveau selon le score
+            if score >= 24:
+                conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                titre = 'Éco-expert 🌱'
+                alert = 'success'
+            elif score >= 18:
+                conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                titre = 'Bon élève ♻️'
+                alert = 'info'
+            elif score >= 12:
+                conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                titre = 'Éco-curieux 🧐'
+                alert = 'warning'
+            else:
+                conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                titre = 'Débutant·e 🐣'
+                alert = 'danger'
+
             with sqlite3.connect(DB_PATH) as conn:
                 c = conn.cursor()
                 c.execute('''INSERT INTO user_eco_analysis (user_id, date_filled, score, details) VALUES (?, ?, ?, ?)''',
                           (session['user_id'], datetime.now().strftime("%Y-%m-%d %H:%M:%S"), score, details_str))
                 conn.commit()
-            return jsonify(success=True, score=score)
+            return jsonify(success=True, score=score, conseil=conseil, titre=titre, alert=alert)
         except Exception as e:
             return jsonify(success=False, error=str(e))
     return render_template('analyses_avancees.html')
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    # Ajout : stats arrondissements (3 premières lignes) pour la page d'accueil
+
     arr_stats = []
-    # Récupérer le dernier questionnaire éco de l'utilisateur
     last_eco = None
-    if 'user_id' in session:
-        try:
-            with sqlite3.connect(DB_PATH) as conn:
-                c = conn.cursor()
-                c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC LIMIT 1", (session['user_id'],))
-                row = c.fetchone()
-                if row:
-                    score, date_filled = row
-                    if score >= 24:
-                        conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
-                        titre = 'Éco-expert 🌱'
-                        alert = 'success'
-                    elif score >= 18:
-                        conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
-                        titre = 'Bon élève ♻️'
-                        alert = 'info'
-                    elif score >= 12:
-                        conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
-                        titre = 'Éco-curieux 🧐'
-                        alert = 'warning'
-                    else:
-                        conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
-                        titre = 'Débutant·e 🐣'
-                        alert = 'danger'
-                    last_eco = dict(score=score, date=date_filled, conseil=conseil, titre=titre, alert=alert)
-        except Exception as e:
-            print(f"[INDEX] Erreur récupération eco_analysis: {e}")
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            c = conn.cursor()
+            c.execute("SELECT score, date_filled FROM user_eco_analysis WHERE user_id = ? ORDER BY date_filled DESC LIMIT 1", (session['user_id'],))
+            row = c.fetchone()
+            if row:
+                score, date_filled = row
+                if score >= 24:
+                    conseil = 'Bravo ! Vos habitudes ont un impact positif. Continuez à inspirer les autres autour de vous. Essayez les défis zéro déchet, ou rejoignez une initiative locale.'
+                    titre = 'Éco-expert 🌱'
+                    alert = 'success'
+                elif score >= 18:
+                    conseil = 'Vous avez de très bons réflexes. Pour progresser : essayez le compostage ou limitez les emballages.'
+                    titre = 'Bon élève ♻️'
+                    alert = 'info'
+                elif score >= 12:
+                    conseil = 'Vous êtes conscient·e de l’enjeu. Triez systématiquement, renseignez-vous sur les points de collecte.'
+                    titre = 'Éco-curieux 🧐'
+                    alert = 'warning'
+                else:
+                    conseil = 'Pas de panique ! Commencez par des gestes simples comme trier ou acheter en vrac. Chaque geste compte !'
+                    titre = 'Débutant·e 🐣'
+                    alert = 'danger'
+                last_eco = dict(score=score, date=date_filled, conseil=conseil, titre=titre, alert=alert)
+    except Exception as e:
+        print(f"[INDEX] Erreur récupération eco_analysis: {e}")
+
     try:
         with open(os.path.join('static', 'data', 'arrondissements.geojson'), encoding='utf-8') as f:
             arr_geo = json.load(f)
@@ -685,21 +705,16 @@ def index():
             })
     except Exception as e:
         print(f"[INDEX] Erreur lors du calcul des stats par arrondissement: {e}")
-        arr_stats = [
-            {'arr': f"{i}e", 'nb_pleines': 0}
-            for i in range(1, 21)
-        ]
-    print("arr_stats:", arr_stats)
-    # ...après avoir rempli arr_stats...
+        arr_stats = [{'arr': f"{i}e", 'nb_pleines': 0} for i in range(1, 21)]
+
     def arrondissement_key(stat):
-        # Extrait le numéro au début (ex: "1er", "2e", "10e", etc.)
         import re
         match = re.match(r"(\d+)", stat['arr'])
         return int(match.group(1)) if match else 0
 
     arr_stats = sorted(arr_stats, key=arrondissement_key)
-
     return render_template('about.html', arr_stats=arr_stats, last_eco=last_eco)
+
 
 
 @app.route('/upload', methods=['GET', 'POST'])
